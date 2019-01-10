@@ -1,0 +1,4 @@
+read me
+install jwasm
+sudo apt-get install gcc-multilib g++-multilib
+sudo apt-get install libboost-all-dev
