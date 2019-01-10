@@ -18,7 +18,7 @@ This file is part of VCC (Virtual Color Computer).
 
 #include <agar/core.h>
 #include <agar/gui.h>
-#include <agar/core/types.h>
+//#include <agar/core/types.h>
 #include <SDL2/SDL.h>
 #include "defines.h"
 #include "audio.h"
