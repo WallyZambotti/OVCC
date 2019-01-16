@@ -18,10 +18,6 @@ This file is part of VCC (Virtual Color Computer).
 
 #include <agar/core.h>
 #include <agar/gui.h>
-<<<<<<< HEAD
-=======
-//#include <agar/core/types.h>
->>>>>>> 9402d3bbd4ef462ec3b54fe9455d4c01cafc2249
 #include <SDL2/SDL.h>
 #include <agar/agar/core/types.h>
 #include "defines.h"
