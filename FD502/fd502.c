@@ -33,7 +33,7 @@ This file is part of VCC (Virtual Color Computer).
 
 #define EXTROMSIZE 16384
 
-static char moduleName[6] = { "FD502 26-133" };
+static char moduleName[13] = { "FD502 26-133" };
 
 extern int WritePrivateProfileString(char *, char *, char *, char *);
 extern int GetPrivateProfileString(char *, char *, char *, char *, int, char *);
