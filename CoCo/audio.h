@@ -19,6 +19,7 @@ This file is part of VCC (Virtual Color Computer).
 */
 
 #define WIN_SDL 2
+#define CARDNAME_LEN 256
 
 int SoundInitSDL (int ,unsigned short);
 int SoundDeInitSDL(void);
@@ -31,7 +32,7 @@ void PurgeAuxBuffer(void);
 unsigned short GetSoundStatus(void);
 unsigned short GetSoundStatusSDL(void);
 typedef struct CardList {
-	char CardName[256];
+	char CardName[CARDNAME_LEN];
     int  sdlID;
 } SndCardList;
 

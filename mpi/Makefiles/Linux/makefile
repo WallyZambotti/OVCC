@@ -59,7 +59,7 @@ clean:
 install:
 	sudo cp libmpi.so /usr/lib
 	sudo ldconfig
-	cp libmpi.so ../CoCo
+	cp libmpi.so ../CoCo/libs
 
 test:
 	./testlib libmpi.so ModuleName

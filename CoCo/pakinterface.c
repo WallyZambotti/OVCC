@@ -87,6 +87,7 @@ static void (*ModuleReset) (void)=NULL;
 static void (*SetIniPath) (char *)=NULL;
 static void (*PakSetCart)(SETCART)=NULL;
 
+void UpdateCartridgeMenu(char *modname);
 
 static char Did=0;
 int FileID(char *);
@@ -438,6 +439,7 @@ int FileID(char *Filename)
 	FILE *DummyHandle=NULL;
 	char elf[5] = { 0x7f, 'E', 'L', 'F', 0 };
 	char pe[4] = { 'M', 'Z', 0220, 0 };
+	char mach[5] = { 0xcf, 0xfa, 0xed, 0xfe, 0 };
 	char *match = NULL;
 	char Temp[5]="";
 	char *Platform = SDL_GetPlatform();
@@ -449,6 +451,10 @@ int FileID(char *Filename)
 	else if (strcmp(Platform, "Windows") == 0)
 	{
 		match = pe;
+	}
+	else if (strcmp(Platform, "Mac OS X") == 0)
+	{
+		match = mach;
 	}
 
 	if (match == NULL)

@@ -239,7 +239,7 @@ unsigned char ReadNamedIniFile(char *iniFilePath)
 	CurrentConfig.MmuType = GetPrivateProfileInt("CPU","MmuType",0,iniFilePath);
 
 	CurrentConfig.AudioRate = GetPrivateProfileInt("Audio","Rate",3,iniFilePath);
-	GetPrivateProfileString("Audio","SndCard","",CurrentConfig.SoundCardName,63,iniFilePath);
+	GetPrivateProfileString("Audio","SndCard","",CurrentConfig.SoundCardName,CARDNAME_LEN-1,iniFilePath);
 
 	CurrentConfig.MonitorType = GetPrivateProfileInt("Video","MonitorType",1,iniFilePath);
 	CurrentConfig.ScanLines = GetPrivateProfileInt("Video","ScanLines",0,iniFilePath);

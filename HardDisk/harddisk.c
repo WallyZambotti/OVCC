@@ -36,11 +36,11 @@ size_t EXTROMSIZE = 8192;
 static char HDDfilename[MAX_PATH] = { 0 };
 static char IniFile[MAX_PATH] = { 0 };
 
-//typedef unsigned char (*MEMREAD8)(unsigned short);
-//typedef void (*MEMWRITE8)(unsigned char,unsigned short);
-// typedef void (*ASSERTINTERUPT) (unsigned char,unsigned char);
-// typedef void (*DMAMEMPOINTERS) ( MEMREAD8,MEMWRITE8);
-// static void (*AssertInt)(unsigned char,unsigned char)=NULL;
+// typedef unsigned char (*MEMREAD8)(unsigned short);
+// typedef void (*MEMWRITE8)(unsigned char,unsigned short);
+typedef void (*ASSERTINTERUPT) (unsigned char,unsigned char);
+typedef void (*DMAMEMPOINTERS) ( MEMREAD8,MEMWRITE8);
+static void (*AssertInt)(unsigned char,unsigned char)=NULL;
 static unsigned char (*MemRead8)(unsigned short);
 static void (*MemWrite8)(unsigned char,unsigned short);
 // static unsigned char *Memory=NULL;

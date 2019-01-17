@@ -70,7 +70,7 @@ clean:
 install:
 	sudo cp libsuperide.so /usr/lib
 	sudo ldconfig
-	cp libsuperide.so ../CoCo
+	cp libsuperide.so ../CoCo/libs
 
 test:
 	./testlib libsuperide.so ModuleName

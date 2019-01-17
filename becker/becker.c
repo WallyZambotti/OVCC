@@ -408,7 +408,7 @@ void SetDWTCPConnectionEnable(unsigned int enable)
 }
 
 // dll exported functions
-
+void BuildMenu(void);
 void ADDCALL ModuleName(char *ModName, AG_MenuItem *Temp)
 {
 
@@ -614,8 +614,8 @@ void ADDCALL SetIniPath(char *IniFilePath)
 
 void LoadConfig(void)
 {
-	char saddr[MAX_LOADSTRING]="";
-	char sport[MAX_LOADSTRING]="";
+	char saddr[MAX_PATH]="";
+	char sport[MAX_PATH]="";
 	char DiskRomPath[MAX_PATH];
 
 	GetPrivateProfileString(moduleName,"DWServerAddr","",saddr,MAX_PATH,IniFile);
