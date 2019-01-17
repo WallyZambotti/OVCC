@@ -31,7 +31,7 @@ void PurgeAuxBuffer(void);
 unsigned short GetSoundStatus(void);
 unsigned short GetSoundStatusSDL(void);
 typedef struct CardList {
-	char CardName[64];
+	char CardName[256];
     int  sdlID;
 } SndCardList;
 
