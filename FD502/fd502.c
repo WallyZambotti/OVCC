@@ -103,6 +103,7 @@ void __attribute__ ((destructor)) cleanUpLibrary(void) {
  //   printf("FD502 is exited\n"); 
 }
 
+void UpdateMenu(int disk);
 
 void ADDCALL ModuleName(char *ModName, AG_MenuItem *Temp)
 {
@@ -403,6 +404,8 @@ void ConfigFD502(AG_Event *event)
 
 	AG_WindowShow(win);
 }
+
+void UpdateMenu(int disk);
 
 void MountDiskFile(char *diskname, int disk)
 {

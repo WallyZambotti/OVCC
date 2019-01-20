@@ -67,7 +67,7 @@ clean:
 install:
 	sudo cp libfd502.so /usr/lib
 	sudo ldconfig
-	cp libfd502.so ../CoCo
+	cp libfd502.so ../CoCo/libs
 
 test:
 	./testlib libfd502.so ModuleName

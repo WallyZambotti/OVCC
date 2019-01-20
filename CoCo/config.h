@@ -18,6 +18,8 @@ This file is part of VCC (Virtual Color Computer).
     along with VCC (Virtual Color Computer).  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "audio.h"
+
 void LoadConfig(SystemState2 *);
 unsigned char WriteIniFile(void);
 unsigned char ReadIniFile(void);
@@ -48,7 +50,7 @@ typedef struct  {
 	unsigned char	RebootNow;
 	unsigned char	SndOutDev;
 	unsigned char	KeyMap;
-	char			SoundCardName[64];
+	char			SoundCardName[CARDNAME_LEN];
 	unsigned short	AudioRate;
 	char			ExternalBasicImage[MAX_PATH];
 	char			ModulePath[MAX_PATH];

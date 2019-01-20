@@ -29,6 +29,9 @@ This file is part of VCC (Virtual Color Computer).
 void SetupDisplay(void); //This routine gets called every time a software video register get updated.
 void MakeRGBPalette (void);
 void MakeCMPpalette(void);
+void SetupDisplaySDL(void);
+void MakeRGBPaletteSDL(void);
+void MakeCMPpaletteSDL(void);
 static unsigned char ColorValues[4]={0,85,170,255};
 static unsigned char ColorTable16Bit[4]={0,10,21,31};	//Color brightness at 0 1 2 and 3 (2 bits)
 static unsigned char ColorTable32Bit[4]={0,85,170,255};	

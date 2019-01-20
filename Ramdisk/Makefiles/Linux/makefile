@@ -59,7 +59,7 @@ clean:
 install:
 	sudo cp libramdisk.so /usr/lib
 	sudo ldconfig
-	cp libramdisk.so ../CoCo
+	cp libramdisk.so ../CoCo/libs
 
 test:
 	./testlib libramdisk.so ModuleName

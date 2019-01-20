@@ -48,7 +48,7 @@ static AG_DataSource *hout=NULL;
 void WritePrintMon(char *);
 static BOOL MonState=FALSE;
 
-//static unsigned char CoutSample=0;
+void CaptureBit(unsigned char Sample);//static unsigned char CoutSample=0;
 //extern STRConfig CurrentConfig;
 // Shift Row Col
 unsigned char pia0_read(unsigned char port)

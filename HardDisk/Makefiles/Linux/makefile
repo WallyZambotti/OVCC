@@ -67,7 +67,7 @@ clean:
 install:
 	sudo cp libharddisk.so /usr/lib
 	sudo ldconfig
-	cp libharddisk.so ../CoCo
+	cp libharddisk.so ../CoCo/libs
 
 test:
 	./testlib libharddisk.so ModuleName

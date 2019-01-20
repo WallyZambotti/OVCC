@@ -49,8 +49,10 @@ clean:
 	rm -f $(ODIR)/*.o $(TARGET) libmpi.so
 
 install:
-	cp liborch90.so ../CoCo
+	sudo cp liborch90.so /usr/lib
+	sudo ldconfig
+	cp liborch90.so ../CoCo/libs
 
 test:
 	./testlib liborch90.so ModuleName
-	
+
