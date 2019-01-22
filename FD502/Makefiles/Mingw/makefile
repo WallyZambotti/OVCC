@@ -64,7 +64,7 @@ clean:
 	rm -f $(ODIR)/*.o $(TARGET) fd502.dll
 
 install:
-	cp fd502.dll ../CoCo
+	cp fd502.dll ../CoCo/libs
 
 test:
 	.\testlib.exe fd502.dll ModuleName

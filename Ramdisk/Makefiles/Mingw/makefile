@@ -54,7 +54,7 @@ clean:
 	rm -f $(ODIR)/*.o $(TARGET) ramdisk.dll
 
 install:
-	cp ramdisk.dll ../CoCo
+	cp ramdisk.dll ../CoCo/libs
 
 test:
 	.\testlib.exe ramdisk.dll ModuleName

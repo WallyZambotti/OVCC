@@ -28,7 +28,7 @@ int CheckPath(char *);
 BOOL PathRemoveFileSpec(char *);
 BOOL PathRemoveExtension(char *);
 char* PathFindExtension(char *);
-int WritePrivateProfileString(char *, char *, char *, char *);
+//int WritePrivateProfileString(char *, char *, char *, char *);
 char GetPathDelim();
 char *GetPathDelimStr();
 

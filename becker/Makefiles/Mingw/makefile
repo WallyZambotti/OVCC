@@ -57,4 +57,7 @@ clean:
 	rm -f $(ODIR)/*.o $(TARGET) becker.dll
 
 install:
-	cp becker.dll ../CoCo
+	cp becker.dll ../CoCo/libs
+
+test:
+	./testlib.exe becker.dll ModuleName

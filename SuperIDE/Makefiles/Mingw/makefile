@@ -28,7 +28,7 @@ SDLLIB=`sdl2-config --libs`
 AGARLIB=`agar-config --libs`
 LIBS=$(AGARLIB) $(SDLLIB)
 
-LDFLAGS=-shared $(PTHREAD) $(LIBS) -s -Wl,--out-implib,liborch90.a,--subsystem,console
+LDFLAGS=-shared $(PTHREAD) $(LIBS) -s -Wl,--out-implib,libsuperide.a,--subsystem,console
 
 UNUSEDOBJS= 
 
@@ -66,7 +66,7 @@ clean:
 	rm -f $(ODIR)/*.o $(TARGET)
 
 install:
-	cp superide.dll ../CoCo
+	cp superide.dll ../CoCo/libs
 
 test:
 	.\testlib.exe superide.dll ModuleName

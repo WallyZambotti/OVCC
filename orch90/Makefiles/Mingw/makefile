@@ -54,7 +54,7 @@ clean:
 	rm -f $(ODIR)/*.o $(TARGET) orch90.dll liborch90.a
 
 install:
-	cp orch90.dll ../CoCo
+	cp orch90.dll ../CoCo/libs
 
 test:
 	.\testlib.exe orch90.dll ModuleName

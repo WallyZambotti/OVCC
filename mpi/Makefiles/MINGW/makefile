@@ -59,7 +59,7 @@ clean:
 	rm -f $(ODIR)/*.o $(TARGET) libmpi.so
 
 install:
-	cp mpi.dll ../CoCo
+	cp mpi.dll ../CoCo/libs
 
 test:
 	.\testlib.exe mpi.dll ModuleName

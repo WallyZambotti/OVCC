@@ -83,6 +83,7 @@ static INIsection *recordSection(char *iniline)
         
     inifile.sections[inifile.sectionCnt].name = strdup(iniline);
     inifile.sections[inifile.sectionCnt].entries = NULL;
+    inifile.sections[inifile.sectionCnt].entryCnt = 0;
 
     return &inifile.sections[inifile.sectionCnt++];
 }
@@ -246,6 +247,8 @@ static INIentry *searchEntry(INIsection *section, char *entry)
 
 int GetPrivateProfileString(char *section, char *entry, char *defaultval, char *buffer, int bufferlen, char *filename)
 {
+    char bracedsection[256];
+
     if (loadINIfile(filename) != true)
     {
         fprintf(stderr, "iniman : cannot load inifile %d : %s\n", errno, filename);
@@ -253,7 +256,8 @@ int GetPrivateProfileString(char *section, char *entry, char *defaultval, char *
         return(strlen(buffer));
     }
 
-    INIsection *sectionp = searchSection(section);
+    sprintf(bracedsection, "[%s]", section);
+    INIsection *sectionp = searchSection(bracedsection);
 
     if (sectionp == NULL)
     {
@@ -274,13 +278,16 @@ int GetPrivateProfileString(char *section, char *entry, char *defaultval, char *
 
 int WritePrivateProfileString(char *section, char *entry, char *value, char *filename)
 {
+    char bracedsection[256];
+
     if (loadINIfile(filename) != true)
     {
         fprintf(stderr, "iniman : cannot load inifile %d : %s\n", errno, filename);
         return(0);
     }
 
-    INIsection *sectionp = searchSection(section);
+    sprintf(bracedsection, "[%s]", section);
+    INIsection *sectionp = searchSection(bracedsection);
 
     if (sectionp == NULL)
     {
@@ -330,13 +337,16 @@ int WritePrivateProfileInt(char *section, char *entry, int defaultval, char *fil
 
 bool DeletePrivateProfileEntry(char *section, char *entry, char *filename)
 {
+    char bracedsection[256];
+
     if (loadINIfile(filename) != true)
     {
         fprintf(stderr, "iniman : cannot load inifile %d : %s\n", errno, filename);
         return(0);
     }
 
-    INIsection *sectionp = searchSection(section);
+    sprintf(bracedsection, "[%s]", section);
+    INIsection *sectionp = searchSection(bracedsection);
 
     if (sectionp == NULL)
     {
@@ -360,13 +370,16 @@ bool DeletePrivateProfileEntry(char *section, char *entry, char *filename)
 
 bool DeletePrivateProfileSection(char *section, char *filename)
 {
+    char bracedsection[256];
+
     if (loadINIfile(filename) != true)
     {
         fprintf(stderr, "iniman : cannot load inifile %d : %s\n", errno, filename);
         return(0);
     }
 
-    INIsection *sectionp = searchSection(section);
+    sprintf(bracedsection, "[%s]", section);
+    INIsection *sectionp = searchSection(bracedsection);
 
     if (sectionp == NULL)
     {

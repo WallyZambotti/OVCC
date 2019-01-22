@@ -34,6 +34,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "keyboard.h"
 #include "fileops.h"
 #include "cassette.h"
+#include "iniman.h"
 
 //#include "logger.h"
 #include <assert.h>
@@ -211,6 +212,8 @@ unsigned char WriteNamedIniFile(char *iniFilePath)
 	WritePrivateProfileInt("RightJoyStick","DiDevice",RightSDL.DiDevice,iniFilePath);
 	WritePrivateProfileInt("RightJoyStick", "HiResDevice", RightSDL.HiRes, iniFilePath);
 
+	FlushPrivateProfile();
+	
 	return(0);
 }
 

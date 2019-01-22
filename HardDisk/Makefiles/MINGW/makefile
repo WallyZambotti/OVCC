@@ -28,7 +28,7 @@ SDLLIB=`sdl2-config --libs`
 AGARLIB=`agar-config --libs`
 LIBS=$(AGARLIB) $(SDLLIB) 
 
-LDFLAGS=-shared $(PTHREAD) -s -Wl,--out-implib,liborch90.a
+LDFLAGS=-shared $(PTHREAD) -s -Wl,--out-implib,libharddisk.a
 
 UNUSEDOBJS= 
 
@@ -63,7 +63,7 @@ clean:
 	rm -f $(ODIR)/*.o $(TARGET) harddisk.dll libharddisk.a
 
 install:
-	cp harddisk.dll ../CoCo
+	cp harddisk.dll ../CoCo/libs
 
 test:
 	.\testlib.exe harddisk.dll ModuleName

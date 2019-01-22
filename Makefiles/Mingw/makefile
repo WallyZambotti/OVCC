@@ -47,3 +47,12 @@ ovcc:
 	$(MAKE) xorch90
 	$(MAKE) xramdisk
 	$(MAKE) xsuperide
+
+install:
+	$(MAKE) -C becker install
+	$(MAKE) -C FD502 install
+	$(MAKE) -C HardDisk install
+	$(MAKE) -C mpi install
+	$(MAKE) -C orch90 install
+	$(MAKE) -C Ramdisk install
+	$(MAKE) -C SuperIDE install

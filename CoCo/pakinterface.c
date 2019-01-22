@@ -236,7 +236,7 @@ int InsertModule (char *ModulePath)
 		PakSetCart = SDL_LoadFunction(hinstLib, "SetCart");
 		if (GetModuleName == NULL)
 		{
-			AG_UnloadDSO(hinstLib); 
+			SDL_UnloadObject(hinstLib); 
 			hinstLib=NULL;
 			return(NOTVCC);
 		}
