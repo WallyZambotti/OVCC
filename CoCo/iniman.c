@@ -59,10 +59,11 @@ static INIsection *recordSection(char * iniline)
     if (inifile.sectionCnt % BUCKETSIZE == 0) 
     {
         inifile.sections = realloc(inifile.sections, BUCKETSIZE * sizeof(INIsection));
-        inifile.sections[inifile.sectionCnt].name = iniline;
-        inifile.sections[inifile.sectionCnt].entries = NULL;
-        inifile.sectionCnt++;
     }
+        
+    inifile.sections[inifile.sectionCnt].name = iniline;
+    inifile.sections[inifile.sectionCnt].entries = NULL;
+    inifile.sectionCnt++;
 }
 
 static void *recordEntry(INIsection *section, char *name, char *value)
@@ -70,10 +71,11 @@ static void *recordEntry(INIsection *section, char *name, char *value)
     if (section->entryCnt % BUCKETSIZE == 0)
     {
         section->entries = realloc(section->entries, BUCKETSIZE * sizeof(INIentry));
-        strdup(section->entries[section->entryCnt].name, name);
-        strdup(section->entries[section->entryCnt].value, value);
-        section->entryCnt++;
     }
+
+    strdup(section->entries[section->entryCnt].name, name);
+    strdup(section->entries[section->entryCnt].value, value);
+    section->entryCnt++;
 }
 
 static bool saveINIfile(bool freemem)
@@ -176,6 +178,36 @@ static bool loadINIfile(char *name)
     return true;
 }
 
+static INIentry *searchSection(char *section)
+{
+    int isection;
+
+    for (isection = 0 ; isection < inifile.sectionCnt ; isection++)
+    {
+        if (! strcmp (inifile.sections[isection].name, section))
+        {
+            return (&inifile.sections[isection]);
+        }
+    }
+
+    return NULL;
+}
+
+static INIentry *searchEntry(INIsection *section, char *entry)
+{
+    int ientry;
+
+    for (ientry = 0 ; ientry < section->entryCnt ; ientry++)
+    {
+        if (! strcmp (section->entries[ientry].name, entry))
+        {
+            return(&section->entries[ientry]);
+        }
+    }
+
+    return NULL;
+}
+
 int GetPrivateProfileString(char *section, char *entry, char *defaultval, char *buffer, int bufferlen, char *filename)
 {
     if (loadINIfile(filename) != true)
@@ -184,4 +216,42 @@ int GetPrivateProfileString(char *section, char *entry, char *defaultval, char *
         strncpy(buffer, defaultval, bufferlen);
         return(strlen(buffer));
     }
+
+    INIsection *sectionp = searchSection(section);
+
+    if (sectionp == NULL)
+    {
+        strncpy(buffer, defaultval, bufferlen);
+    }
+
+    INIentry *entryp = searchEntry(sectionp, entry);
+
+    if (entryp == NULL)
+    {
+        strncpy(buffer, defaultval, bufferlen);
+        return strlen(buffer);
+    }
+
+    strncpy(buffer, entryp->value, bufferlen);
+    return strlen(buffer);
+}
+
+int WritePrivateProfileString(char *section, char *entry, char *value, char *filename)
+{
+    if (loadINIfile(filename) != true)
+    {
+        fprintf(stderr, "iniman : cannot load inifile %d : %s\n", errno, filename);
+        return(0);
+    }
+
+    INIsection *sectionp = searchSection(section);
+
+    if (sectionp == NULL)
+    {
+        sectionp = recordSection(section);
+    }
+
+    recordEntry(sectionp, entry, value);
+
+    return 1;
 }
