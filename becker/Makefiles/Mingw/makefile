@@ -29,13 +29,13 @@ CCFLAGS=$(IDIR) $(DEBUG) $(OPT) $(WARN) -fPIC
 SDLLIB=`sdl2-config --libs`
 AGARLIB=`agar-config --libs`
 POSSIBLE_LIBS= -lm -lWinmm -lgdi32 -ldxguid -lddraw -ldsound -ldinput -ldinput8 -lComctl32 -lole32
-LIBS=$(AGARLIB) $(SDLLIB) -lws2_32
+LIBS=$(AGARLIB) $(SDLLIB) -lws2_32 -lregex
 
 LDFLAGS=-shared $(PTHREAD) $(LIBS) -Wl,--out-implib,libbecker.a,--subsystem,console
 
 UNUSEDOBJS= 
 
-_OBJS=	becker.o profport.o
+_OBJS=	becker.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 testlib: obj/testlib.o becker.dll 
@@ -50,7 +50,7 @@ becker.dll: $(OBJS)
 $(ODIR)/becker.o: becker.c becker.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 
-$(ODIR)/profport.o: ../CoCo/profport.c ../CoCo/profport.h
+$(ODIR)/iniman.o: ../CoCo/iniman.c ../CoCo/iniman.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 
 clean:
@@ -58,6 +58,3 @@ clean:
 
 install:
 	cp becker.dll ../CoCo/libs
-
-test:
-	./testlib.exe becker.dll ModuleName

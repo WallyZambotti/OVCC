@@ -23,7 +23,7 @@ This file is part of VCC (Virtual Color Computer).
 #include <stdbool.h>
 #include "stdio.h"
 #include "mpi.h"
-#include "../CoCo/profport.h"
+#include "../CoCo/iniman.h"
 #define BOOL bool
 #include "../CoCo/fileops.h"
 

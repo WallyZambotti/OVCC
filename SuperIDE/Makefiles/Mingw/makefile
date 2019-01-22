@@ -26,13 +26,13 @@ CCFLAGS=$(IDIR) $(DEBUG) $(OPT) $(WARN) -fPIC
  
 SDLLIB=`sdl2-config --libs`
 AGARLIB=`agar-config --libs`
-LIBS=$(AGARLIB) $(SDLLIB)
+LIBS=$(AGARLIB) $(SDLLIB) -lregex
 
 LDFLAGS=-shared $(PTHREAD) $(LIBS) -s -Wl,--out-implib,libsuperide.a,--subsystem,console
 
 UNUSEDOBJS= 
 
-_OBJS=superide.o cloud9.o fileops.o idebus.o logger.o profport.o
+_OBJS=superide.o cloud9.o fileops.o idebus.o logger.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 testlib: obj/testlib.o superide.dll
@@ -59,7 +59,7 @@ $(ODIR)/logger.o: logger.c logger.h
 $(ODIR)/fileops.o: ../CoCo/fileops.c ../CoCo/fileops.h
 	$(CC) -c $(CCFLAGS) $< -o $@
     
-$(ODIR)/profport.o: ../CoCo/profport.c ../CoCo/profport.h
+$(ODIR)/iniman.o: ../CoCo/iniman.c ../CoCo/iniman.h
 	$(CC) -c $(CCFLAGS) $< -o $@
     
 clean:

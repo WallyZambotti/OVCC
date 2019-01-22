@@ -26,13 +26,13 @@ CCFLAGS=$(IDIR) $(DEBUG) $(OPT) $(WARN) -fPIC
  
 SDLLIB=`sdl2-config --libs`
 AGARLIB=`agar-config --libs`
-LIBS=$(AGARLIB) $(SDLLIB) 
+LIBS=$(AGARLIB) $(SDLLIB) -lregex
 
 LDFLAGS=-shared $(PTHREAD) -s -Wl,--out-implib,libharddisk.a
 
 UNUSEDOBJS= 
 
-_OBJS=harddisk.o cloud9.o cc3vhd.o fileops.o profport.o
+_OBJS=harddisk.o cloud9.o cc3vhd.o fileops.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 testlib: obj/testlib.o harddisk.dll
@@ -56,7 +56,7 @@ $(ODIR)/cc3vhd.o: cc3vhd.c cc3vhd.h defines.h harddisk.h ../CoCo/fileops.h
 $(ODIR)/fileops.o: ../CoCo/fileops.c ../CoCo/fileops.h
 	$(CC) $(CCFLAGS) -c $< -o $@
     
-$(ODIR)/profport.o: ../CoCo/profport.c ../Coco/profport.h
+$(ODIR)/iniman.o: ../CoCo/iniman.c ../Coco/iniman.h
 	$(CC) $(CCFLAGS) -I../CoCo -c $< -o $@
     
 clean:

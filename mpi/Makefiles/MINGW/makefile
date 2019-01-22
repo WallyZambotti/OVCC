@@ -28,13 +28,13 @@ CCFLAGS=$(IDIR) $(DEBUG) $(OPT) $(WARN) -fPIC
 
 SDLLIB=`sdl2-config --libs`
 AGARLIB=`agar-config --libs`
-LIBS=$(AGARLIB) $(SDLLIB)
+LIBS=$(AGARLIB) $(SDLLIB) -lregex
 
 LDFLAGS=-shared $(PTHREAD) $(LIBS) -Wl,--out-implib,libmpi.a
 
 UNUSEDOBJS= 
 
-_OBJS=mpi.o fileops.o profport.o
+_OBJS=mpi.o fileops.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 testlib: obj/testlib.o mpi.dll
@@ -52,7 +52,7 @@ $(ODIR)/mpi.o: mpi.c mpi.h ../CoCo/fileops.h
 $(ODIR)/fileops.o: ../CoCo/fileops.c ../CoCo/fileops.h
 	$(CC) $(CCFLAGS) -c $< -o $@
     
-$(ODIR)/profport.o: ../CoCo/profport.c ../Coco/profport.h
+$(ODIR)/iniman.o: ../CoCo/iniman.c ../Coco/iniman.h
 	$(CC) $(CCFLAGS) -I../CoCo -c $< -o $@
     
 clean:
