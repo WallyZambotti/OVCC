@@ -46,6 +46,7 @@ static unsigned char *ExtRomPointers[MAXPAX]={NULL,NULL,NULL,NULL};
 static unsigned int BankedCartOffset[MAXPAX]={0,0,0,0};
 static unsigned char Temp,Temp2;
 static char IniFile[MAX_PATH]="";
+static INIfile inifile = { NULL, NULL, NULL, false, 0 };
 
 //**************************************************************
 //Array of fuction pointer for each Slot
@@ -72,7 +73,8 @@ void SetCartSlot3(unsigned char);
 static unsigned char CartForSlot[MAXPAX]={0,0,0,0};
 static void (*SetCarts[MAXPAX])(unsigned char)={SetCartSlot0,SetCartSlot1,SetCartSlot2,SetCartSlot3};
 static void (*SetCartCalls[MAXPAX])(SETCART)={NULL,NULL,NULL,NULL};
-static void (*SetIniPathCalls[MAXPAX]) (char *)={NULL,NULL,NULL,NULL};
+//static void (*SetIniPathCalls[MAXPAX]) (char *)={NULL,NULL,NULL,NULL};
+static void (*SetIniPathCalls[MAXPAX]) (INIfile *)={NULL,NULL,NULL,NULL};
 //***************************************************************
 static void *hinstLib[4]={NULL,NULL,NULL,NULL};
 static unsigned char ChipSelectSlot=3,SpareSelectSlot=3,SwitchSlot=3,SlotRegister=255;
@@ -299,9 +301,13 @@ unsigned char ADDCALL ModuleReset(void)
 	return(NULL);
 }
 
-void ADDCALL SetIniPath(char *IniFilePath)
+//void ADDCALL SetIniPath(char *IniFilePath)
+void ADDCALL SetIniPath(INIfile *IniFileP)
 {
-	strcpy(IniFile,IniFilePath);
+	//strcpy(IniFile,IniFilePath);
+	strcpy(IniFile, IniFileP->name);
+	SetPrivateProfile(IniFileP);
+	inifile = *IniFileP;
 	LoadConfig();
 	return;
 }
@@ -491,7 +497,10 @@ unsigned char MountModule(unsigned char Slot,char *ModName)
 		if (DmaMemPointerCalls[Slot] !=NULL)
 			DmaMemPointerCalls[Slot](MemRead8,MemWrite8);
 		if (SetIniPathCalls[Slot] != NULL)
-			SetIniPathCalls[Slot](IniFile);
+		{
+			//SetIniPathCalls[Slot](IniFile);
+			SetIniPathCalls[Slot](&inifile);
+		}
 		if (SetCartCalls[Slot] !=NULL)
 			SetCartCalls[Slot](*SetCarts[Slot]);	//Transfer the address of the SetCart routin to the pak
 													//For the multpak there is 1 for each slot se we know where it came from

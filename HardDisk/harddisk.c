@@ -177,9 +177,12 @@ void ADDCALL ModuleStatus(char *MyStatus)
 	return ;
 }
 
-void ADDCALL SetIniPath (char *IniFilePath)
+//void ADDCALL SetIniPath (char *IniFilePath)
+void ADDCALL SetIniPath (INIfile *IniFileP)
 {
-	strcpy(IniFile, IniFilePath);
+	//strcpy(IniFile, IniFilePath);
+	strcpy(IniFile, IniFileP->name);
+	SetPrivateProfile(IniFileP);
 	LoadConfig();
 	return;
 }

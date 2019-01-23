@@ -19,12 +19,14 @@ This file is part of VCC (Virtual Color Computer).
 */
 
 #include "audio.h"
+#include "iniman.h"
 
 void LoadConfig(SystemState2 *);
 unsigned char WriteIniFile(void);
 unsigned char ReadIniFile(void);
 char * BasicRomName(void);
 void GetIniFilePath( char *);
+INIfile *GetIniFile(void);
 void UpdateConfig (void);
 void UpdateSoundBar(unsigned short,unsigned short);
 void UpdateTapeCounter(unsigned int,unsigned char);

@@ -15,6 +15,7 @@
 #include <time.h>
 #include <unistd.h>
 #include "becker.h"
+#include "../CoCo/iniman.h"
 
 #define MAX_PATH 260
 
@@ -604,9 +605,12 @@ void ADDCALL ModuleConfig(unsigned char func)
 	return;
 }
 
-void ADDCALL SetIniPath(char *IniFilePath)
+//void ADDCALL SetIniPath(char *IniFilePath)
+void ADDCALL SetIniPath(INIfile *IniFileP)
 {
-	strcpy(IniFile,IniFilePath);
+	//strcpy(IniFile,IniFilePath);
+	strcpy(IniFile,IniFileP->name);
+	SetPrivateProfile(IniFileP);
 	LoadConfig();
 	SetDWTCPConnectionEnable(1);
 	return;

@@ -18,6 +18,28 @@ This file is part of iniman
 
 #include <stdbool.h>
 
+typedef struct 
+{
+    char        *name;
+    char        *value;
+} INIentry;
+
+typedef struct 
+{
+    char        *name;
+    INIentry    *entries;
+    short int   entryCnt;
+} INIsection;
+
+typedef struct
+{
+    char        *name;
+    FILE        *file;
+    INIsection  *sections;
+    bool        dirty;
+    short int   sectionCnt;
+} INIfile;
+
 int GetPrivateProfileString(char *, char *, char *, char *, int , char *);
 int WritePrivateProfileString(char *, char *, char *, char *);
 int GetPrivateProfileInt(char *, char *, int , char *);
@@ -25,3 +47,5 @@ int WritePrivateProfileInt(char *, char *, int , char *);
 bool DeletePrivateProfileEntry(char *, char *, char *);
 bool DeletePrivateProfileSection(char *, char *);
 void FlushPrivateProfile(void);
+INIfile *GetPrivateProfile(void);
+void SetPrivateProfile(INIfile *);

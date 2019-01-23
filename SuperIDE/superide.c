@@ -28,6 +28,7 @@ typedef int BOOL;
 #include "logger.h"
 #include "../CoCo/fileops.h"
 #include "../CoCo/profport.h"
+#include "../CoCo/iniman.h"
 
 #define MAX_PATH 260
 
@@ -170,9 +171,12 @@ void ADDCALL ModuleConfig(unsigned char func)
 	return;
 }
 
-void ADDCALL SetIniPath (char *IniFilePath)
+//void ADDCALL SetIniPath (char *IniFilePath)
+void ADDCALL SetIniPath (INIfile *IniFileP)
 {
-	strcpy(IniFile, IniFilePath);
+	//strcpy(IniFile, IniFilePath);
+	strcpy(IniFile, IniFileP->name);
+	SetPrivateProfile(IniFileP);
 	LoadConfig();
 	return;
 }

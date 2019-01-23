@@ -34,7 +34,6 @@ This file is part of VCC (Virtual Color Computer).
 #include "keyboard.h"
 #include "fileops.h"
 #include "cassette.h"
-#include "iniman.h"
 
 //#include "logger.h"
 #include <assert.h>
@@ -64,6 +63,7 @@ static unsigned int	RightJoystickEmulation[3] = { IDC_RIGHTSTANDARD,IDC_RIGHTTHR
 static unsigned short int	Cpuchoice[2]={IDC_6809,IDC_6309};
 static unsigned short int	Monchoice[2]={IDC_COMPOSITE,IDC_RGB};
 static unsigned char temp=0,temp2=0;
+static INIfile inifile = { NULL, NULL, NULL, false, 0 };
 static char IniFileName[]="Vcc.ini";
 static char IniFilePath[MAX_PATH]="";
 static char TapeFileName[MAX_PATH]="";
@@ -312,6 +312,7 @@ unsigned char ReadNamedIniFile(char *iniFilePath)
 	//fprintf(stderr, "InsertModule : %s\n", CurrentConfig.ModulePath);
 	//InsertModule (CurrentConfig.ModulePath);	// Should this be here?
 	
+	inifile = *GetPrivateProfile();
 	return(0);
 }
 
@@ -361,6 +362,11 @@ void GetIniFilePath( char *Path)
 {
 	strcpy(Path,IniFilePath);
 	return;
+}
+
+INIfile *GetIniFile(void)
+{
+	return (&inifile);
 }
 
 void UpdateConfig (void)

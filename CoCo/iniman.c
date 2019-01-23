@@ -26,27 +26,27 @@ This file is part of iniman
 
 #define MAX_LINE_LEN 512
 
-typedef struct 
-{
-    char        *name;
-    char        *value;
-} INIentry;
+// typedef struct 
+// {
+//     char        *name;
+//     char        *value;
+// } INIentry;
 
-typedef struct 
-{
-    char        *name;
-    INIentry    *entries;
-    short int   entryCnt;
-} INIsection;
+// typedef struct 
+// {
+//     char        *name;
+//     INIentry    *entries;
+//     short int   entryCnt;
+// } INIsection;
 
-typedef struct 
-{
-    char        *name;
-    FILE        *file;
-    INIsection  *sections;
-    bool        dirty;
-    short int   sectionCnt;
-} INIfile;
+//typedef struct 
+// {
+//     char        *name;
+//     FILE        *file;
+//     INIsection  *sections;
+//     bool        dirty;
+//     short int   sectionCnt;
+// } INIfile;
 
 static INIfile inifile = 
 {
@@ -405,4 +405,14 @@ bool DeletePrivateProfileSection(char *section, char *filename)
 void FlushPrivateProfile(void)
 {
     saveINIfile(true);
+}
+
+INIfile *GetPrivateProfile(void)
+{
+    return &inifile;
+}
+
+void SetPrivateProfile(INIfile *inifilep)
+{
+    inifile = *inifilep;
 }

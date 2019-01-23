@@ -30,13 +30,11 @@ This file is part of VCC (Virtual Color Computer).
 #include "distortc.h"
 #include "fd502.h"
 #include "defines.h"
+#include "../CoCo/iniman.h"
 
 #define EXTROMSIZE 16384
 
 static char moduleName[13] = { "FD502 26-133" };
-
-extern int WritePrivateProfileString(char *, char *, char *, char *);
-extern int GetPrivateProfileString(char *, char *, char *, char *, int, char *);
 
 extern DiskInfo Drive[5];
 typedef unsigned char (*MEMREAD8)(unsigned short);
@@ -147,9 +145,12 @@ void ADDCALL ModuleConfig(unsigned char func)
 	return;
 }
 
-void ADDCALL SetIniPath (char *IniFilePath)
+//void ADDCALL SetIniPath (char *IniFilePath)
+void ADDCALL SetIniPath (INIfile *IniFileP)
 {
-	strcpy(IniFile,IniFilePath);
+	//strcpy(IniFile,IniFilePath);
+	strcpy(IniFile,IniFileP->name);
+	SetPrivateProfile(IniFileP);
 	LoadConfig();
 	return;
 }

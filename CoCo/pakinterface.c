@@ -26,6 +26,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "mc6821.h"
 #include "logger.h"
 #include "fileops.h"
+
 #define HASCONFIG		1
 #define HASIOWRITE		2
 #define HASIOREAD		4
@@ -71,6 +72,7 @@ typedef void (*SETINTERUPTCALLPOINTER) (ASSERTINTERUPT);
 typedef unsigned short (*MODULEAUDIOSAMPLE)(void);
 typedef void (*MODULERESET)(void);
 typedef void (*SETINIPATH)(char *);
+typedef void (*SETINI)(INIfile *);
 
 static void (*GetModuleName)(char *, AG_MenuItem *)=NULL;
 static void (*ConfigModule)(unsigned char)=NULL;
@@ -85,6 +87,7 @@ static void (*ModuleStatus)(char *)=NULL;
 static unsigned short (*ModuleAudioSample)(void)=NULL;
 static void (*ModuleReset) (void)=NULL;
 static void (*SetIniPath) (char *)=NULL;
+static void (*SetIni) (INIfile *)=NULL;
 static void (*PakSetCart)(SETCART)=NULL;
 
 void UpdateCartridgeMenu(char *modname);
@@ -180,6 +183,7 @@ int InsertModule (char *ModulePath)
 	char Temp[MAX_LOADSTRING]="";
 	char String[1024]="";
 	char TempIni[MAX_PATH]="";
+	INIfile tempIni = { NULL, NULL, NULL, false, 0 };
 	unsigned char FileType=0;
 	FileType=FileID(ModulePath);
 
@@ -232,7 +236,8 @@ int InsertModule (char *ModulePath)
 		ModuleStatus = SDL_LoadFunction(hinstLib, "ModuleStatus");
 		ModuleAudioSample = SDL_LoadFunction(hinstLib, "ModuleAudioSample");
 		ModuleReset = SDL_LoadFunction(hinstLib, "ModuleReset");
-		SetIniPath = SDL_LoadFunction(hinstLib, "SetIniPath");
+		// SetIniPath = SDL_LoadFunction(hinstLib, "SetIniPath");
+		SetIni = SDL_LoadFunction(hinstLib, "SetIniPath");
 		PakSetCart = SDL_LoadFunction(hinstLib, "SetCart");
 		if (GetModuleName == NULL)
 		{
@@ -310,12 +315,15 @@ int InsertModule (char *ModulePath)
 			ModualParms|=1024;
 			strcat(String,"Needs Reset Notification\n");
 		}
-		if (SetIniPath!=NULL)
+		//if (SetIniPath!=NULL)
+		if (SetIni!=NULL)
 		{
 			ModualParms|=2048;
-			GetIniFilePath(TempIni);
+			//GetIniFilePath(TempIni);
 			//fprintf(stderr, "Insert Module : Calling SetIniPath %lx(%s)\n", (unsigned long)SetIniPath, TempIni);
-			SetIniPath(TempIni);
+			//SetIniPath(TempIni);
+			tempIni = *GetIniFile();
+			SetIni(&tempIni);
 		}
 		if (PakSetCart!=NULL)
 		{
