@@ -34,7 +34,7 @@ LDFLAGS=-shared $(PTHREAD) $(LIBS) #-Wl,--out-implib,libharddisk.a # -export-dyn
 
 UNUSEDOBJS= 
 
-_OBJS=	fd502.o distortc.o wd1793.o fileops.o profport.o
+_OBJS=	fd502.o distortc.o wd1793.o fileops.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 testlib: obj/testlib.o libfd502.so
@@ -58,7 +58,7 @@ $(ODIR)/wd1793.o: wd1793.c wd1793.h fd502.h defines.h
 $(ODIR)/fileops.o: ../CoCo/fileops.c ../CoCo/fileops.h
 	$(CC) -c $(CCFLAGS) $< -o $@
     
-$(ODIR)/profport.o: ../CoCo/profport.c ../CoCo/profport.h
+$(ODIR)/iniman.o: ../CoCo/iniman.c ../CoCo/iniman.h
 	$(CC) $(CCFLAGS) -c $< -o $@
 
 clean:

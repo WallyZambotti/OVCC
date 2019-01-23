@@ -34,7 +34,7 @@ LDFLAGS=-shared $(PTHREAD) $(LIBS) #-Wl,--out-implib,libharddisk.a # -export-dyn
 
 UNUSEDOBJS= 
 
-_OBJS=harddisk.o cloud9.o cc3vhd.o fileops.o profport.o
+_OBJS=harddisk.o cloud9.o cc3vhd.o fileops.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 testlib: obj/testlib.o libharddisk.so
@@ -58,7 +58,7 @@ $(ODIR)/cc3vhd.o: cc3vhd.c cc3vhd.h defines.h harddisk.h ../CoCo/fileops.h
 $(ODIR)/fileops.o: ../CoCo/fileops.c ../CoCo/fileops.h
 	$(CC) $(CCFLAGS) -c $< -o $@
     
-$(ODIR)/profport.o: ../CoCo/profport.c ../CoCo/profport.h
+$(ODIR)/iniman.o: ../CoCo/iniman.c ../CoCo/iniman.h
 	$(CC) $(CCFLAGS) -c $< -o $@
 
 clean:

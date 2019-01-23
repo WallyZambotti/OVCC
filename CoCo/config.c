@@ -312,7 +312,9 @@ unsigned char ReadNamedIniFile(char *iniFilePath)
 	//fprintf(stderr, "InsertModule : %s\n", CurrentConfig.ModulePath);
 	//InsertModule (CurrentConfig.ModulePath);	// Should this be here?
 	
-	inifile = *GetPrivateProfile();
+	INIfile *inifilep = GetPrivateProfile();
+	inifile = *inifilep;
+	inifilep->backup = true;
 	return(0);
 }
 

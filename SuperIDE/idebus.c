@@ -291,11 +291,8 @@ FILE *OpenDisk(char *ImageFile,unsigned char DiskNum)
 
 	strncpy(SerialNumber,ImageFile,20);
 
-#ifdef __MINGW32__
 	hTemp = fopen(ImageFile, "rb+");
-#else
-	hTemp = fopen(ImageFile, "r+");
-#endif
+
 	if (hTemp==INVALID_HANDLE_VALUE)
 		return(hTemp);
 

@@ -101,9 +101,67 @@ static void *recordEntry(INIsection *section, char *name, char *value)
     return &section->entries[section->entryCnt++];
 }
 
+static void BackupINIfile(void)
+{
+    if (!inifile.backup) return;
+
+#define BUF_SIZE 1024
+
+    FILE *inputFd, *outputFd;
+    size_t numRead;
+    char buf[BUF_SIZE];
+    char backupininame[256];
+
+    /* Open input and output files */
+
+    inputFd = fopen(inifile.name, "rb");
+    if (inputFd == NULL)
+    {
+        printf("iniman : backup error opening ini file %s", inifile.name);
+    }
+
+    strcpy(backupininame, inifile.name);
+    strcat(backupininame, "_bck");
+
+    outputFd = fopen(backupininame, "wb");
+    if (outputFd == NULL)
+    {
+        printf("iniman : backup error opening backup file %s", backupininame);
+    }
+
+    /* Transfer data until we encounter end of input or an error */
+
+    while ((numRead = fread(buf, 1, BUF_SIZE, inputFd)) > 0)
+    {
+        if (fwrite(buf, 1, numRead, outputFd) != numRead)
+        {
+            printf("iniman : error while writing backup\n");
+        }
+    }
+
+    if (ferror(outputFd))
+    {
+        printf("iniman : error while writing backup\n");
+    }
+
+    if (fclose(inputFd))
+    {
+        printf("iniman : error closing ini\n");
+    }
+
+    if (fclose(outputFd) == -1)
+    {
+        printf("iniman : error closing backup\n");
+    }
+
+    inifile.backup = false; // Only backup once!
+}
+
 static bool saveINIfile(bool freemem)
 {
     int isection, ientry;
+
+    BackupINIfile();
 
     if ((inifile.file = fopen(inifile.name, "w")) == NULL)
     {

@@ -34,7 +34,7 @@ LDFLAGS=-shared $(PTHREAD) $(LIBS) #-Wl,--out-implib,libharddisk.a # -export-dyn
 
 UNUSEDOBJS= 
 
-_OBJS=	becker.o profport.o
+_OBJS=	becker.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 testlib: obj/testlib.o libbecker.so
@@ -49,7 +49,7 @@ libbecker.so: $(OBJS)
 $(ODIR)/becker.o: becker.c becker.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 
-$(ODIR)/profport.o: ../CoCo/profport.c ../CoCo/profport.h
+$(ODIR)/iniman.o: ../CoCo/iniman.c ../CoCo/iniman.h
 	$(CC) $(CCFLAGS) -c $< -o $@
 
 clean:

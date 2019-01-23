@@ -34,7 +34,7 @@ LDFLAGS=-shared $(PTHREAD)  #-mwindows -Wl,-export-all-symbols -Wl,--out-implib,
 
 UNUSEDOBJS= 
 
-_OBJS=	superide.o cloud9.o fileops.o idebus.o logger.o profport.o
+_OBJS=	superide.o cloud9.o fileops.o idebus.o logger.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 testlib: obj/testlib.o libsuperide.so
@@ -61,7 +61,7 @@ $(ODIR)/idebus.o: idebus.c idebus.h logger.h
 $(ODIR)/logger.o: logger.c logger.h 
 	$(CC) -c $(CCFLAGS) $< -o $@
 
-$(ODIR)/profport.o: ../CoCo/profport.c ../CoCo/profport.h
+$(ODIR)/iniman.o: ../CoCo/iniman.c ../CoCo/iniman.h
 	$(CC) $(CCFLAGS) -c $< -o $@
 
 clean:

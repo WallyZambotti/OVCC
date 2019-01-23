@@ -32,7 +32,7 @@ LDFLAGS=-shared $(PTHREAD) #-Wl,--out-implib,libharddisk.a # -export-dynamic
 
 UNUSEDOBJS= 
 
-_OBJS=	mpi.o fileops.o profport.o
+_OBJS=	mpi.o fileops.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 testlib: obj/testlib.o libmpi.so
@@ -50,7 +50,7 @@ $(ODIR)/mpi.o: mpi.c mpi.h ../CoCo/fileops.h
 $(ODIR)/fileops.o: ../CoCo/fileops.c ../CoCo/fileops.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 
-$(ODIR)/profport.o: ../CoCo/profport.c ../CoCo/profport.h
+$(ODIR)/iniman.o: ../CoCo/iniman.c ../CoCo/iniman.h
 	$(CC) $(CCFLAGS) -c $< -o $@
 
 clean:

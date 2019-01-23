@@ -331,18 +331,11 @@ unsigned char MountDisk(char *FileName,unsigned char disk)
 
 	if (Drive[disk].RawDrive==0)
 	{
-#ifdef __MINGW32__
 		Drive[disk].FileHandle = fopen( FileName, "rb+");
-#else
-		Drive[disk].FileHandle = fopen( FileName, "r+");
-#endif
+
 		if (Drive[disk].FileHandle==NULL)
 		{	//Can't open read/write might be read only
-#ifdef __MINGW32__
 			Drive[disk].FileHandle = fopen( FileName, "rb");
-#else
-			Drive[disk].FileHandle = fopen( FileName, "r");
-#endif
 			Drive[disk].WriteProtect=0xFF;
 		}
 		if (Drive[disk].FileHandle==NULL)
@@ -1499,11 +1492,8 @@ FILE *OpenFloppy (int nDrive_)
 	FILE *h=NULL;
 //    wsprintf(szDevice, "\\\\.\\fdraw%u", nDrive_);
 //	MessageBox(0,szDevice,"ok",0);
-#ifdef __MINGW32__
     h = fopen(szDevice, "rb+");
-#else
-    h = fopen(szDevice, "r+");
-#endif
+
 	if (h == NULL)
 	{
 		sprintf(szTemp,"Unable to open RAW device %s",szDevice);

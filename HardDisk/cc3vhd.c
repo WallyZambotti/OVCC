@@ -96,19 +96,11 @@ int MountHD(char FileName[MAX_PATH])
 	Status = HD_OK;
 	SectorOffset.All = 0;
 	DMAaddress.word = 0;
-#ifdef __MINGW32__
 	HardDrive = fopen(FileName, "rb+");
-#else
-	HardDrive = fopen(FileName, "r+");
-#endif
 
 	if (HardDrive == NULL)	//Can't open read/write. try read only
 	{
-#ifdef __MINGW32__
 		HardDrive = fopen(FileName, "rb");
-#else
-		HardDrive = fopen(FileName, "r");
-#endif
 		WpHD=1;
 	}
 

@@ -36,13 +36,15 @@ typedef struct
     char        *name;
     FILE        *file;
     INIsection  *sections;
-    bool        dirty;
+    bool        backup;
     short int   sectionCnt;
 } INIfile;
 
+#ifndef __MINGW32__
 int GetPrivateProfileString(char *, char *, char *, char *, int , char *);
 int WritePrivateProfileString(char *, char *, char *, char *);
 int GetPrivateProfileInt(char *, char *, int , char *);
+#endif
 int WritePrivateProfileInt(char *, char *, int , char *);
 bool DeletePrivateProfileEntry(char *, char *, char *);
 bool DeletePrivateProfileSection(char *, char *);

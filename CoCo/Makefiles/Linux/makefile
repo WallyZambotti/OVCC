@@ -35,7 +35,7 @@ LDFLAGS=$(LIBS) #-Wl,-export-all-symbols # -export-dynamic
 _OBJS=	vcc.o coco3.o config.o fileops.o hd6309.o iobus.o logger.o mc6809.o \
 	mc6821.o pakinterface.o quickload.o tcc1014mmu.o tcc1014registers.o \
 	throttle.o _xdebug.o cassette.o SDLInterface.o tcc1014graphicsSDL.o keyboardSDL.o \
-	keyboardLayoutSDL.o joystickinputSDL.o audioSDL.o vccgui.o profport.o
+	keyboardLayoutSDL.o joystickinputSDL.o audioSDL.o vccgui.o iniman.o
 _UNUSED_OBJS = hd6309-a.o fixedtexture.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
  
@@ -52,7 +52,7 @@ $(ODIR)/coco3.o: coco3.c defines.h tcc1014graphicsSDL.h \
 		throttle.h logger.h
 	$(CC) -c $(CCFLAGS) $< -o $@
     
-$(ODIR)/config.o: config.c profport.h config.h defines.h resource.h tcc1014graphicsSDL.h \
+$(ODIR)/config.o: config.c iniman.h config.h defines.h resource.h tcc1014graphicsSDL.h \
 		mc6821.h audio.h tcc1014mmu.h joystickinputSDL.h vcc.h fileops.h \
 		pakinterface.h keyboard.h cassette.h
 	$(CC) -c $(CCFLAGS) $< -o $@
@@ -128,11 +128,8 @@ $(ODIR)/tcc1014graphicsSDL.o: tcc1014graphicsSDL.c defines.h tcc1014graphicsSDL.
 	logger.h 
 	$(CC) -c $(CCFLAGS) $< -o $@
 
-$(ODIR)/profport.o: profport.c profport.h
+$(ODIR)/iniman.o: iniman.c iniman.h
 	$(CC) -c $(CCFLAGS) -fPIC $< -o $@
 
 clean:
 	rm -f $(ODIR)/*.o $(TARGET)
-
-install:
-	sudo cp libprofport.so /usr/lib
