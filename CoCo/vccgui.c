@@ -159,7 +159,7 @@ int SaveIniFile(AG_Event *event)
 
     extern unsigned char WriteNamedIniFile(char *);
 
-    DuplicatePrivateProfile(file);
+    //DuplicatePrivateProfile(file);
 
     AG_TextMsg(AG_MSG_INFO, "Config (ini) file saved!");
 }

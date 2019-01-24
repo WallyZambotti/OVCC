@@ -26,7 +26,7 @@ unsigned char WriteIniFile(void);
 unsigned char ReadIniFile(void);
 char * BasicRomName(void);
 void GetIniFilePath( char *);
-INIfile *GetIniFile(void);
+INIman *GetIniMan(void);
 void UpdateConfig (void);
 void UpdateSoundBar(unsigned short,unsigned short);
 void UpdateTapeCounter(unsigned int,unsigned char);

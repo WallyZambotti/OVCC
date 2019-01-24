@@ -7,8 +7,9 @@ CoCo/libs
 CoCo/paks
 CoCo/vhds
 CoCo/roms
-CoCo/Vcc.ini
 CoCo/makefile
+CoCo/Vcc.ini
+CoCo/Vcc.ini_bck
 FD502/makefile
 FD502/testlib
 FD502/obj

@@ -183,7 +183,7 @@ int InsertModule (char *ModulePath)
 	char Temp[MAX_LOADSTRING]="";
 	char String[1024]="";
 	char TempIni[MAX_PATH]="";
-	INIfile *tempIni = NULL;
+	INIman *tempMan = NULL;
 	unsigned char FileType=0;
 	FileType=FileID(ModulePath);
 
@@ -322,8 +322,8 @@ int InsertModule (char *ModulePath)
 			//GetIniFilePath(TempIni);
 			//fprintf(stderr, "Insert Module : Calling SetIniPath %lx(%s)\n", (unsigned long)SetIniPath, TempIni);
 			//SetIniPath(TempIni);
-			tempIni = GetIniFile();
-			SetIni(tempIni);
+			tempMan = GetIniMan();
+			SetIni(tempMan);
 		}
 		if (PakSetCart!=NULL)
 		{

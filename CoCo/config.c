@@ -63,7 +63,7 @@ static unsigned int	RightJoystickEmulation[3] = { IDC_RIGHTSTANDARD,IDC_RIGHTTHR
 static unsigned short int	Cpuchoice[2]={IDC_6809,IDC_6309};
 static unsigned short int	Monchoice[2]={IDC_COMPOSITE,IDC_RGB};
 static unsigned char temp=0,temp2=0;
-static INIfile *inifile = NULL;
+static INIman *iniman = NULL;
 static char IniFileName[]="Vcc.ini";
 static char IniFilePath[MAX_PATH]="";
 static char TapeFileName[MAX_PATH]="";
@@ -212,7 +212,7 @@ unsigned char WriteNamedIniFile(char *iniFilePath)
 	WritePrivateProfileInt("RightJoyStick","DiDevice",RightSDL.DiDevice,iniFilePath);
 	WritePrivateProfileInt("RightJoyStick", "HiResDevice", RightSDL.HiRes, iniFilePath);
 
-	FlushPrivateProfile();
+	FlushPrivateProfile(iniFilePath);
 	
 	return(0);
 }
@@ -314,8 +314,8 @@ unsigned char ReadNamedIniFile(char *iniFilePath)
 	
 	//  To keep ini file processing consistent we need one global iniman structure for the core and to later share with all other modules
 
-	inifile = GetPrivateProfile();
-	inifile->backup = true;
+	iniman = GetPrivateProfile();
+	SetBackup(iniFilePath);
 	return(0);
 }
 
@@ -367,9 +367,9 @@ void GetIniFilePath( char *Path)
 	return;
 }
 
-INIfile *GetIniFile(void)
+INIman *GetIniMan(void)
 {
-	return (inifile);
+	return (iniman);
 }
 
 void UpdateConfig (void)
