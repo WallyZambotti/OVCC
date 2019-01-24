@@ -51,3 +51,4 @@ bool DeletePrivateProfileSection(char *, char *);
 void FlushPrivateProfile(void);
 INIfile *GetPrivateProfile(void);
 void SetPrivateProfile(INIfile *);
+void DuplicatePrivateProfile(char *);

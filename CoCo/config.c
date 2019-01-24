@@ -63,7 +63,7 @@ static unsigned int	RightJoystickEmulation[3] = { IDC_RIGHTSTANDARD,IDC_RIGHTTHR
 static unsigned short int	Cpuchoice[2]={IDC_6809,IDC_6309};
 static unsigned short int	Monchoice[2]={IDC_COMPOSITE,IDC_RGB};
 static unsigned char temp=0,temp2=0;
-static INIfile inifile = { NULL, NULL, NULL, false, 0 };
+static INIfile *inifile = NULL;
 static char IniFileName[]="Vcc.ini";
 static char IniFilePath[MAX_PATH]="";
 static char TapeFileName[MAX_PATH]="";
@@ -312,9 +312,10 @@ unsigned char ReadNamedIniFile(char *iniFilePath)
 	//fprintf(stderr, "InsertModule : %s\n", CurrentConfig.ModulePath);
 	//InsertModule (CurrentConfig.ModulePath);	// Should this be here?
 	
-	INIfile *inifilep = GetPrivateProfile();
-	inifile = *inifilep;
-	inifilep->backup = true;
+	//  To keep ini file processing consistent we need one global iniman structure for the core and to later share with all other modules
+
+	inifile = GetPrivateProfile();
+	inifile->backup = true;
 	return(0);
 }
 
@@ -368,7 +369,7 @@ void GetIniFilePath( char *Path)
 
 INIfile *GetIniFile(void)
 {
-	return (&inifile);
+	return (inifile);
 }
 
 void UpdateConfig (void)

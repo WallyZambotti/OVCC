@@ -161,7 +161,7 @@ static bool saveINIfile(bool freemem)
 {
     int isection, ientry;
 
-    BackupINIfile();
+    if (freemem) BackupINIfile();
 
     if ((inifile.file = fopen(inifile.name, "w")) == NULL)
     {
@@ -186,24 +186,38 @@ static bool saveINIfile(bool freemem)
                 if (freemem)
                 {
                     free(inifile.sections[isection].entries[ientry].name);
+                    inifile.sections[isection].entries[ientry].name = NULL;
                 }
             }
 
             if (freemem)
             {
-                free(inifile.sections[isection].entries[ientry].value);                
+                free(inifile.sections[isection].entries[ientry].value);        
+                inifile.sections[isection].entries[ientry].value = NULL;        
             }
         }
 
         if (freemem && inifile.sections[isection].name != NULL)
         {
             free(inifile.sections[isection].name);
+            inifile.sections[isection].name = NULL;
+            inifile.sections[isection].entryCnt = 0;
+            free(inifile.sections[isection].entries);
+            inifile.sections[isection].entries = NULL;
         }
     }
 
     fclose(inifile.file);
-    free(inifile.name);
-    inifile.name = NULL;
+
+    if (freemem)
+    {
+        free(inifile.name);
+        inifile.name = NULL;
+        inifile.sectionCnt = 0;
+        free(inifile.sections);
+        inifile.sections = NULL;
+    }
+    
     return true;
 }
 
@@ -234,7 +248,14 @@ static bool loadINIfile(char *name)
 
     if (inifile.file == NULL)
     {
-        return false;
+        inifile.file = fopen(name, "w");
+
+        if (inifile.file == NULL)
+        {
+            return false;
+        }
+
+        inifile.sectionCnt = 0;
     }
 
     inifile.name = strdup(name);
@@ -473,4 +494,13 @@ INIfile *GetPrivateProfile(void)
 void SetPrivateProfile(INIfile *inifilep)
 {
     inifile = *inifilep;
+}
+
+void DuplicatePrivateProfile(char *newfilename)
+{
+    char *previousname = inifile.name;
+    inifile.name = strdup(newfilename);
+    saveINIfile(false);
+    free(inifile.name);
+    inifile.name = previousname;
 }

@@ -1,64 +1,70 @@
 [Version]
-Release=ovcc.exe
+Release=ovcc
 [CPU]
-DoubleSpeedClock=45
+DoubleSpeedClock=166
 FrameSkip=1
 Throttle=1
 CpuType=0
-MaxOverClock=500
+MaxOverClock=100
 MmuType=0
 [Audio]
-SndCard=Headset Earphone (SONY:SRS-X2 Hands-Free)
+SndCard=Built-in Audio Analogue Stereo
 Rate=3
 [Video]
-MonitorType=0
+MonitorType=1
 ScanLines=0
 AllowResize=0
 ForceAspect=0
 [Memory]
-RamSize=0
+RamSize=1
 ExternalBasicImage=
 [Misc]
 AutoStart=1
 CartAutoStart=1
 KeyMapIndex=1
+ThreadSafeLocking=0
 [Module]
-OnBoot=libs\mpi.dll
+OnBoot=libs/libmpi.so
 [LeftJoyStick]
 UseMouse=2
-DiDevice=0
-HiResDevice=0
 Left=276
 Right=275
 Up=273
 Down=274
 Fire1=282
 Fire2=283
+DiDevice=0
+HiResDevice=0
 [RightJoyStick]
 UseMouse=2
-DiDevice=0
-HiResDevice=0
 Left=276
 Right=275
 Up=273
 Down=274
 Fire1=282
 Fire2=283
+DiDevice=0
+HiResDevice=0
 [MPI]
 SWPOSITION=2
-SLOT1=
+SLOT1=paks/Dungeons of Daggorath (1982) (26-3093) (DynaMicro).ccc
 SLOT2=
-SLOT3=libs\harddisk.dll
-SLOT4=libs\fd502.dll
+SLOT3=libs/libharddisk.so
+SLOT4=libs/libfd502.so
+[Hard Disk]
+VHDImage=VHD Images/VCC-H0 NitrOS9 3.3.0 VCC 6309 Becker EmuDsk Boot ofs-5A000.vhd
+[HDBDOS/DW/Becker]
+DWServerAddr=127.0.0.1
+DWServerPort=65504
+[Hard Drive + Cloud9 RTC]
+VHDImage=vhds/VCCEmuDisk.vhd
 [FD502 26-133]
-DiskRom=1
-RomPath=
+DiskRom=2
+RomPath=roms/hdbdw3bc3 w-offset 5A000.rom
 Persist=1
-Disk#0=dsks\256XMAS1.DSK
+Disk#0=dsks/Basic09 Development.OS9
 Disk#1=
 Disk#2=
 Disk#3=
 ClkEnable=1
 TurboDisk=1
-[Hard Drive + Cloud9 RTC]
-VHDImage=vhds\VCCEmuDisk.vhd
