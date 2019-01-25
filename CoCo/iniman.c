@@ -342,7 +342,7 @@ static INIentry *searchEntry(INIsection *section, char *entry)
 
 int GetPrivateProfileString(char *section, char *entry, char *defaultval, char *buffer, int bufferlen, char *filename)
 {
-    INIfile *inifile = loadINIfile(filename, true);
+    INIfile *inifile = loadINIfile(filename, false);
 
     if (inifile == NULL) 
     {
@@ -374,7 +374,7 @@ int GetPrivateProfileString(char *section, char *entry, char *defaultval, char *
 
 int WritePrivateProfileString(char *section, char *entry, char *value, char *filename)
 {
-    INIfile *inifile = loadINIfile(filename, true);
+    INIfile *inifile = loadINIfile(filename, false);
 
     if (inifile == NULL) 
     {
@@ -430,7 +430,7 @@ int WritePrivateProfileInt(char *section, char *entry, int defaultval, char *fil
 
 bool DeletePrivateProfileEntry(char *section, char *entry, char *filename)
 {
-    INIfile *inifile = loadINIfile(filename, false);
+    INIfile *inifile = loadINIfile(filename, true);
 
     if (inifile == NULL) 
     {
@@ -465,7 +465,7 @@ bool DeletePrivateProfileEntry(char *section, char *entry, char *filename)
 
 bool DeletePrivateProfileSection(char *section, char *filename)
 {
-    INIfile *inifile = loadINIfile(filename, false);
+    INIfile *inifile = loadINIfile(filename, true);
 
     if (inifile == NULL) 
     {
@@ -501,7 +501,7 @@ bool DeletePrivateProfileSection(char *section, char *filename)
 
 bool DuplicatePrivateProfile(char *filename, char *newfilename)
 {
-    INIfile *inifile = loadINIfile(filename, false);
+    INIfile *inifile = loadINIfile(filename, true);
 
     if (inifile == NULL) 
     {
