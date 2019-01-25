@@ -109,7 +109,7 @@ static int PrintMonitor = 0;
 
 void _MessageBox(const char *msg)
 {
-    AG_TextMsg(AG_MSG_INFO, msg);
+    AG_TextMsg(AG_MSG_INFO, "%s", msg);
 }
 
 void Run(AG_Event *event)
@@ -720,10 +720,12 @@ void BrowseTape(AG_Event *event)
     AG_WindowShow(fdw);
 }
 
-void UpdateTapeWidgets(int counter, char *mode, char *file)
+void UpdateTapeWidgets(int counter, char mode, char *file)
 {
+    char modestr[2] = { mode, 0 };
+
     tapecounter = counter;
-    AG_Strlcpy(tapeMode, mode, sizeof(tapeMode));
+    AG_Strlcpy(tapeMode, modestr, sizeof(tapeMode));
     AG_Strlcpy(tapefile, file, sizeof(tapefile));
 }
 
@@ -857,7 +859,7 @@ void PopulateJoystickDevices(AG_Tlist *list)
     int numOfSticks = 0, stick = 0, currentleft = 0, currentright;
     char **sticknames;
 
-    extern void AudioConfigGetJoyStickDevices(int *, int*, int*, char **);
+    extern void AudioConfigGetJoyStickDevices(int *, int*, int*, char **[]);
 
     AudioConfigGetJoyStickDevices(&numOfSticks, &currentleft, &currentright, &sticknames);
 
@@ -1181,6 +1183,8 @@ void Configure(AG_Event *ev)
 
         // Left Key Left Combo
 
+        extern unsigned short TranslateScan2Disp(int);
+
         com = comLeftKeyLeft = AG_ComboNew(vbox2, AG_COMBO_HFILL, "Left  ");
         AG_ComboSizeHint(com, "12345678", 8);
         PopulateKeysList(com->list);
@@ -1478,7 +1482,7 @@ int LoadPack(AG_Event *event)
 
 	    AG_ThreadTryCreate(&threadID, CartLoad, state);
 
-        if (threadID == NULL)
+        if (threadID == (AG_Thread)NULL)
         {
             fprintf(stderr, "Can't Start Cart Load Thread!\n");
             return(0);
@@ -1585,7 +1589,7 @@ void KeyDownUp(AG_Event *event)
     int mod = AG_INT(3);
     unsigned short uc = AG_ULONG(4);
 
-    extern DoKeyBoardEvent(unsigned short, unsigned short, unsigned short);
+    extern void DoKeyBoardEvent(unsigned short, unsigned short, unsigned short);
 
     DoKeyBoardEvent(uc, kb, updown);
 	//fprintf(stderr, "key %d - scancode %d - mod %d - unicode %ld - updown %i,\n", kb&0xf, sc&0xff, mod, uc, updown);

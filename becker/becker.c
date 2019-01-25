@@ -606,11 +606,11 @@ void ADDCALL ModuleConfig(unsigned char func)
 }
 
 //void ADDCALL SetIniPath(char *IniFilePath)
-void ADDCALL SetIniPath(INIfile *IniFileP)
+void ADDCALL SetIniPath(INIman *InimanP)
 {
 	//strcpy(IniFile,IniFilePath);
-	strcpy(IniFile,IniFileP->name);
-	SetPrivateProfile(IniFileP);
+	strcpy(IniFile, InimanP->files[0].name);
+	InitPrivateProfile(InimanP);
 	LoadConfig();
 	SetDWTCPConnectionEnable(1);
 	return;

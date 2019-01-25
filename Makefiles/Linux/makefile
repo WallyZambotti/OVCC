@@ -31,7 +31,7 @@ xorch90:
 xramdisk:
 	if [ ! -f ./Ramdisk/makefile ]; then cp ./Ramdisk/Makefiles/Linux/makefile ./Ramdisk ; fi 
 	if [ ! -d ./Ramdisk/obj ]; then mkdir ./Ramdisk/obj ; fi
-	$(MAKE) -C RamDisk
+	$(MAKE) -C Ramdisk
 
 xsuperide:
 	if [ ! -f ./SuperIDE/makefile ]; then cp ./SuperIDE/Makefiles/Linux/makefile ./SuperIDE ; fi 

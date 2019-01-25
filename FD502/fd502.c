@@ -26,10 +26,13 @@ This file is part of VCC (Virtual Color Computer).
 #include <agar/gui.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "wd1793.h"
 #include "distortc.h"
 #include "fd502.h"
 #include "defines.h"
+#define BOOL bool
+#include "../CoCo/fileops.h"
 #include "../CoCo/iniman.h"
 
 #define EXTROMSIZE 16384
@@ -72,6 +75,7 @@ void LoadConfig(void);
 void SaveConfig(void);
 long CreateDiskHeader(char *,unsigned char,unsigned char,unsigned char);
 void Load_Disk(unsigned char);
+void BuildMenu(void);
 
 static unsigned long RealDisks=0;
 long CreateDisk (unsigned char);
@@ -146,11 +150,11 @@ void ADDCALL ModuleConfig(unsigned char func)
 }
 
 //void ADDCALL SetIniPath (char *IniFilePath)
-void ADDCALL SetIniPath (INIfile *IniFileP)
+void ADDCALL SetIniPath(INIman *InimanP)
 {
 	//strcpy(IniFile,IniFilePath);
-	strcpy(IniFile,IniFileP->name);
-	SetPrivateProfile(IniFileP);
+	strcpy(IniFile, InimanP->files[0].name);
+	InitPrivateProfile(InimanP);
 	LoadConfig();
 	return;
 }
@@ -394,7 +398,7 @@ void ConfigFD502(AG_Event *event)
 	hbox = AG_BoxNewHoriz(win, AG_HBOX_HFILL | AG_BOX_FRAME);
 	vbox = AG_BoxNewVert(hbox, AG_VBOX_HFILL);
 
-	AG_LabelNew(vbox, NULL, "External Disk ROM Image");
+	AG_LabelNewString(vbox, 0, "External Disk ROM Image");
 
     AG_Label *lab = AG_LabelNewPolled(vbox, AG_LABEL_HFILL | AG_LABEL_FRAME, "%s", TempRomFileName);
 	AG_LabelSizeHint(lab, 1, "/home/user/folder/path/directory/longfile.ext");
@@ -422,7 +426,7 @@ void MountDiskFile(char *diskname, int disk)
 	}
 }
 
-int CreateCallback(AG_Event *event)
+void CreateCallback(AG_Event *event)
 {
 	int disk = AG_INT(1);
 	char *file = AG_STRING(2);
@@ -501,11 +505,11 @@ void CreateNewDisk(char *diskname, int disk)
 
 	vbox = AG_BoxNewVert(hbox, AG_BOX_FRAME);
 
-	AG_LabelNew(vbox, 0, diskname);
+	AG_LabelNewString(vbox, 0, diskname);
 	AG_SeparatorNewHoriz(vbox);
-	AG_LabelNew(vbox, 0, "This file does not exist");
-	AG_LabelNew(vbox, 0, "");
-	AG_LabelNew(vbox, 0, "Create this file?");
+	AG_LabelNewString(vbox, 0, "This file does not exist");
+	AG_LabelNewString(vbox, 0, "");
+	AG_LabelNewString(vbox, 0, "Create this file?");
 
 	// Double Sided / Ok / Cancel	
 

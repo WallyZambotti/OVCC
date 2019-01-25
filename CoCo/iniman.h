@@ -49,12 +49,11 @@ int GetPrivateProfileString(char *, char *, char *, char *, int , char *);
 int WritePrivateProfileString(char *, char *, char *, char *);
 int GetPrivateProfileInt(char *, char *, int , char *);
 #endif
+INIman *InitPrivateProfile(INIman *);
 int WritePrivateProfileInt(char *, char *, int , char *);
 bool DeletePrivateProfileEntry(char *, char *, char *);
 bool DeletePrivateProfileSection(char *, char *);
 void FlushPrivateProfile(char *);
 void FlushAllPrivateProfile(void);
-INIman *GetPrivateProfile(void);
-void SetPrivateProfile(INIman *);
-void DuplicatePrivateProfile(char *, char *);
-void SetBackup(char *);
+bool DuplicatePrivateProfile(char *, char *);
+void SetBackupPrivateProfile(char *);

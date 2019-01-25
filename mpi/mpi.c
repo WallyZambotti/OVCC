@@ -46,7 +46,7 @@ static unsigned char *ExtRomPointers[MAXPAX]={NULL,NULL,NULL,NULL};
 static unsigned int BankedCartOffset[MAXPAX]={0,0,0,0};
 static unsigned char Temp,Temp2;
 static char IniFile[MAX_PATH]="";
-static INIfile inifile = { NULL, NULL, NULL, false, 0 };
+static INIman *iniman = NULL;
 
 //**************************************************************
 //Array of fuction pointer for each Slot
@@ -302,12 +302,12 @@ unsigned char ADDCALL ModuleReset(void)
 }
 
 //void ADDCALL SetIniPath(char *IniFilePath)
-void ADDCALL SetIniPath(INIfile *IniFileP)
+void ADDCALL SetIniPath(INIman *InimanP)
 {
 	//strcpy(IniFile,IniFilePath);
-	strcpy(IniFile, IniFileP->name);
-	SetPrivateProfile(IniFileP);
-	inifile = *IniFileP;
+	strcpy(IniFile, InimanP->files[0].name);
+	InitPrivateProfile(InimanP);
+	iniman = InimanP;
 	LoadConfig();
 	return;
 }
@@ -499,7 +499,7 @@ unsigned char MountModule(unsigned char Slot,char *ModName)
 		if (SetIniPathCalls[Slot] != NULL)
 		{
 			//SetIniPathCalls[Slot](IniFile);
-			SetIniPathCalls[Slot](&inifile);
+			SetIniPathCalls[Slot](iniman);
 		}
 		if (SetCartCalls[Slot] !=NULL)
 			SetCartCalls[Slot](*SetCarts[Slot]);	//Transfer the address of the SetCart routin to the pak

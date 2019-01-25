@@ -20,6 +20,7 @@ This file is part of VCC (Virtual Color Computer).
 
 #include <agar/core.h>
 #include <agar/gui.h>
+#include <stdbool.h>
 #include "../CoCo/iniman.h"
 
 #ifdef __MINGW32__
@@ -46,7 +47,6 @@ void ADDCALL MemPointers(MEMREAD8, MEMWRITE8);
 unsigned char ADDCALL PakMemRead8 (unsigned short);
 void ADDCALL ModuleStatus (char *);
 //void ADDCALL SetIniPath (char *);
-void ADDCALL SetIniPath (INIfile *);
 
 #ifdef __cplusplus
 } // __cplusplus defined.

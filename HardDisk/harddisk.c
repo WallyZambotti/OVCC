@@ -22,6 +22,7 @@ typedef int BOOL;
 #include <agar/core.h>
 #include <agar/gui.h>
 #include "harddisk.h"
+#include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
 #include "cc3vhd.h"
@@ -178,11 +179,11 @@ void ADDCALL ModuleStatus(char *MyStatus)
 }
 
 //void ADDCALL SetIniPath (char *IniFilePath)
-void ADDCALL SetIniPath (INIfile *IniFileP)
+void ADDCALL SetIniPath(INIman *InimanP)
 {
-	//strcpy(IniFile, IniFilePath);
-	strcpy(IniFile, IniFileP->name);
-	SetPrivateProfile(IniFileP);
+	//strcpy(IniFile,IniFilePath);
+	strcpy(IniFile, InimanP->files[0].name);
+	InitPrivateProfile(InimanP);
 	LoadConfig();
 	return;
 }

@@ -20,6 +20,7 @@ typedef int BOOL;
 
 #include <agar/core.h>
 #include <agar/gui.h>
+#include <stdbool.h>
 #include "stdio.h"
 #include "defines.h"
 #include "superide.h"
@@ -172,11 +173,11 @@ void ADDCALL ModuleConfig(unsigned char func)
 }
 
 //void ADDCALL SetIniPath (char *IniFilePath)
-void ADDCALL SetIniPath (INIfile *IniFileP)
+void ADDCALL SetIniPath(INIman *InimanP)
 {
-	//strcpy(IniFile, IniFilePath);
-	strcpy(IniFile, IniFileP->name);
-	SetPrivateProfile(IniFileP);
+	//strcpy(IniFile,IniFilePath);
+	strcpy(IniFile, InimanP->files[0].name);
+	InitPrivateProfile(InimanP);
 	LoadConfig();
 	return;
 }

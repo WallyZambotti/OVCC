@@ -34,6 +34,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "keyboard.h"
 #include "fileops.h"
 #include "cassette.h"
+#include "SDLInterface.h"
 
 //#include "logger.h"
 #include <assert.h>
@@ -233,6 +234,10 @@ unsigned char ReadNamedIniFile(char *iniFilePath)
 
 	//fprintf(stderr, "Read Ini File : %s\n", IniFilePath);
 
+	//  To keep ini file processing consistent we need one global iniman structure for the core and to later share with all other modules
+
+	iniman = InitPrivateProfile(NULL);
+
 	//Loads the config structure from the hard disk
 	CurrentConfig.CPUMultiplyer = GetPrivateProfileInt("CPU","DoubleSpeedClock",2,iniFilePath);
 	CurrentConfig.FrameSkip = GetPrivateProfileInt("CPU","FrameSkip",1,iniFilePath);
@@ -312,10 +317,7 @@ unsigned char ReadNamedIniFile(char *iniFilePath)
 	//fprintf(stderr, "InsertModule : %s\n", CurrentConfig.ModulePath);
 	//InsertModule (CurrentConfig.ModulePath);	// Should this be here?
 	
-	//  To keep ini file processing consistent we need one global iniman structure for the core and to later share with all other modules
-
-	iniman = GetPrivateProfile();
-	SetBackup(iniFilePath);
+	SetBackupPrivateProfile(iniFilePath);
 	return(0);
 }
 
@@ -374,6 +376,8 @@ INIman *GetIniMan(void)
 
 void UpdateConfig (void)
 {
+	extern unsigned char SetMmuType(unsigned char);
+
 	SetResizeSDL(CurrentConfig.Resize);
 	SetAspectSDL(CurrentConfig.Aspect);
 	SetScanLinesSDL(CurrentConfig.ScanLines);
@@ -450,10 +454,10 @@ void AudioConfigGetAudioDevices(int *num, int * currentdev, SndCardList **DevLis
 	*currentdev = CurrentConfig.SndOutDev;
 }
 
-void AudioConfigGetJoyStickDevices(int *num, int *currentleft, int *currentright, char *StickNames[])
+void AudioConfigGetJoyStickDevices(int *num, int *currentleft, int *currentright, char **StickNames[])
 {
 	*num = NumberofJoysticks;
-	*StickNames = &StickName;
+	*StickNames = StickName;
 	*currentleft = LeftSDL.DiDevice;
 	*currentright = RightSDL.DiDevice;
 }
@@ -663,7 +667,7 @@ void UpdateSoundBar (unsigned short Left,unsigned short Right)
 
 void UpdateTapeCounter(unsigned int Counter,unsigned char TapeMode)
 {
-	extern void UpdateTapeWidgets(int, char *, char *);
+	extern void UpdateTapeWidgets(int, char, char *);
 
 	GetTapeName(TapeFileName);
 	PathStripPath(TapeFileName);  
