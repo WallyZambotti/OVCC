@@ -27,7 +27,7 @@ This file is part of iniman
 
 #define MAX_LINE_LEN 512
 
-static INIman _iniman = { NULL, 0 };
+static INIman _iniman = { NULL, 0, -1 };
 static INIman *iniman = NULL;
 
 static int readline(FILE *fp, char *bp)
@@ -64,6 +64,7 @@ static INIfile *recordFile(char *filename)
     iniman->files[iniman->fileCnt].sectionCnt = 0;
     iniman->files[iniman->fileCnt].file = NULL;
     iniman->files[iniman->fileCnt].backup = false;
+    iniman->lastfile = iniman->fileCnt;
 
     return &iniman->files[iniman->fileCnt++];
 }
@@ -253,6 +254,7 @@ static INIfile *searchFile(char *filename)
     {
         if (! strcmp(iniman->files[ifile].name, filename))
         {
+            iniman->lastfile = ifile;
             return (&iniman->files[ifile]);
         }
     }

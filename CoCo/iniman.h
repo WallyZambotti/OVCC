@@ -42,6 +42,7 @@ typedef struct
 {
     INIfile     *files;
     short int   fileCnt;
+    short int   lastfile;
 } INIman;
 
 #ifndef __MINGW32__
