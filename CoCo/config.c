@@ -223,6 +223,12 @@ unsigned char WriteIniFile(void)
 	return WriteNamedIniFile(IniFilePath);
 }
 
+unsigned char SaveCurrentConfigToFile(char *newfilename)
+{
+	DuplicatePrivateProfile(IniFilePath, newfilename);
+	WriteNamedIniFile(newfilename);
+}
+
 void UpdateOnBoot(char *modname)
 {
 	AG_Strlcpy(CurrentConfig.ModulePath, modname, sizeof(CurrentConfig.ModulePath));

@@ -151,6 +151,58 @@ static void BackupINIfile(INIfile *inifile)
     inifile->backup = false; // Only backup once!
 }
 
+static bool freeINIfile(INIfile *inifile)
+{
+    int isection, ientry;
+
+    if (inifile == NULL) return false;
+
+    for(isection = 0 ; isection < inifile->sectionCnt ; isection++)
+    {
+        for(ientry = 0 ; ientry < inifile->sections[isection].entryCnt ; ientry++)
+        {
+            if (inifile->sections[isection].entries[ientry].name != NULL)
+            {
+                free(inifile->sections[isection].entries[ientry].name);
+                inifile->sections[isection].entries[ientry].name = NULL;
+            }
+
+            if (inifile->sections[isection].entries[ientry].value != NULL)
+            {
+                free(inifile->sections[isection].entries[ientry].value);        
+                inifile->sections[isection].entries[ientry].value = NULL;        
+            }
+        }
+
+        if (inifile->sections[isection].name)
+        {
+            free(inifile->sections[isection].name);
+            inifile->sections[isection].name = NULL;
+        }
+        if (inifile->sections[isection].entries != 0)
+        {
+            free(inifile->sections[isection].entries);
+            inifile->sections[isection].entries = NULL;
+        }
+        inifile->sections[isection].entryCnt = 0;
+    }
+
+    if (inifile->name != NULL)
+    {
+        free(inifile->name);
+        inifile->name = NULL;
+    }
+
+    if (inifile->sections != NULL)
+    {
+        free(inifile->sections);
+        inifile->sections = NULL;
+    }
+    
+    inifile->sectionCnt = 0;
+    return true;
+}
+
 static bool saveINIfile(INIfile *inifile, bool freemem)
 {
     int isection, ientry;
@@ -179,27 +231,7 @@ static bool saveINIfile(INIfile *inifile, bool freemem)
                     inifile->sections[isection].entries[ientry].name,
                     inifile->sections[isection].entries[ientry].value);
 
-                if (freemem)
-                {
-                    free(inifile->sections[isection].entries[ientry].name);
-                    inifile->sections[isection].entries[ientry].name = NULL;
-                }
             }
-
-            if (freemem)
-            {
-                free(inifile->sections[isection].entries[ientry].value);        
-                inifile->sections[isection].entries[ientry].value = NULL;        
-            }
-        }
-
-        if (freemem && inifile->sections[isection].name != NULL)
-        {
-            free(inifile->sections[isection].name);
-            inifile->sections[isection].name = NULL;
-            inifile->sections[isection].entryCnt = 0;
-            free(inifile->sections[isection].entries);
-            inifile->sections[isection].entries = NULL;
         }
     }
 
@@ -207,11 +239,7 @@ static bool saveINIfile(INIfile *inifile, bool freemem)
 
     if (freemem)
     {
-        free(inifile->name);
-        inifile->name = NULL;
-        inifile->sectionCnt = 0;
-        free(inifile->sections);
-        inifile->sections = NULL;
+        freeINIfile(inifile);
     }
     
     return true;
@@ -509,26 +537,53 @@ bool DuplicatePrivateProfile(char *filename, char *newfilename)
         return false;
     }
 
-    INIfile *newinifile = recordFile(newfilename);
+    INIfile *newinifile = searchFile(newfilename);
 
-    int ifile, isection;
+    if (newinifile != NULL)
+    {
+        freeINIfile(newinifile);
+    }
+    else
+    {
+        newinifile = recordFile(newfilename);
+    }
+    
+    int isection, ientry;
     size_t size;
 
-    for (ifile = 0 ; ifile < iniman->fileCnt ; ifile++)
+    newinifile->sectionCnt = inifile->sectionCnt;
+
+    if (inifile->sectionCnt == 0) return true;
+    size = ((inifile->sectionCnt%SECTIONBUCKETSIZE)+1)*SECTIONBUCKETSIZE;
+    newinifile->sections = malloc(size);
+    memset(newinifile->sections, 0, size);
+
+    for (isection = 0 ; isection < inifile->sectionCnt ; isection++)
     {
-        if (!inifile->sectionCnt) continue;
-
-        size = ((inifile->sectionCnt%SECTIONBUCKETSIZE)+1)*SECTIONBUCKETSIZE;
-        newinifile->sections = malloc(size);
-        memcpy(newinifile->sections, inifile->sections, size);
-
-        for (isection = 0 ; isection < inifile->sectionCnt ; isection++)
+        if (inifile->sections[isection].name != NULL)
         {
-            if (!inifile->sections[isection].entryCnt) continue;
+            newinifile->sections[isection].name = strdup(inifile->sections[isection].name);
+        }
+        
+        newinifile->sections[isection].entryCnt = inifile->sections[isection].entryCnt;
 
-            size = ((inifile->sections[isection].entryCnt%ENTRYBUCKETSIZE)+1)*ENTRYBUCKETSIZE;
-            newinifile->sections[isection].entries = malloc(size);
-            memcpy(newinifile->sections[isection].entries, inifile->sections[isection].entries, size);
+        if (!inifile->sections[isection].entryCnt) continue;
+
+        size = ((inifile->sections[isection].entryCnt%ENTRYBUCKETSIZE)+1)*ENTRYBUCKETSIZE;
+        newinifile->sections[isection].entries = malloc(size);
+        memset(newinifile->sections[isection].entries, 0, size);
+
+        for (ientry = 0 ; ientry < inifile->sections[isection].entryCnt ; ientry++)
+        {
+            if (inifile->sections[isection].entries[ientry].name != NULL)
+            {
+                newinifile->sections[isection].entries[ientry].name = strdup(inifile->sections[isection].entries[ientry].name);
+            }
+
+            if (inifile->sections[isection].entries[ientry].value != NULL)
+            {
+                newinifile->sections[isection].entries[ientry].value = strdup(inifile->sections[isection].entries[ientry].value);
+            }
         }
     }
 
