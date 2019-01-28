@@ -6,9 +6,9 @@ CC=gcc
 # linker
 LD=gcc
 # debug
-DEBUG=-g
+DEBUG=#-g
 # optimisation
-OPT=-O0
+OPT=-O2
 # warnings
 WARN=#-Wall
 # Include Path 

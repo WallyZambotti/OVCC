@@ -8,9 +8,9 @@ LD=gcc
 # Resource Compiler
 RC=windres
 # debug
-DEBUG=-g
+DEBUG=#-g
 # optimisation
-OPT=-O0
+OPT=-O2
 # warnings
 WARN=-Wall
 # Include Path 
