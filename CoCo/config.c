@@ -332,6 +332,25 @@ unsigned char ReadIniFile(void)
 	return ReadNamedIniFile(IniFilePath);
 }
 
+void ConfigLoadIniFile(char * filename)
+{
+	void TriggerModuleConfig(unsigned char);
+	char dummy[32];
+
+	// Update the config from the provided ini file name
+	// Re-trigger the Insert Module because the OnBoot may be different
+	// Do a hard reset
+	ReadNamedIniFile(filename);
+    UpdateConfig();
+	InsertModule (CurrentConfig.ModulePath);
+    DoClsSDL(&EmuState2);
+    DoHardReset(&EmuState2);
+	// And then perform a dummy read of the default Vcc.ini file to direct any futher 
+	// config changes to the correct ini file
+	GetPrivateProfileString("Dummy","Dummy","", dummy, 32, IniFilePath);
+	TriggerModuleConfig(1); // 1 = update inifile name
+}
+
 char * BasicRomName(void)
 {
 	return(CurrentConfig.ExternalBasicImage); 

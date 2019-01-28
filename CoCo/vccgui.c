@@ -127,15 +127,9 @@ int LoadIniFile(AG_Event *event)
 	char *file = AG_STRING(2);
 	AG_FileType *ft = AG_PTR(3);
 
-    extern unsigned char ReadNamedIniFile(char *);
-    extern void SetClockSpeed(unsigned short);
-    extern void DoHardReset(SystemState2*);
+    extern void  ConfigLoadIniFile(char *);
 
-    ReadNamedIniFile(file);
-    UpdateConfig();
-	InsertModule (CurrentConfig.ModulePath);
-    DoClsSDL(state);
-    DoHardReset(state);
+    ConfigLoadIniFile(file);
 }
 
 void LoadConf(AG_Event *event)

@@ -152,6 +152,19 @@ void ADDCALL ModuleConfig(unsigned char func)
 		}
 	break;
 
+	case 1: // Update ini file
+		strcpy(IniFile, iniman->files[iniman->lastfile].name);
+
+		for(int Slot = 0 ; Slot < 4 ; Slot++)
+		{
+			if (ConfigModuleCalls[Slot] != NULL)
+			{
+				ConfigModuleCalls[Slot](1);
+			}
+		}
+
+	break;
+
 	default:
 		break;
 	}

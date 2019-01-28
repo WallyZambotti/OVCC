@@ -339,6 +339,14 @@ int InsertModule (char *ModulePath)
 	return(NOMODULE);
 }
 
+void TriggerModuleConfig(unsigned char func)
+{
+	if (ConfigModule != NULL) 
+	{
+		ConfigModule(func); // 0 = Release Resources (Menus etc)
+	}
+}
+
 /**
 Load a ROM pack
 return total bytes loaded, or 0 on failure

@@ -60,6 +60,8 @@ AG_MenuItem *itemEjectHDD = NULL;
 AG_MenuItem *itemLoadHDD = NULL;
 AG_MenuItem *itemSeperator = NULL;
 
+INIman *iniman = NULL;
+
 void __attribute__ ((constructor)) initLibrary(void) {
  //
  // Function that is called when the library is loaded
@@ -110,6 +112,11 @@ void ADDCALL ModuleConfig(unsigned char func)
 		AG_MenuDel(itemMenu);
 		AG_MenuDel(itemSeperator);
 		break;
+
+	case 1: // Update ini file
+		strcpy(IniFile, iniman->files[iniman->lastfile].name);
+
+	break;
 
 	default:
 		break;
@@ -184,6 +191,7 @@ void ADDCALL SetIniPath(INIman *InimanP)
 	//strcpy(IniFile,IniFilePath);
 	strcpy(IniFile, InimanP->files[InimanP->lastfile].name);
 	InitPrivateProfile(InimanP);
+	iniman = InimanP;
 	LoadConfig();
 	return;
 }

@@ -90,6 +90,8 @@ AG_MenuItem *itemLoadFD[MAX_DRIVES] = { NULL,NULL,NULL,NULL };
 AG_MenuItem *itemConfig = NULL;
 AG_MenuItem *itemSeperator = NULL;
 
+INIman *iniman = NULL;
+
 
 void __attribute__ ((constructor)) initLibrary(void) {
  //
@@ -142,6 +144,11 @@ void ADDCALL ModuleConfig(unsigned char func)
 	}
 	break;
 
+	case 1: // Update ini file
+		strcpy(IniFile, iniman->files[iniman->lastfile].name);
+
+	break;
+
 	default:
 		break;
 	}
@@ -155,6 +162,7 @@ void ADDCALL SetIniPath(INIman *InimanP)
 	//strcpy(IniFile,IniFilePath);
 	strcpy(IniFile, InimanP->files[InimanP->lastfile].name);
 	InitPrivateProfile(InimanP);
+	iniman = InimanP;
 	LoadConfig();
 	return;
 }

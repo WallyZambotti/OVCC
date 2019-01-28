@@ -48,6 +48,16 @@ ovcc:
 	$(MAKE) xramdisk
 	$(MAKE) xsuperide
 
+clean:
+	$(MAKE) -C CoCo clean
+	$(MAKE) -C becker clean
+	$(MAKE) -C FD502 clean
+	$(MAKE) -C HardDisk clean
+	$(MAKE) -C mpi clean
+	$(MAKE) -C orch90 clean
+	$(MAKE) -C Ramdisk clean
+	$(MAKE) -C SuperIDE clean
+
 install:
 	$(MAKE) -C becker install
 	$(MAKE) -C FD502 install

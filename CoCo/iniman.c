@@ -388,6 +388,7 @@ int GetPrivateProfileString(char *section, char *entry, char *defaultval, char *
     if (sectionp == NULL)
     {
         strncpy(buffer, defaultval, bufferlen);
+        return strlen(buffer);
     }
 
     INIentry *entryp = searchEntry(sectionp, entry);
