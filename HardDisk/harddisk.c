@@ -182,7 +182,7 @@ void ADDCALL ModuleStatus(char *MyStatus)
 void ADDCALL SetIniPath(INIman *InimanP)
 {
 	//strcpy(IniFile,IniFilePath);
-	strcpy(IniFile, InimanP->files[0].name);
+	strcpy(IniFile, InimanP->files[InimanP->lastfile].name);
 	InitPrivateProfile(InimanP);
 	LoadConfig();
 	return;
