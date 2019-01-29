@@ -46,7 +46,7 @@ $(ODIR)/testlib.o: testlib.c
 libharddisk.so: $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
     
-$(ODIR)/harddisk.o: harddisk.c harddisk.h defines.h resource.h cloud9.h ../CoCo/fileops.h
+$(ODIR)/harddisk.o: harddisk.c harddisk.h defines.h cloud9.h ../CoCo/fileops.h
 	$(CC) $(CCFLAGS) -I../CoCo -c $< -o $@
     
 $(ODIR)/cloud9.o: cloud9.c cloud9.h
