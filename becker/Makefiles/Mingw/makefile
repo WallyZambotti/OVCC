@@ -46,7 +46,7 @@ $(ODIR):
 
 $(OBJS): | $(ODIR)
 
-$(ODIR)/testlib.o: testlib.c | $(ODIR)
+$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
 	$(CC) -O0 -g -c $(SDLINC) $< -o $@
 
 becker.dll: $(OBJS)
