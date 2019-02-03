@@ -36,7 +36,12 @@ OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 testlib: obj/testlib.o fd502.dll
 	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
 
-$(ODIR)/testlib.o: testlib.c
+$(ODIR):
+	mkdir -p $@
+
+$(OBJS): | $(ODIR)
+
+$(ODIR)/testlib.o: testlib.c | $(ODIR)
 	$(CC) -O0 -g -c $(SDLINC) $< -o $@
 
 fd502.dll: $(OBJS)

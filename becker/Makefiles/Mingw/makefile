@@ -41,7 +41,12 @@ OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 testlib: obj/testlib.o becker.dll 
 	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
 
-$(ODIR)/testlib.o: testlib.c
+$(ODIR):
+	mkdir -p $@
+
+$(OBJS): | $(ODIR)
+
+$(ODIR)/testlib.o: testlib.c | $(ODIR)
 	$(CC) -O0 -g -c $(SDLINC) $< -o $@
 
 becker.dll: $(OBJS)

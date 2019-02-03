@@ -42,6 +42,11 @@ OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 ovcc: $(OBJS)
 	$(LD) -o $(TARGET) $(OBJS) $(LDFLAGS) -Wl,--subsystem,console
     
+$(ODIR):
+	mkdir -p $@
+
+$(OBJS): | $(ODIR)
+
 $(ODIR)/vcc.o: vcc.c fileops.h defines.h resource.h vcc.h tcc1014mmu.h tcc1014graphicsSDL.h \
 		tcc1014registers.h hd6309.h mc6809.h mc6821.h keyboard.h coco3.h pakinterface.h audio.h \
 		config.h quickload.h throttle.h logger.h iniman.o
