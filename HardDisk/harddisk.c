@@ -28,7 +28,6 @@ typedef int BOOL;
 #include "cc3vhd.h"
 #include "defines.h"
 #include "cloud9.h"
-#include "profport.h"
 #include "fileops.h"
 
 static char moduleName[24] = { "Hard Drive + Cloud9 RTC" };
