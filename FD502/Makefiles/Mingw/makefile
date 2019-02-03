@@ -62,7 +62,7 @@ $(ODIR)/wd1793.o: wd1793.c wd1793.h fd502.h defines.h
 $(ODIR)/fileops.o: ../CoCo/fileops.c ../CoCo/fileops.h
 	$(CC) -c $(CCFLAGS) $< -o $@
     
-$(ODIR)/iniman.o: ../CoCo/iniman.c ../Coco/iniman.h
+$(ODIR)/iniman.o: ../CoCo/iniman.c ../CoCo/iniman.h
 	$(CC) $(CCFLAGS) -I../CoCo -c $< -o $@
     
 clean:
