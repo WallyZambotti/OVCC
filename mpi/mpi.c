@@ -377,7 +377,7 @@ void ConfigMPI(AG_Event *event)
 	{	
 		sprintf(slotName, "Slot %i", dev);
 		vbox2 = AG_BoxNewVert(vbox, AG_BOX_FRAME);
-		AG_LabelNew(vbox2, 0, slotName);
+		AG_LabelNew(vbox2, 0, "%s", slotName);
 		AG_Label *lbl = AG_LabelNewPolled(vbox2, AG_LABEL_EXPAND | AG_LABEL_FRAME, "%s", SlotLabel[dev-1]);
 		AG_LabelSizeHint(lbl, 1, "Great big module names goes here!\n");
 	}

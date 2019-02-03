@@ -52,10 +52,10 @@ void _xDbgTrace(const void * pFile, const int iLine, const void * pFormat, ...)
 	va_start(args, pFormat);
 
 	sprintf(temp, "%s(%d) : ", (char *)pFile, iLine);
-	fprintf(stderr, temp);
+	fprintf(stderr, "%s", temp);
 
 	vsprintf(temp, (char *)pFormat, args);
-	fprintf(stderr, temp);
+	fprintf(stderr, "%s", temp);
 
 	va_end(args);
 

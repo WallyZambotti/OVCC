@@ -138,7 +138,7 @@ int dw_write( char dwdata)
 		if (res != 1)
 		{
 			sprintf(msg,"dw_write: socket error\n");
-			fprintf(stderr, msg);
+			fprintf(stderr, "%s", msg);
 #ifdef __MINGW32__
 			closesocket(dwSocket);
 #else
@@ -154,7 +154,7 @@ int dw_write( char dwdata)
 		else
 	{
 		sprintf(msg,"coco write but null socket\n");
-		fprintf(stderr, msg);
+		fprintf(stderr, "%s", msg);
 	}
 
 	return(0);
@@ -211,7 +211,7 @@ void attemptDWConnection( void )
 	curport= dwsport;
 
 	sprintf(msg,"Connecting to %s:%d... \n",dwaddress,dwsport);
-	fprintf(stderr, msg);
+	fprintf(stderr, "%s", msg);
 
 	// resolve hostname
 	struct hostent *dwSrvHost = gethostbyname(dwaddress);
@@ -394,7 +394,7 @@ void SetDWTCPConnectionEnable(unsigned int enable)
 		}
 
 		sprintf(msg,"DWTCPConnection thread started\n");
-		fprintf(stderr, msg);
+		fprintf(stderr, "%s", msg);
 
 	}
 	else if ((enable != 1) & DWTCPEnabled)
