@@ -1,0 +1,54 @@
+
+ifeq ($(TARGETOS),Mingw)
+    EXEDIR = ..
+    LIBDIR = ../libs
+else
+    prefix = /usr/local
+    EXEDIR = $(DESTDIR)$(prefix)/bin
+    LIBDIR = $(DESTDIR)$(prefix)/lib/ovcc
+endif
+
+ODIR = obj
+
+WARN = -Wall
+PTHREAD = -pthread
+
+SDLINC := $(shell pkg-config --cflags sdl2)
+AGARINC := $(shell agar-config --cflags)
+IDIR = $(INCDIR) $(SDLINC) $(AGARINC)
+
+SDLLIB := $(shell sdl2-config --libs)
+AGARLIB := $(shell agar-config --libs)
+LIBS = $(SDLLIB) $(AGARLIB)
+
+CFLAGS += $(DEBUG) $(OPT) $(WARN) $(IDIR)
+
+LDFLAGS += $(LIBS) #-Wl,-export-all-symbols # -export-dynamic
+
+OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
+
+$(TARGET): $(OBJS)
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+testlib: $(ODIR)/testlib.o
+	$(CC) -o $@ $< $(LIBS)
+
+$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
+	$(CC) -O0 -g -c $(SDLINC) $< -o $@
+
+test: $(TARGET) testlib
+	LD_LIBRARY_PATH=. ./testlib $(TARGET) ModuleName
+
+$(ODIR):
+	mkdir -p $@
+
+$(OBJS): | $(ODIR)
+
+$(OBJS):
+	$(CC) $(CFLAGS) -c $< -o $@
+
+install: $(TARGET)
+	install -D --mode=0644 $(TARGET) $(LIBDIR)/$(TARGET)
+
+clean:
+	rm -f $(ODIR)/*.o $(TARGET) testlib
