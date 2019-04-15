@@ -31,21 +31,17 @@ static INIman _iniman = { NULL, 0, -1 };
 static INIman *iniman = NULL;
 
 static int readline(FILE *fp, char *bp)
-{   char c = '\0';
+{   
+    int c = '\0';
     int i = 0;
 
-    while( (c = getc(fp)) != '\n')
+    while(((c = getc(fp)) != '\n') && (c != EOF))
     {   
-        if(c == EOF) 
-        {
-            return(0);
-        }
-
         bp[i++] = c;
     }
 
     bp[i] = '\0';
-    return(1);
+    return(c != EOF);
 }
 
 #define SECTIONBUCKETSIZE 128

@@ -2,3 +2,5 @@ CoCo/ovcc
 */obj
 */lib*.so
 */testlib
+*/*_bck
+.vscode/*
