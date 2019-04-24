@@ -34,6 +34,7 @@ void CalibrateThrottle(void)
 	OneFrame = MasterClock / (TARGETFRAMERATE);
 	OneMs = MasterClock / 1000;
 	fMasterClock=(float)MasterClock;
+	//printf("CalibrateThrottle : MC %ld fMC %f 1ms %ld 1Frame %ld\n", MasterClock, fMasterClock, OneMs, OneFrame);
 }
 
 
@@ -77,6 +78,29 @@ void FrameWait(void)
 	return;
 }
 
+float timems()
+{
+	static struct timeval tval_before, tval_after, tval_result;
+	static int firsttime = 1;
+	float secs, fsecs;
+
+	if (firsttime)
+	{
+		gettimeofday(&tval_before, NULL);
+		firsttime = 0;
+		return 0.0;
+	}
+
+	gettimeofday(&tval_after, NULL);
+	timersub(&tval_after, &tval_before, &tval_result);
+	memcpy(&tval_before, &tval_after, sizeof(tval_after));
+
+	secs = tval_result.tv_sec;
+	fsecs = (float)tval_result.tv_usec / 1000000.0;
+
+	return secs + fsecs;
+}
+
 float CalculateFPS(void) //Done at end of render;
 {
 
@@ -89,9 +113,10 @@ float CalculateFPS(void) //Done at end of render;
 	Now = SDL_GetPerformanceCounter();
 	fNow=(float)Now;
 	fps=(fNow-fLast)/fMasterClock;
+	fps= FRAMEINTERVAL/fps;
+	//printf("%d %2.2f %f %f %f\n", FrameCount, fps, fNow, fLast, timems());
 	fLast=fNow;
 	FrameCount=0;
-	fps= FRAMEINTERVAL/fps;
 	return(fps);
 }
-		
+

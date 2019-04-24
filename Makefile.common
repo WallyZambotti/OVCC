@@ -10,7 +10,9 @@ endif
 
 ODIR = obj
 
-WARN = -Wall
+DEBUG=#-g
+OPT=-O2
+WARN = -w # -Wall
 PTHREAD = -pthread
 
 SDLINC := $(shell pkg-config --cflags sdl2)

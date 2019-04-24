@@ -26,6 +26,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "keyboard.h"
 #include "joystickinputSDL.h"
 #include "sdl2driver.h"
+#include "throttle.h"
 
 #ifndef Ulong
 #define Ulong unsigned long
@@ -189,6 +190,16 @@ void SoftReset(AG_Event *ev)
     extern void DoSoftReset();
 
     DoSoftReset();
+}
+
+void ExitF4(AG_Event *event)
+{
+    SystemState2 *SState = AG_PTR(1);
+    AG_Window *win = SState->agwin;
+
+    AG_CloseFocusedWindow();    
+
+    //AGWINDETACH(win);
 }
 
 void SoftResetF5(AG_Event *event)
@@ -1635,7 +1646,7 @@ void FXdrawn(AG_Event *event)
 {
     SystemState2 *SState = AG_PTR(1);
 
-    //fprintf(stderr, "4.");
+    fprintf(stderr, "4(%2.3f)-", timems());
     if (SState->Pixels != NULL)
     {
         SDL_UnlockTexture(SState->Texture);
@@ -1664,7 +1675,7 @@ void LockTexture(AG_Event *event)
 
     if (SState->Pixels == NULL) 
     {
-        //fprintf(stderr, "2.");
+        fprintf(stderr, "2(%2.3f)", timems());
         SDL_LockTexture(SState->Texture, NULL, &SState->Pixels, &pitch);
     }
 }
@@ -1768,6 +1779,8 @@ void PrepareEventCallBacks(SystemState2 *EmuState2)
 
    // VCC Hot FN Keys
 
+    AG_ActionFn(EmuState2->agwin, "F4", ExitF4, "%p", EmuState2);
+    AG_ActionOnKeyUp(EmuState2->agwin, AG_KEY_F4, AG_KEYMOD_ANY, "F4");
     AG_ActionFn(EmuState2->agwin, "F5", SoftResetF5, NULL);
     AG_ActionOnKeyUp(EmuState2->agwin, AG_KEY_F5, AG_KEYMOD_ANY, "F5");
     AG_ActionFn(EmuState2->agwin, "F6", MonitorChangeF6, NULL);

@@ -84,7 +84,6 @@ float RenderFrame (SystemState2 *RFState2, unsigned long DCnt)
 //********************************Start of frame Render*****************************************************
 	SetBlinkStateSDL(BlinkPhase);
 	irq_fs(0);				//FS low to High transition start of display Boink needs this
-
 	for (RFState2->LineCounter=0;RFState2->LineCounter<13;RFState2->LineCounter++)		//Vertical Blanking 13 H lines 
 		CPUCycle();
 

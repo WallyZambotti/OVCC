@@ -80,7 +80,7 @@ void CheckSurfacesSDL()
 
 void DisplayFlipSDL(SystemState2 *DFState)	// Double buffering flip
 {
-	//fprintf(stderr, "3.");
+    fprintf(stderr, "3(%2.3f)", timems());
 	AG_Redraw(DFState->fx);
 }
 
@@ -107,20 +107,23 @@ unsigned char LockScreenSDL(SystemState2 *LSState)
 	char message[256]="";
 
 	if (LSState->EmulationRunning == 0) return 0;
-
+	//fprintf(stderr, "0.");
     //Texture is already locked
     if(LSState->Pixels != NULL)
     {
-        SDL_LogDebug(SDL_LOG_CATEGORY_ERROR, "LockScreen : Texture is already locked!\n" );
+		//fprintf(stderr, "!");
+        //SDL_LogDebug(SDL_LOG_CATEGORY_ERROR, "LockScreen : Texture is already locked!\n" );
         return 1;
     }
 
 	//fprintf(stderr, "1.");
+    fprintf(stderr, "1(%2.3f)", timems());
 	AG_PostEvent(NULL, LSState->fx, "lock-texture", "%p", LSState);
 
 	if (LSState->Pixels == NULL)
 	{
-		SDL_LogDebug(SDL_LOG_CATEGORY_ERROR, "LockScreen : Unable to lock texture!\n");
+		//fprintf(stderr, "?");
+		//SDL_LogDebug(SDL_LOG_CATEGORY_ERROR, "LockScreen : Unable to lock texture!\n");
 		return 1;
 	}
 
@@ -137,10 +140,9 @@ void UnlockScreenSDL(SystemState2 *USState)
 {
 	if (USState->EmulationRunning == 0) 
 	{
-		//fprintf(stderr, "*");
+		fprintf(stderr, "*");
 		return;
 	}
-	//fprintf(stderr, "-");
 	DisplayFlipSDL(USState);
 	return;
 }

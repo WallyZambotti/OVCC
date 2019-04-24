@@ -2,5 +2,15 @@ CoCo/ovcc
 */obj
 */lib*.so
 */testlib
+<<<<<<< Updated upstream
 */*_bck
 .vscode/*
+=======
+CoCo/*.ini
+CoCo/*_bck
+CoCo/libs/*
+CoCo/roms/*
+CoCo/vhds/*
+CoCo/dsks/*
+CoCo/*.rom
+>>>>>>> Stashed changes
