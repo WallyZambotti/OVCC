@@ -439,6 +439,8 @@ void EmuLoop(void)
 	AG_Delay(30);
 	unsigned long LC = 0;
 
+	TestDelay();
+
 	//printf("Entering Emu Loop : Skip %i - Reset : %i\n", (int)EmuState2.FrameSkip, (int)EmuState2.ResetPending);
 
 	while (1) 
@@ -508,10 +510,15 @@ void EmuLoop(void)
 
 		char ttbuff[256];
 		sprintf(ttbuff,"Skip:%2.2i|FPS:%3.0f|%s@%3.2fMhz|%s",EmuState2.FrameSkip,FPS,CpuName,EmuState2.CPUCurrentSpeed,EmuState2.StatusLine);
+		//sprintf(ttbuff,"Skip:%2.2i|FPS:%3.0f|%s@%3.2fMhz|%s",EmuState2.FrameSkip,0.0,CpuName,EmuState2.CPUCurrentSpeed,EmuState2.StatusLine);
 		SetStatusBarText(ttbuff,&EmuState2);
 
 		if (Throttle )	//Do nothing until the frame is over returning unused time to OS
+		{
+    		fprintf(stderr, "4(%2.3f)", timems());
 			FrameWait();
+    		fprintf(stderr, "5(%2.3f)-", timems());
+		}
 	} //Still Emulating
 	return;
 }

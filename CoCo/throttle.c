@@ -18,6 +18,7 @@ This file is part of VCC (Virtual Color Computer).
 
 #include <agar/core.h>
 #include <SDL2/SDL.h>
+#include <sys/time.h>
 #include "throttle.h"
 #include "audio.h"
 #include "defines.h"
@@ -49,6 +50,20 @@ void EndRender(unsigned char Skip)
 	FrameSkip = Skip;
 	TargetTime = ( StartTime + (OneFrame * FrameSkip));
 	return;
+}
+
+void TestDelay(void)
+{
+	float time1, time2;
+	int i;
+
+	for (i = 0 ; i < 10 ; i++)
+	{
+		time1 = timems();
+		AG_Delay(1);
+		time2 = timems();
+		fprintf(stderr, "(%2.3f)\n", time2);
+	}
 }
 
 void FrameWait(void)

@@ -1646,7 +1646,7 @@ void FXdrawn(AG_Event *event)
 {
     SystemState2 *SState = AG_PTR(1);
 
-    fprintf(stderr, "4(%2.3f)-", timems());
+    //fprintf(stderr, "4(%2.3f)", timems());
     if (SState->Pixels != NULL)
     {
         SDL_UnlockTexture(SState->Texture);
@@ -1654,6 +1654,7 @@ void FXdrawn(AG_Event *event)
     }
 
     SDL_RenderCopy(SState->Renderer, SState->Texture, NULL, (SDL_Rect*)&SState->fx->wid.x);
+    //fprintf(stderr, "5(%2.3f)-", timems());
 }
 
 /*
@@ -1675,7 +1676,7 @@ void LockTexture(AG_Event *event)
 
     if (SState->Pixels == NULL) 
     {
-        fprintf(stderr, "2(%2.3f)", timems());
+        //fprintf(stderr, "2(%2.3f)", timems());
         SDL_LockTexture(SState->Texture, NULL, &SState->Pixels, &pitch);
     }
 }

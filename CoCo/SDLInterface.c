@@ -80,7 +80,7 @@ void CheckSurfacesSDL()
 
 void DisplayFlipSDL(SystemState2 *DFState)	// Double buffering flip
 {
-    fprintf(stderr, "3(%2.3f)", timems());
+    //fprintf(stderr, "3(%2.3f)", timems());
 	AG_Redraw(DFState->fx);
 }
 
@@ -117,7 +117,7 @@ unsigned char LockScreenSDL(SystemState2 *LSState)
     }
 
 	//fprintf(stderr, "1.");
-    fprintf(stderr, "1(%2.3f)", timems());
+    //fprintf(stderr, "1(%2.3f)", timems());
 	AG_PostEvent(NULL, LSState->fx, "lock-texture", "%p", LSState);
 
 	if (LSState->Pixels == NULL)
