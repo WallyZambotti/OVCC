@@ -24,8 +24,9 @@ This file is part of VCC (Virtual Color Computer).
 #include "defines.h"
 #include "vcc.h"
 
-static Uint64 StartTime,EndTime,OneFrame,CurrentTime,SleepRes,TargetTime,OneMs;
-static Uint64 MasterClock,Now;
+static unsigned long long StartTime,EndTime,OneFrame,CurrentTime,SleepRes,TargetTime,OneMs;
+static long long LagTime;
+static unsigned long long MasterClock,Now;
 static unsigned char FrameSkip=0;
 static float fMasterClock=0;
 
@@ -35,6 +36,7 @@ void CalibrateThrottle(void)
 	OneFrame = MasterClock / (TARGETFRAMERATE);
 	OneMs = MasterClock / 1000;
 	fMasterClock=(float)MasterClock;
+	LagTime = 0;
 	//printf("CalibrateThrottle : MC %ld fMC %f 1ms %ld 1Frame %ld\n", MasterClock, fMasterClock, OneMs, OneFrame);
 }
 
@@ -48,7 +50,7 @@ void StartRender(void)
 void EndRender(unsigned char Skip)
 {
 	FrameSkip = Skip;
-	TargetTime = ( StartTime + (OneFrame * FrameSkip));
+	TargetTime = ( StartTime + (OneFrame * FrameSkip)) + LagTime;
 	return;
 }
 
@@ -68,13 +70,33 @@ void TestDelay(void)
 
 void FrameWait(void)
 {
+	unsigned long long TwoMs = OneMs * 1;
+	unsigned long long Tt_minus_2ms = TargetTime - TwoMs;
+	CurrentTime = SDL_GetPerformanceCounter();
+	int msDelays = (Tt_minus_2ms - CurrentTime) / OneMs;
+	long cnt;
+	float delayed;
+
+	//fprintf(stderr, "%d ", msDelays);
+	//fprintf(stderr, "(%ld) ", (long long)TargetTime-CurrentTime);
+
+	//delayed = timems();
+
+	if (msDelays > 1)
+	{
+		AG_Delay(msDelays);
+	}
+
+	//delayed = timems();
+	//fprintf(stderr, "%2.3f ", delayed);
+
 	CurrentTime = SDL_GetPerformanceCounter();
 
-	while ( ((long)TargetTime - (long)CurrentTime) > (long)(OneMs * 2))	//If we have more that 2Ms till the end of the frame
-	{
-		AG_Delay(1);	//Give about 1Ms back to the system
-		CurrentTime = SDL_GetPerformanceCounter();	//And check again
-	}
+	// while (CurrentTime < Tt_minus_2ms)	//If we have more that 2Ms till the end of the frame
+	// {
+	// 	AG_Delay(1);	//Give about 1Ms back to the system
+	// 	CurrentTime = SDL_GetPerformanceCounter();	//And check again
+	// }
 
 	if (GetSoundStatusSDL())	//Lean on the sound card a bit for timing
 	{
@@ -87,8 +109,18 @@ void FrameWait(void)
 		// }
 
 	}
-	while ( CurrentTime < TargetTime )	//Poll Untill frame end.
+	
+	//fprintf(stderr, "%ld ", (long long)TargetTime-CurrentTime);
+	//cnt=0;
+
+	while (CurrentTime < TargetTime)	//Poll Until frame end.
+	{
 		CurrentTime = SDL_GetPerformanceCounter();
+		//cnt++;
+	}
+
+	LagTime = (long long)TargetTime-CurrentTime;
+	//fprintf(stderr, "%ld %d\n", LagTime, cnt);
 
 	return;
 }
