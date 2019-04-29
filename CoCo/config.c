@@ -420,6 +420,24 @@ void UpdateConfig (void)
 	CurrentConfig.RebootNow = 0;
 }
 
+void CPUConfigSpeedInc(void)
+{
+	if (TempConfig.CPUMultiplyer >= CurrentConfig.CPUMultiplyer) return;
+	TempConfig.CPUMultiplyer += 1;
+	EmuState2.CPUCurrentSpeed = TempConfig.CPUMultiplyer * 0.894;
+	EmuState2.DoubleSpeedMultiplyer = TempConfig.CPUMultiplyer;
+	return TempConfig.CPUMultiplyer;
+}
+
+void CPUConfigSpeedDec(void)
+{
+	if (TempConfig.CPUMultiplyer <= 1) return;
+	TempConfig.CPUMultiplyer -= 1;
+	EmuState2.CPUCurrentSpeed = TempConfig.CPUMultiplyer * 0.894;
+	EmuState2.DoubleSpeedMultiplyer = TempConfig.CPUMultiplyer;
+	return TempConfig.CPUMultiplyer;
+}
+
 void CPUConfigSpeed(int multiplier)
 {
 	TempConfig.CPUMultiplyer = (unsigned short)multiplier;

@@ -19,6 +19,7 @@ This file is part of VCC (Virtual Color Computer).
 #include <agar/core.h>
 #include <SDL2/SDL.h>
 #include <sys/time.h>
+#include <time.h>
 #include "throttle.h"
 #include "audio.h"
 #include "defines.h"
@@ -76,16 +77,38 @@ void FrameWait(void)
 	int msDelays = (Tt_minus_2ms - CurrentTime) / OneMs;
 	long cnt;
 	float delayed;
+	struct timespec duration, dummy;
 
 	//fprintf(stderr, "%d ", msDelays);
 	//fprintf(stderr, "(%ld) ", (long long)TargetTime-CurrentTime);
 
 	//delayed = timems();
 
-	if (msDelays > 1)
+	if (CurrentTime > TargetTime)
 	{
-		AG_Delay(msDelays);
+		extern void CPUConfigSpeedDec(void);
+		CPUConfigSpeedDec();
+		return;
 	}
+
+	if (CurrentTime == TargetTime)
+	{
+		return;
+	}
+	
+	duration.tv_sec = 0;
+	duration.tv_nsec = TargetTime - CurrentTime;
+	nanosleep(&duration, &dummy);
+
+	{
+		extern void CPUConfigSpeedInc(void);
+		CPUConfigSpeedInc();
+	}
+
+	// if (msDelays > 1)
+	// {
+	// 	AG_Delay(msDelays);
+	// }
 
 	//delayed = timems();
 	//fprintf(stderr, "%2.3f ", delayed);
