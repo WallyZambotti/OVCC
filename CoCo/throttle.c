@@ -18,8 +18,10 @@ This file is part of VCC (Virtual Color Computer).
 
 #include <agar/core.h>
 #include <SDL2/SDL.h>
+#include <sys/timerfd.h>
 #include <sys/time.h>
 #include <time.h>
+#include <sched.h>
 #include "throttle.h"
 #include "audio.h"
 #include "defines.h"
@@ -30,14 +32,23 @@ static long long LagTime;
 static unsigned long long MasterClock,Now;
 static unsigned char FrameSkip=0;
 static float fMasterClock=0;
+static int timerfd;
 
 void CalibrateThrottle(void)
 {
+    struct sched_param schedparm;
+
 	MasterClock = SDL_GetPerformanceFrequency();
 	OneFrame = MasterClock / (TARGETFRAMERATE);
 	OneMs = MasterClock / 1000;
 	fMasterClock=(float)MasterClock;
 	LagTime = 0;
+
+	timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
+	memset(&schedparm, 0, sizeof(schedparm));
+	schedparm.sched_priority = 1; // lowest rt priority
+	sched_setscheduler(0, SCHED_FIFO, &schedparm);
+
 	//printf("CalibrateThrottle : MC %ld fMC %f 1ms %ld 1Frame %ld\n", MasterClock, fMasterClock, OneMs, OneFrame);
 }
 
@@ -78,6 +89,8 @@ void FrameWait(void)
 	long cnt;
 	float delayed;
 	struct timespec duration, dummy;
+	struct itimerspec waitspec;
+	unsigned long long expiries;
 
 	//fprintf(stderr, "%d ", msDelays);
 	//fprintf(stderr, "(%ld) ", (long long)TargetTime-CurrentTime);
@@ -86,7 +99,7 @@ void FrameWait(void)
 
 	if (CurrentTime > TargetTime)
 	{
-		extern void CPUConfigSpeedDec(void);
+		extern void CPUConfigSpeedDec(void);  // ran out of time so reduce the CPU frequency
 		CPUConfigSpeedDec();
 		return;
 	}
@@ -95,15 +108,28 @@ void FrameWait(void)
 	{
 		return;
 	}
-	
-	duration.tv_sec = 0;
-	duration.tv_nsec = TargetTime - CurrentTime;
-	nanosleep(&duration, &dummy);
+
+	// Use timerfd API to delay;
+
+	waitspec.it_interval.tv_sec = 0;
+	waitspec.it_interval.tv_nsec = 0;
+	waitspec.it_value.tv_sec = 0;
+	waitspec.it_value.tv_nsec = TargetTime - CurrentTime;
+	timerfd_settime(timerfd, 0, &waitspec, 0);
+	read(timerfd, &expiries, sizeof(expiries));
+
+	// Use nanosleep to delay
+
+	// duration.tv_sec = 0;
+	// duration.tv_nsec = TargetTime - CurrentTime;
+	// nanosleep(&duration, &dummy);
 
 	{
-		extern void CPUConfigSpeedInc(void);
+		extern void CPUConfigSpeedInc(void); // had time left over so increase the CPU frequency
 		CPUConfigSpeedInc();
 	}
+
+	// Use AG_Delay or SDL_Delay ro delay
 
 	// if (msDelays > 1)
 	// {
@@ -114,6 +140,8 @@ void FrameWait(void)
 	//fprintf(stderr, "%2.3f ", delayed);
 
 	CurrentTime = SDL_GetPerformanceCounter();
+
+	// Use Loop with AG_Delay or SDL_Delay to delay
 
 	// while (CurrentTime < Tt_minus_2ms)	//If we have more that 2Ms till the end of the frame
 	// {
@@ -135,6 +163,8 @@ void FrameWait(void)
 	
 	//fprintf(stderr, "%ld ", (long long)TargetTime-CurrentTime);
 	//cnt=0;
+
+	// Use busy CPU with high resolution counter to delay
 
 	while (CurrentTime < TargetTime)	//Poll Until frame end.
 	{
