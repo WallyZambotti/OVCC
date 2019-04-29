@@ -968,6 +968,7 @@ void Configure(AG_Event *ev)
         AG_LabelNew(tab, 0, "Over-Clocking");
         box = AG_BoxNewHoriz(tab, AG_BOX_HFILL | AG_BOX_FRAME);
 
+        cpuMax = (double)CurrentConfig.MaxOverclock * cpuMin;
         sl = AG_SliderNew(box, AG_SLIDER_HORIZ, AG_SLIDER_EXCL | AG_SLIDER_HFILL);
         AG_BindDouble(sl, "value", &cpuOCval);
         AG_BindDouble(sl, "min", &cpuMin);
