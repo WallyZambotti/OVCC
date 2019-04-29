@@ -47,8 +47,7 @@ void CalibrateThrottle(void)
 	timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
 	memset(&schedparm, 0, sizeof(schedparm));
 	schedparm.sched_priority = 1; // lowest rt priority
-	sched_setscheduler(0, SCHED_FIFO, &schedparm);
-
+	pthread_setschedparam(0, SCHED_FIFO, &schedparm);
 	//printf("CalibrateThrottle : MC %ld fMC %f 1ms %ld 1Frame %ld\n", MasterClock, fMasterClock, OneMs, OneFrame);
 }
 
@@ -63,6 +62,7 @@ void EndRender(unsigned char Skip)
 {
 	FrameSkip = Skip;
 	TargetTime = ( StartTime + (OneFrame * FrameSkip)) + LagTime;
+	LagTime = 0;
 	return;
 }
 
@@ -117,6 +117,11 @@ void FrameWait(void)
 	waitspec.it_value.tv_nsec = TargetTime - CurrentTime;
 	timerfd_settime(timerfd, 0, &waitspec, 0);
 	read(timerfd, &expiries, sizeof(expiries));
+
+	if (expiries) 
+	{
+		return;
+	}
 
 	// Use nanosleep to delay
 

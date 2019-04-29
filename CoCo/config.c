@@ -422,19 +422,17 @@ void UpdateConfig (void)
 
 void CPUConfigSpeedInc(void)
 {
-	if (TempConfig.CPUMultiplyer >= CurrentConfig.CPUMultiplyer) return;
-	TempConfig.CPUMultiplyer += 1;
-	EmuState2.CPUCurrentSpeed = TempConfig.CPUMultiplyer * 0.894;
-	EmuState2.DoubleSpeedMultiplyer = TempConfig.CPUMultiplyer;
+	if (EmuState2.DoubleSpeedMultiplyer >= TempConfig.CPUMultiplyer) return;
+	EmuState2.DoubleSpeedMultiplyer += 1;
+	EmuState2.CPUCurrentSpeed = EmuState2.DoubleSpeedMultiplyer * 0.894;
 	return TempConfig.CPUMultiplyer;
 }
 
 void CPUConfigSpeedDec(void)
 {
-	if (TempConfig.CPUMultiplyer <= 1) return;
-	TempConfig.CPUMultiplyer -= 1;
-	EmuState2.CPUCurrentSpeed = TempConfig.CPUMultiplyer * 0.894;
-	EmuState2.DoubleSpeedMultiplyer = TempConfig.CPUMultiplyer;
+	if (EmuState2.DoubleSpeedMultiplyer <= 1) return;
+	EmuState2.DoubleSpeedMultiplyer -= 1;
+	EmuState2.CPUCurrentSpeed = EmuState2.DoubleSpeedMultiplyer * 0.894;
 	return TempConfig.CPUMultiplyer;
 }
 
