@@ -109,30 +109,28 @@ void FrameWait(void)
 		return;
 	}
 
-	// Use timerfd API to delay;
-
-	waitspec.it_interval.tv_sec = 0;
-	waitspec.it_interval.tv_nsec = 0;
-	waitspec.it_value.tv_sec = 0;
-	waitspec.it_value.tv_nsec = TargetTime - CurrentTime;
-	timerfd_settime(timerfd, 0, &waitspec, 0);
-	read(timerfd, &expiries, sizeof(expiries));
-
-	if (expiries) 
-	{
-		return;
-	}
-
-	// Use nanosleep to delay
-
-	// duration.tv_sec = 0;
-	// duration.tv_nsec = TargetTime - CurrentTime;
-	// nanosleep(&duration, &dummy);
-
 	{
 		extern void CPUConfigSpeedInc(void); // had time left over so increase the CPU frequency
 		CPUConfigSpeedInc();
 	}
+	// Use timerfd API to delay;
+
+	// waitspec.it_interval.tv_sec = 0;
+	// waitspec.it_interval.tv_nsec = 0;
+	// waitspec.it_value.tv_sec = 0;
+	// waitspec.it_value.tv_nsec = TargetTime - CurrentTime;
+	// timerfd_settime(timerfd, 0, &waitspec, 0);
+	// read(timerfd, &expiries, sizeof(expiries));
+	// if (expiries) 
+	// {
+	// 	return;
+	// }
+
+	// Use nanosleep to delay
+
+	duration.tv_sec = 0;
+	duration.tv_nsec = TargetTime - CurrentTime;
+	nanosleep(&duration, &dummy);
 
 	// Use AG_Delay or SDL_Delay ro delay
 
