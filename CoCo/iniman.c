@@ -416,7 +416,7 @@ int WritePrivateProfileString(char *section, char *entry, char *value, char *fil
 
     if (sectionp == NULL) // New Section and New Entry
     {
-        sectionp = recordSection(inifile, section);
+        sectionp = recordSection(inifile, bracedsection);
         recordEntry(sectionp, entry, value);
         return 1;
     }
