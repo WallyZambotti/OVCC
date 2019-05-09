@@ -23,6 +23,7 @@ void StartRender(void);
 void EndRender(unsigned char);
 void FrameWait(void);
 float CalculateFPS(void);
+float GetCurrentFPS(void);
 float timems();
 
 #endif

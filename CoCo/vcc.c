@@ -144,6 +144,12 @@ int main(int argc, char **argv)
 
     sdl = (AG_DriverSDL2Ghost *)((AG_Widget *)EmuState2.agwin)->drv;
     EmuState2.Window = sdl->w;
+	// AGAR create an SDL Window with PRESENTVSYNC
+	// There is no way to pass custom flags when that occurs.
+	// So the renderer associated with the window must be destroyed 
+	// and and a new unsync'd renderer substituted in it's place
+	SDL_DestroyRenderer(sdl->r);
+	sdl->r = SDL_CreateRenderer(sdl->w, -1, SDL_RENDERER_ACCELERATED);
     EmuState2.Renderer = sdl->r;
 	EmuState2.Texture = SDL_CreateTexture(sdl->r, sdl->f, SDL_TEXTUREACCESS_STREAMING, 640, 480);
     EmuState2.SurfacePitch = 640;
@@ -506,7 +512,7 @@ void EmuLoop(void)
 		}
 
 		EndRender(EmuState2.FrameSkip);
-		FPS/=EmuState2.FrameSkip;
+		FPS=GetCurrentFPS()/EmuState2.FrameSkip;
 		GetModuleStatus(&EmuState2);
 
 		char ttbuff[256];

@@ -204,6 +204,8 @@ float timems()
 	return secs + fsecs;
 }
 
+static float cfps=0;
+
 float CalculateFPS(void) //Done at end of render;
 {
 
@@ -220,6 +222,12 @@ float CalculateFPS(void) //Done at end of render;
 	//printf("%d %2.2f %f %f %f\n", FrameCount, fps, fNow, fLast, timems());
 	fLast=fNow;
 	FrameCount=0;
+	cfps = fps;
 	return(fps);
+}
+
+float GetCurrentFPS()
+{
+	return cfps;
 }
 

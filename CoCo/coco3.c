@@ -45,6 +45,9 @@ This file is part of VCC (Virtual Color Computer).
 	unsigned short SoundRate=0;
 //*****************************************************
 
+#define AUDIO_BUF_LEN 16384
+#define CAS_BUF_LEN 8192
+
 static unsigned char HorzInteruptEnabled=0,VertInteruptEnabled=0;
 static unsigned char TopBoarder=0,BottomBoarder=0;
 static unsigned char LinesperScreen;
@@ -55,8 +58,8 @@ static int TimerCycleCount=0;
 static double MasterTickCounter=0,UnxlatedTickCounter=0,OldMaster=0;
 static double PicosThisLine=0;
 static unsigned char BlinkPhase=1;
-static unsigned int AudioBuffer[16384];
-static unsigned char CassBuffer[8192];
+static unsigned int AudioBuffer[AUDIO_BUF_LEN];
+static unsigned char CassBuffer[CAS_BUF_LEN];
 static unsigned short AudioIndex=0;
 double PicosToInterupt=0;
 static int IntEnable=0;
@@ -401,20 +404,29 @@ unsigned short SetAudioRate (unsigned short Rate)
 
 void AudioOut(void)
 {
-	AudioBuffer[AudioIndex++]=GetDACSample();
+	if (AudioIndex < AUDIO_BUF_LEN)
+	{
+		AudioBuffer[AudioIndex++]=GetDACSample();
+	}
 	return;
 }
 
 void CassOut(void)
 {
-	CassBuffer[AudioIndex++]=GetCasSample();
+	if (AudioIndex < CAS_BUF_LEN)
+	{
+		CassBuffer[AudioIndex++]=GetCasSample();
+	}
 	return;
 }
 
 void CassIn(void)
 {
-	AudioBuffer[AudioIndex]=GetDACSample();
-	SetCassetteSample(CassBuffer[AudioIndex++]);
+	if (AudioIndex < AUDIO_BUF_LEN)
+	{
+		AudioBuffer[AudioIndex]=GetDACSample();
+		SetCassetteSample(CassBuffer[AudioIndex++]);
+	}
 	return;
 }
 
