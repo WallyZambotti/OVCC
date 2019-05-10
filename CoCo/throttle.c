@@ -54,7 +54,7 @@ void CalibrateThrottle(void)
 
 void StartRender(void)
 {
-	StartTime = SDL_GetPerformanceCounter();
+	StartTime = SDL_GetPerformanceCounter();// + LagTime*2;
 	return;
 }
 
@@ -62,22 +62,8 @@ void EndRender(unsigned char Skip)
 {
 	FrameSkip = Skip;
 	TargetTime = ( StartTime + (OneFrame * FrameSkip)) + LagTime;
-	LagTime = 0;
+	//fprintf(stderr, "(%ld)", LagTime);
 	return;
-}
-
-void TestDelay(void)
-{
-	float time1, time2;
-	int i;
-
-	for (i = 0 ; i < 10 ; i++)
-	{
-		time1 = timems();
-		AG_Delay(1);
-		time2 = timems();
-		fprintf(stderr, "(%2.3f)\n", time2);
-	}
 }
 
 void FrameWait(void)
@@ -101,11 +87,13 @@ void FrameWait(void)
 	{
 		extern void CPUConfigSpeedDec(void);  // ran out of time so reduce the CPU frequency
 		CPUConfigSpeedDec();
+		LagTime = TargetTime - CurrentTime;
 		return;
 	}
 
 	if (CurrentTime == TargetTime)
 	{
+		LagTime = 0;
 		return;
 	}
 
@@ -175,8 +163,8 @@ void FrameWait(void)
 		//cnt++;
 	}
 
-	LagTime = (long long)TargetTime-CurrentTime;
-	//fprintf(stderr, "%ld %d\n", LagTime, cnt);
+	LagTime = (long long)(TargetTime-CurrentTime);
+	//fprintf(stderr, "(%ld,%ld)", LagTime);
 
 	return;
 }

@@ -512,17 +512,16 @@ void EmuLoop(void)
 		}
 
 		EndRender(EmuState2.FrameSkip);
-		FPS=GetCurrentFPS()/EmuState2.FrameSkip;
+		FPS= FPS != 0 ? FPS/EmuState2.FrameSkip : GetCurrentFPS()/EmuState2.FrameSkip;
 		GetModuleStatus(&EmuState2);
 
 		char ttbuff[256];
-		if (++framecnt == 6)
-		{
+		// if (++framecnt == 6)
+		// {
 			sprintf(ttbuff,"Skip:%2.2i|FPS:%3.0f|%s@%3.2fMhz|%s",EmuState2.FrameSkip,FPS,CpuName,EmuState2.CPUCurrentSpeed,EmuState2.StatusLine);
-			//sprintf(ttbuff,"Skip:%2.2i|FPS:%3.0f|%s@%3.2fMhz|%s",EmuState2.FrameSkip,0.0,CpuName,EmuState2.CPUCurrentSpeed,EmuState2.StatusLine);
 			SetStatusBarText(ttbuff,&EmuState2);
-			framecnt = 0;
-		}
+		// 	framecnt = 0;
+		// }
 
 		if (Throttle )	//Do nothing until the frame is over returning unused time to OS
 		{
