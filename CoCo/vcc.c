@@ -520,6 +520,7 @@ void EmuLoop(void)
 		// {
 			sprintf(ttbuff,"Skip:%2.2i|FPS:%3.0f|%s@%3.2fMhz|%s",EmuState2.FrameSkip,FPS,CpuName,EmuState2.CPUCurrentSpeed,EmuState2.StatusLine);
 			SetStatusBarText(ttbuff,&EmuState2);
+			//fprintf(stderr, "|");
 		// 	framecnt = 0;
 		// }
 
