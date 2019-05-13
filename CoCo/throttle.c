@@ -43,13 +43,14 @@ void CalibrateThrottle(void)
 	OneMs = MasterClock / 1000;
 	fMasterClock=(float)MasterClock;
 	LagTime = 0;
+	LagCnt = 0;
 
 	// timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
 	// memset(&schedparm, 0, sizeof(schedparm));
 	// schedparm.sched_priority = 1; // lowest rt priority
 	// pthread_setschedparam(0, SCHED_FIFO, &schedparm);
 
-	TargetTime = SDL_GetPerformanceCounter();
+	StartTime = TargetTime = SDL_GetPerformanceCounter();
 	//printf("CalibrateThrottle : MC %ld fMC %f 1ms %ld 1Frame %ld\n", MasterClock, fMasterClock, OneMs, OneFrame);
 }
 
@@ -126,7 +127,7 @@ void FrameWait(void)
 	// Use nanosleep to delay
 
 	unsigned long long tmpt = TargetTime - CurrentTime;
-	unsigned long long lagavg = LagTime/LagCnt;
+	unsigned long long lagavg = LagCnt ? LagTime / LagCnt : 0;
 	if (lagavg < tmpt)
 	{
 		tmpt -= lagavg;

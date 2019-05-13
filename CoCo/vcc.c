@@ -377,7 +377,10 @@ unsigned char SetRamSize(unsigned char Size)
 unsigned char SetSpeedThrottle(unsigned char throttle)
 {
 	if (throttle!=QUERY)
+	{
+		CalibrateThrottle();
 		Throttle=throttle;
+	}
 	return(Throttle);
 }
 

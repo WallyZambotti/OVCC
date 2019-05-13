@@ -192,7 +192,7 @@ void SoftReset(AG_Event *ev)
     DoSoftReset();
 }
 
-void ExitF4(AG_Event *event)
+void ExitF7(AG_Event *event)
 {
     SystemState2 *SState = AG_PTR(1);
     AG_Window *win = SState->agwin;
@@ -214,6 +214,27 @@ void MonitorChangeF6(AG_Event *ev)
     extern void ToggleMonitorType();
 
     ToggleMonitorType();
+}
+
+void CPUIncDecF3F4(AG_Event *event)
+{
+    extern void ConfigOKApply(int);
+    extern void CPUConfigSpeed(int);
+
+    int incdec = AG_INT(1);
+
+    cpuMax = (double)CurrentConfig.MaxOverclock * cpuMin;
+    cpuOCval = (double)CurrentConfig.CPUMultiplyer * cpuMin;
+
+    if (cpuOCval <= cpuMin || cpuOCval >= cpuMax)
+    {
+        return;
+    }
+
+    cpuOCval += cpuMin * (double)incdec;
+
+    CPUConfigSpeed((int)(cpuOCval/cpuMin));
+    ConfigOKApply(0);
 }
 
 void ThrottleSpeedF8(AG_Event *ev)
@@ -1543,25 +1564,39 @@ static void EjectCart(AG_Event *ev)
 
 void About(AG_Event *ev)
 {
-    AG_Window *fdw = AG_WindowNew(AG_WINDOW_DIALOG);
-    AG_WindowSetCaption(fdw, "OVCC About");
-    AG_WindowSetGeometryAligned(fdw, AG_WINDOW_ALIGNMENT_NONE, 500, 250);
-    AG_WindowSetCloseAction(fdw, AG_WINDOW_DETACH);
+    static    AG_Window *AboutWin = NULL;
 
-	AG_Label *lbl = AG_LabelNewPolled(fdw, AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
-        "OVCC 1.0 Beta\n"
+    if (AboutWin != NULL)
+    {
+        AG_ObjectDetach(AboutWin);
+        AboutWin = NULL;
+        return;
+    }
+
+    AboutWin = AG_WindowNew(AG_WINDOW_DIALOG);
+    AG_WindowSetCaption(AboutWin, "OVCC About");
+    AG_WindowSetGeometryAligned(AboutWin, AG_WINDOW_ALIGNMENT_NONE, 500, 250);
+    AG_WindowSetCloseAction(AboutWin, AG_WINDOW_DETACH);
+
+	AG_Label *lbl = AG_LabelNewPolled(AboutWin, AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
+        "OVCC 1.0\n"
         "SDL2 / AGAR 1.5.0 modifications by:"
         "Walter Zambotti\n"
-        "Forked from VCC 2.01B\n"
+        "Forked from VCC 2.01B (1.43)\n"
         "Copy Righted Joseph Forgione (GNU General Public License)\n"
         "\n"
         "Keyboard Shortcuts\n"
-        "F5 - Soft Reset        F9 - Hard Reset\n"
-        "F6 - Monitor Type    F10 - Fullscreen Status\n"
-        "F8 - Throttle            F11 - Fullscreen\n"
+        "F3 - Inc CPU Frequency    F4 - Dec CPU Frequency\n"
+        "F7 - Exit OVCC                  F12 - About\n"
+        "F5 - Soft Reset                 F9 - Hard Reset\n"
+        "F6 - Monitor Type              F10 - Fullscreen Status\n"
+        "F8 - Throttle                     F11 - Fullscreen\n"
     );
 
-    AG_WindowShow(fdw);
+    AG_ActionFn(AboutWin, "F12", About, NULL);
+    AG_ActionOnKeyUp(AboutWin, AG_KEY_F12, AG_KEYMOD_ANY, "F12");
+
+    AG_WindowShow(AboutWin);
 }
 
 void MouseMotion(AG_Event *event)
@@ -1781,12 +1816,16 @@ void PrepareEventCallBacks(SystemState2 *EmuState2)
 
    // VCC Hot FN Keys
 
-    AG_ActionFn(EmuState2->agwin, "F4", ExitF4, "%p", EmuState2);
+    AG_ActionFn(EmuState2->agwin, "F3", CPUIncDecF3F4, "%i", 1);
+    AG_ActionOnKeyUp(EmuState2->agwin, AG_KEY_F3, AG_KEYMOD_ANY, "F3");
+    AG_ActionFn(EmuState2->agwin, "F4", CPUIncDecF3F4, "%i", -1);
     AG_ActionOnKeyUp(EmuState2->agwin, AG_KEY_F4, AG_KEYMOD_ANY, "F4");
     AG_ActionFn(EmuState2->agwin, "F5", SoftResetF5, NULL);
     AG_ActionOnKeyUp(EmuState2->agwin, AG_KEY_F5, AG_KEYMOD_ANY, "F5");
     AG_ActionFn(EmuState2->agwin, "F6", MonitorChangeF6, NULL);
     AG_ActionOnKeyUp(EmuState2->agwin, AG_KEY_F6, AG_KEYMOD_ANY, "F6");
+    AG_ActionFn(EmuState2->agwin, "F7", ExitF7, "%p", EmuState2);
+    AG_ActionOnKeyUp(EmuState2->agwin, AG_KEY_F7, AG_KEYMOD_ANY, "F7");
     AG_ActionFn(EmuState2->agwin, "F8", ThrottleSpeedF8, NULL);
     AG_ActionOnKeyUp(EmuState2->agwin, AG_KEY_F8, AG_KEYMOD_ANY, "F8");
     AG_ActionFn(EmuState2->agwin, "F9", HardResetF9, NULL);
@@ -1795,4 +1834,6 @@ void PrepareEventCallBacks(SystemState2 *EmuState2)
     AG_ActionOnKeyUp(EmuState2->agwin, AG_KEY_F10, AG_KEYMOD_ANY, "F10");
     AG_ActionFn(EmuState2->agwin, "F11", FullScreenF11, NULL);
     AG_ActionOnKeyUp(EmuState2->agwin, AG_KEY_F11, AG_KEYMOD_ANY, "F11");
+    AG_ActionFn(EmuState2->agwin, "F12", About, NULL);
+    AG_ActionOnKeyUp(EmuState2->agwin, AG_KEY_F12, AG_KEYMOD_ANY, "F12");
 }
