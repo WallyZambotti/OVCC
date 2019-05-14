@@ -140,7 +140,7 @@ void UnlockScreenSDL(SystemState2 *USState)
 {
 	if (USState->EmulationRunning == 0) 
 	{
-		fprintf(stderr, "*");
+		//fprintf(stderr, "*");
 		return;
 	}
 	DisplayFlipSDL(USState);
