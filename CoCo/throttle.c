@@ -78,14 +78,7 @@ void FrameWait(void)
 	//unsigned long long Tt_minus_2ms = TargetTime - TwoMs;
 	CurrentTime = SDL_GetPerformanceCounter();
 	//int msDelays = (Tt_minus_2ms - CurrentTime) / OneMs;
-	//long cnt;
-	//float delayed;
 	struct timespec duration, dummy;
-	//struct itimerspec waitspec;
-	//unsigned long long expiries;
-
-	//fprintf(stderr, "%d ", msDelays);
-	//fprintf(stderr, "(%llu:%llu:%lld:%lld)", TargetTime, CurrentTime, (long long)(TargetTime-CurrentTime), LagTime);
 
 	//delayed = timems();
 
@@ -106,23 +99,9 @@ void FrameWait(void)
 		return;
 	}
 
-	{
-		extern void CPUConfigSpeedInc(void); // had time left over so increase the CPU frequency
-		CPUConfigSpeedInc();
-		//fprintf(stderr, "^");
-	}
-	// Use timerfd API to delay;
-
-	// waitspec.it_interval.tv_sec = 0;
-	// waitspec.it_interval.tv_nsec = 0;
-	// waitspec.it_value.tv_sec = 0;
-	// waitspec.it_value.tv_nsec = TargetTime - CurrentTime;
-	// timerfd_settime(timerfd, 0, &waitspec, 0);
-	// read(timerfd, &expiries, sizeof(expiries));
-	// if (expiries) 
-	// {
-	// 	return;
-	// }
+	extern void CPUConfigSpeedInc(void); // had time left over so increase the CPU frequency
+	CPUConfigSpeedInc();
+	//fprintf(stderr, "^");
 
 	// Use nanosleep to delay
 
@@ -135,10 +114,6 @@ void FrameWait(void)
 		duration.tv_nsec = tmpt;
 		nanosleep(&duration, &dummy);
 	}
-	// else
-	// {
-	// 	fprintf(stderr, "(%llu)", lagavg);
-	// }
 
 	// Use AG_Delay or SDL_Delay ro delay
 
@@ -146,9 +121,6 @@ void FrameWait(void)
 	// {
 	// 	AG_Delay(msDelays);
 	// }
-
-	//delayed = timems();
-	//fprintf(stderr, "%2.3f ", delayed);
 
 	CurrentTime = SDL_GetPerformanceCounter();
 
@@ -172,15 +144,11 @@ void FrameWait(void)
 
 	}
 	
-	//fprintf(stderr, "%ld ", (long long)TargetTime-CurrentTime);
-	//cnt=0;
-
 	// Use busy CPU with high resolution counter to delay
 
 	while (CurrentTime < TargetTime)	//Poll Until frame end.
 	{
 		CurrentTime = SDL_GetPerformanceCounter();
-		//cnt++;
 	}
 
 	LagTime += CurrentTime - TargetTime;
