@@ -22,6 +22,7 @@ typedef int BOOL;
 #include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <math.h>
 #include "fileops.h"
 #include "defines.h"
 #include "mpu.h"
@@ -60,7 +61,16 @@ enum Commands
 {
 	CMD_Check,
 	CMD_Test,
-	CMD_MultDbl
+	CMD_MultDbl,
+	CMD_DivDbl,
+	CMD_AddDbl,
+	CMD_SubDbl,
+	CMD_NegDbl,
+	CMD_PowDbl,
+	CMD_SqrtDbl,
+	CMD_ExpDbl,
+	CMD_LogDbl,
+	CMD_Log10Dbl
 };
 
 unsigned short int Params[MAX_PARAMS];
@@ -150,10 +160,36 @@ void DumpParams()
 	}
 }
 
+void CompareDbl()
+{
+	PDP1dbl pdp1dbl;
+	double dvalue, dvalue1, dvalue2;
+	char result = 0;
+
+	pdp1dbl = ReadPDP1dbl(Params[1]);
+	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+
+	pdp1dbl = ReadPDP1dbl(Params[2]);
+	dvalue2 = ConvertPDP1toIEE754(pdp1dbl);
+
+	dvalue = dvalue1 - dvalue2;
+
+	if (dvalue < 0)
+	{
+		result = -1;
+	}
+	else if (dvalue > 0)
+	{
+		result = 1;
+	}
+
+	// fprintf(stderr, "MPU : CommpareDbl %d = %f - %f\n", result, dvalue1, dvalue2);
+
+	MemWrite8(result, Param[0]);
+}
+
 void MultDbl()
 {
-	// unsigned char byteL, byteH ;
-	// unsigned short int val;
 	PDP1dbl pdp1dbl;
 	double dvalue, dvalue1, dvalue2;
 
@@ -166,6 +202,162 @@ void MultDbl()
 	dvalue = dvalue1 * dvalue2;
 
 	// fprintf(stderr, "MPU : MultDbl %f = %f * %f\n", dvalue, dvalue1, dvalue2);
+
+	pdp1dbl = ConvertIEE754toPDP1(dvalue);
+	WritePDP1dbl(Params[0], pdp1dbl);
+}
+
+void DivDbl()
+{
+	PDP1dbl pdp1dbl;
+	double dvalue, dvalue1, dvalue2;
+
+	pdp1dbl = ReadPDP1dbl(Params[1]);
+	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+
+	pdp1dbl = ReadPDP1dbl(Params[2]);
+	dvalue2 = ConvertPDP1toIEE754(pdp1dbl);
+
+	dvalue = dvalue1 / dvalue2;
+
+	// fprintf(stderr, "MPU : DivDbl %f = %f / %f\n", dvalue, dvalue1, dvalue2);
+
+	pdp1dbl = ConvertIEE754toPDP1(dvalue);
+	WritePDP1dbl(Params[0], pdp1dbl);
+}
+
+void AddDbl()
+{
+	PDP1dbl pdp1dbl;
+	double dvalue, dvalue1, dvalue2;
+
+	pdp1dbl = ReadPDP1dbl(Params[1]);
+	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+
+	pdp1dbl = ReadPDP1dbl(Params[2]);
+	dvalue2 = ConvertPDP1toIEE754(pdp1dbl);
+
+	dvalue = dvalue1 + dvalue2;
+
+	// fprintf(stderr, "MPU : AddltDbl %f = %f + %f\n", dvalue, dvalue1, dvalue2);
+
+	pdp1dbl = ConvertIEE754toPDP1(dvalue);
+	WritePDP1dbl(Params[0], pdp1dbl);
+}
+
+void SubDbl()
+{
+	PDP1dbl pdp1dbl;
+	double dvalue, dvalue1, dvalue2;
+
+	pdp1dbl = ReadPDP1dbl(Params[1]);
+	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+
+	pdp1dbl = ReadPDP1dbl(Params[2]);
+	dvalue2 = ConvertPDP1toIEE754(pdp1dbl);
+
+	dvalue = dvalue1 * dvalue2;
+
+	// fprintf(stderr, "MPU : SubDbl %f = %f - %f\n", dvalue, dvalue1, dvalue2);
+
+	pdp1dbl = ConvertIEE754toPDP1(dvalue);
+	WritePDP1dbl(Params[0], pdp1dbl);
+}
+
+void NegDbl()
+{
+	PDP1dbl pdp1dbl;
+	double dvalue, dvalue1, dvalue2;
+
+	pdp1dbl = ReadPDP1dbl(Params[1]);
+	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+
+	dvalue = -dvalue1;
+
+	// fprintf(stderr, "MPU : NegDbl %f = %f\n", dvalue, dvalue1);
+
+	pdp1dbl = ConvertIEE754toPDP1(dvalue);
+	WritePDP1dbl(Params[0], pdp1dbl);
+}
+
+void PowDbl()
+{
+	PDP1dbl pdp1dbl;
+	double dvalue, dvalue1, dvalue2;
+
+	pdp1dbl = ReadPDP1dbl(Params[1]);
+	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+
+	pdp1dbl = ReadPDP1dbl(Params[2]);
+	dvalue2 = ConvertPDP1toIEE754(pdp1dbl);
+
+	dvalue = pow(dvalue1, dvalue2);
+
+	// fprintf(stderr, "MPU : PowDbl %f = pow(%f, %f)\n", dvalue, dvalue1, dvalue2);
+
+	pdp1dbl = ConvertIEE754toPDP1(dvalue);
+	WritePDP1dbl(Params[0], pdp1dbl);
+}
+
+void SqrtDbl()
+{
+	PDP1dbl pdp1dbl;
+	double dvalue, dvalue1, dvalue2;
+
+	pdp1dbl = ReadPDP1dbl(Params[1]);
+	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+
+	dvalue = dsqrt(dvalue1);
+
+	// fprintf(stderr, "MPU : SqrtDbl %f = sqrt(%f)\n", dvalue, dvalue1);
+
+	pdp1dbl = ConvertIEE754toPDP1(dvalue);
+	WritePDP1dbl(Params[0], pdp1dbl);
+}
+
+void ExpDbl()
+{
+	PDP1dbl pdp1dbl;
+	double dvalue, dvalue1, dvalue2;
+
+	pdp1dbl = ReadPDP1dbl(Params[1]);
+	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+
+	dvalue = exp(dvalue1);
+
+	// fprintf(stderr, "MPU : ExpDbl %f = exp(%f)\n", dvalue, dvalue1);
+
+	pdp1dbl = ConvertIEE754toPDP1(dvalue);
+	WritePDP1dbl(Params[0], pdp1dbl);
+}
+
+void LogDbl()
+{
+	PDP1dbl pdp1dbl;
+	double dvalue, dvalue1, dvalue2;
+
+	pdp1dbl = ReadPDP1dbl(Params[1]);
+	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+
+	dvalue = log(dvalue1);
+	
+	// fprintf(stderr, "MPU : LogDbl %f = log(%f)\n", dvalue, dvalue1);
+
+	pdp1dbl = ConvertIEE754toPDP1(dvalue);
+	WritePDP1dbl(Params[0], pdp1dbl);
+}
+
+void Log10Dbl()
+{
+	PDP1dbl pdp1dbl;
+	double dvalue, dvalue1, dvalue2;
+
+	pdp1dbl = ReadPDP1dbl(Params[1]);
+	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+
+	dvalue = log10(dvalue1);
+	
+	// fprintf(stderr, "MPU : Log10Dbl %f = log10(%f)\n", dvalue, dvalue1);
 
 	pdp1dbl = ConvertIEE754toPDP1(dvalue);
 	WritePDP1dbl(Params[0], pdp1dbl);
@@ -187,6 +379,42 @@ void ExecuteCommand(unsigned char cmd)
 
 		case CMD_MultDbl:
 			MultDbl();
+		break;
+
+		case CMD_DivDbl:
+			DivDbl();
+		break;
+
+		case CMD_AddDbl:
+			AddDbl();
+		break;
+
+		case CMD_SubDbl:
+			SUbDbl();
+		break;
+
+		case CMD_NegDbl:
+			NegDbl();
+		break;
+
+		case CMD_PowDbl:
+			PowDbl();
+		break;
+
+		case CMD_SqrtDbl:
+			SqrtDbl();
+		break;
+
+		case CMD_ExpDbl:
+			ExpDbl();
+		break;
+
+		case CMD_LogDbl:
+			LogDbl();
+		break;
+
+		case CMD_Log10Dbl:
+			Log10Dbl();
 		break;
 
 		default:
