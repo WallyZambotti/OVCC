@@ -425,6 +425,7 @@ void CPUConfigSpeedInc(void)
 	if (EmuState2.DoubleSpeedMultiplyer >= TempConfig.CPUMultiplyer) return;
 	EmuState2.DoubleSpeedMultiplyer += 1;
 	EmuState2.CPUCurrentSpeed = EmuState2.DoubleSpeedMultiplyer * 0.894;
+	SetClockSpeed(EmuState2.DoubleSpeedMultiplyer * EmuState2.TurboSpeedFlag);
 	return;
 }
 
@@ -433,6 +434,7 @@ void CPUConfigSpeedDec(void)
 	if (EmuState2.DoubleSpeedMultiplyer <= 1) return;
 	EmuState2.DoubleSpeedMultiplyer -= 1;
 	EmuState2.CPUCurrentSpeed = EmuState2.DoubleSpeedMultiplyer * 0.894;
+	SetClockSpeed(EmuState2.DoubleSpeedMultiplyer * EmuState2.TurboSpeedFlag);	
 	return ;
 }
 
