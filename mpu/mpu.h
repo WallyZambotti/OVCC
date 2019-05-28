@@ -52,4 +52,21 @@ void ADDCALL ModuleStatus (char *);
 } // __cplusplus defined.
 #endif
 
+void CompareDbl(unsigned short, unsigned short, unsigned short);
+void MultDbl(unsigned short, unsigned short, unsigned short);
+void DivDbl(unsigned short, unsigned short, unsigned short);
+void AddDbl(unsigned short, unsigned short, unsigned short);
+void SubDbl(unsigned short, unsigned short, unsigned short);
+void NegDbl(unsigned short, unsigned short);
+void PowDbl(unsigned short, unsigned short, unsigned short);
+void SqrtDbl(unsigned short, unsigned short);
+void ExpDbl(unsigned short, unsigned short);
+void LogDbl(unsigned short, unsigned short);
+void Log10Dbl(unsigned short, unsigned short);
+void InvDbl(unsigned short, unsigned short);
+void ltod(unsigned short, unsigned short);
+void dtol(unsigned short, unsigned short);
+void ftod(unsigned short, unsigned short);
+void dtof(unsigned short, unsigned short);
+
 #endif
