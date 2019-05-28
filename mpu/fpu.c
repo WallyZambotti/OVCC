@@ -35,10 +35,10 @@ long ReadPDP14bytes(unsigned short int address)
 {
 	PDP1data pdp1data;
 
-	pdp1data.bytes[3] = MemRead(address);
-	pdp1data.bytes[2] = MemRead(address+1);
-	pdp1data.bytes[1] = MemRead(address+2);
-	pdp1data.bytes[0] = MemRead(address+3);
+	pdp1data.bytes[3] = MemRead8(address);
+	pdp1data.bytes[2] = MemRead8(address+1);
+	pdp1data.bytes[1] = MemRead8(address+2);
+	pdp1data.bytes[0] = MemRead8(address+3);
 
 	return pdp1data.lval;
 }
@@ -55,14 +55,14 @@ PDP1data ReadPDP18bytes(unsigned short int address)
 {
 	PDP1data PDP1data;
 
-	PDP1data.bytes[7] = MemRead(address);
-	PDP1data.bytes[6] = MemRead(address+1);
-	PDP1data.bytes[5] = MemRead(address+2);
-	PDP1data.bytes[4] = MemRead(address+3);
-	PDP1data.bytes[3] = MemRead(address+4);
-	PDP1data.bytes[2] = MemRead(address+5);
-	PDP1data.bytes[1] = MemRead(address+6);
-	PDP1data.bytes[0] = MemRead(address+7);
+	PDP1data.bytes[7] = MemRead8(address);
+	PDP1data.bytes[6] = MemRead8(address+1);
+	PDP1data.bytes[5] = MemRead8(address+2);
+	PDP1data.bytes[4] = MemRead8(address+3);
+	PDP1data.bytes[3] = MemRead8(address+4);
+	PDP1data.bytes[2] = MemRead8(address+5);
+	PDP1data.bytes[1] = MemRead8(address+6);
+	PDP1data.bytes[0] = MemRead8(address+7);
 
 	return PDP1data;
 }
