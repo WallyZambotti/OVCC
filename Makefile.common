@@ -21,7 +21,7 @@ IDIR = $(INCDIR) $(SDLINC) $(AGARINC)
 
 SDLLIB := $(shell sdl2-config --libs)
 AGARLIB := $(shell agar-config --libs)
-LIBS = $(SDLLIB) $(AGARLIB) -lregex
+LIBS = $(SDLLIB) $(AGARLIB)
 
 CFLAGS += $(DEBUG) $(OPT) $(WARN) $(IDIR)
 

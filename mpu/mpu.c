@@ -61,6 +61,7 @@ enum Commands
 {
 	CMD_Check,
 	CMD_Test,
+	CMD_CompareDbl,
 	CMD_MultDbl,
 	CMD_DivDbl,
 	CMD_AddDbl,
@@ -70,7 +71,12 @@ enum Commands
 	CMD_SqrtDbl,
 	CMD_ExpDbl,
 	CMD_LogDbl,
-	CMD_Log10Dbl
+	CMD_Log10Dbl,
+	CMD_Inv,
+	CMD_ltod,
+	CMD_dtol,
+	CMD_ftod,
+	CMD_dtof
 };
 
 unsigned short int Params[MAX_PARAMS];
@@ -87,69 +93,90 @@ union Data
 {
 	unsigned long long llval;
 	double dval;
+	unsigned long lval;
 	unsigned char bytes[8];
 };
 
-typedef union Data PDP1dbl;
-typedef union Data IEEE754dbl;
+typedef union Data PDP1data;
+typedef union Data IEEE754data;
 
-PDP1dbl ReadPDP1dbl(unsigned short int address)
+long ReadPDP14bytes(unsigned short int address)
 {
-	PDP1dbl pdp1dbl;
+	PDP1data pdp1data;
 
-	pdp1dbl.bytes[7] = MemRead(address);
-	pdp1dbl.bytes[6] = MemRead(address+1);
-	pdp1dbl.bytes[5] = MemRead(address+2);
-	pdp1dbl.bytes[4] = MemRead(address+3);
-	pdp1dbl.bytes[3] = MemRead(address+4);
-	pdp1dbl.bytes[2] = MemRead(address+5);
-	pdp1dbl.bytes[1] = MemRead(address+6);
-	pdp1dbl.bytes[0] = MemRead(address+7);
+	pdp1data.bytes[3] = MemRead(address);
+	pdp1data.bytes[2] = MemRead(address+1);
+	pdp1data.bytes[1] = MemRead(address+2);
+	pdp1data.bytes[0] = MemRead(address+3);
 
-	return pdp1dbl;
+	return pdp1data.lval;
 }
 
-void WritePDP1dbl(unsigned short int address, PDP1dbl pdp1dbl)
+void WritePDP14bytes(unsigned short int address, PDP1data pdp1data)
 {
-	MemWrite8(pdp1dbl.bytes[7], address);
-	MemWrite8(pdp1dbl.bytes[6], address+1);
-	MemWrite8(pdp1dbl.bytes[5], address+2);
-	MemWrite8(pdp1dbl.bytes[4], address+3);
-	MemWrite8(pdp1dbl.bytes[3], address+4);
-	MemWrite8(pdp1dbl.bytes[2], address+5);
-	MemWrite8(pdp1dbl.bytes[1], address+6);
-	MemWrite8(pdp1dbl.bytes[0], address+7);
+	MemWrite8(pdp1data.bytes[3], address);
+	MemWrite8(pdp1data.bytes[2], address+1);
+	MemWrite8(pdp1data.bytes[1], address+2);
+	MemWrite8(pdp1data.bytes[0], address+3);
 }
 
-double ConvertPDP1toIEE754(PDP1dbl pdp1dbl)
+PDP1data ReadPDP18bytes(unsigned short int address)
 {
-	IEEE754dbl iee754;
+	PDP1data PDP1data;
+
+	PDP1data.bytes[7] = MemRead(address);
+	PDP1data.bytes[6] = MemRead(address+1);
+	PDP1data.bytes[5] = MemRead(address+2);
+	PDP1data.bytes[4] = MemRead(address+3);
+	PDP1data.bytes[3] = MemRead(address+4);
+	PDP1data.bytes[2] = MemRead(address+5);
+	PDP1data.bytes[1] = MemRead(address+6);
+	PDP1data.bytes[0] = MemRead(address+7);
+
+	return PDP1data;
+}
+
+void WritePDP18bytes(unsigned short int address, PDP1data PDP1data)
+{
+	MemWrite8(PDP1data.bytes[7], address);
+	MemWrite8(PDP1data.bytes[6], address+1);
+	MemWrite8(PDP1data.bytes[5], address+2);
+	MemWrite8(PDP1data.bytes[4], address+3);
+	MemWrite8(PDP1data.bytes[3], address+4);
+	MemWrite8(PDP1data.bytes[2], address+5);
+	MemWrite8(PDP1data.bytes[1], address+6);
+	MemWrite8(PDP1data.bytes[0], address+7);
+}
+
+double ConvertDBLPDP1toIEEE754(PDP1data PDP1data)
+{
+	IEEE754data iee754;
 	unsigned long long signbit, exp, mantissa;
 
-	signbit  =  pdp1dbl.llval & 0x8000000000000000;
-	exp      = (pdp1dbl.llval & 0x00000000000000ff) + 0x37e;
-	mantissa =  pdp1dbl.llval & 0x7fffffffffffff00;
+	signbit  =  PDP1data.llval & 0x8000000000000000;
+	exp      = (PDP1data.llval & 0x00000000000000ff) + 0x37e;
+	mantissa =  PDP1data.llval & 0x7fffffffffffff00;
 
 	iee754.llval = signbit | (exp<<52) | (mantissa>>11);
 
 	return iee754.dval;
 }
 
-PDP1dbl ConvertIEE754toPDP1(double dvalue)
+PDP1data ConvertDblIEEE754toPDP1(double dvalue)
 {
-	PDP1dbl pdp1dbl;
-	IEEE754dbl ieee754dbl;
+	PDP1data PDP1data;
+	IEEE754data IEEE754data;
 	unsigned long long signbit, exp, mantissa;
 
-	ieee754dbl.dval = dvalue;
+	IEEE754data.dval = dvalue;
 
-	signbit  =   ieee754dbl.llval & 0x8000000000000000;
-	exp      = ((ieee754dbl.llval & 0x7ff0000000000000)>>52) - 0x37e;
-	mantissa =   ieee754dbl.llval & 0x000fffffffffffff;
+	signbit  =   IEEE754data.llval & 0x8000000000000000;
+	exp      = ((IEEE754data.llval & 0x7ff0000000000000)>>52) - 0x37e;
+	mantissa =   IEEE754data.llval & 0x000fffffffffffff;
 
-	pdp1dbl.llval = signbit | (exp) | (mantissa<<11);
+	PDP1data.llval = signbit | (exp) | (mantissa<<11);
 
-	return pdp1dbl;
+	return PDP1data;
 }
 
 void DumpParams()
@@ -162,15 +189,15 @@ void DumpParams()
 
 void CompareDbl()
 {
-	PDP1dbl pdp1dbl;
+	PDP1data PDP1data;
 	double dvalue, dvalue1, dvalue2;
 	char result = 0;
 
-	pdp1dbl = ReadPDP1dbl(Params[1]);
-	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[1]);
+	dvalue1 = ConvertDBLPDP1toIEEE754(PDP1data);
 
-	pdp1dbl = ReadPDP1dbl(Params[2]);
-	dvalue2 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[2]);
+	dvalue2 = ConvertDBLPDP1toIEEE754(PDP1data);
 
 	dvalue = dvalue1 - dvalue2;
 
@@ -190,177 +217,264 @@ void CompareDbl()
 
 void MultDbl()
 {
-	PDP1dbl pdp1dbl;
+	PDP1data PDP1data;
 	double dvalue, dvalue1, dvalue2;
 
-	pdp1dbl = ReadPDP1dbl(Params[1]);
-	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[1]);
+	dvalue1 = ConvertDBLPDP1toIEEE754(PDP1data);
 
-	pdp1dbl = ReadPDP1dbl(Params[2]);
-	dvalue2 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[2]);
+	dvalue2 = ConvertDBLPDP1toIEEE754(PDP1data);
 
 	dvalue = dvalue1 * dvalue2;
 
 	// fprintf(stderr, "MPU : MultDbl %f = %f * %f\n", dvalue, dvalue1, dvalue2);
 
-	pdp1dbl = ConvertIEE754toPDP1(dvalue);
-	WritePDP1dbl(Params[0], pdp1dbl);
+	PDP1data = ConvertDblIEEE754toPDP1(dvalue);
+	WritePDP18bytes(Params[0], PDP1data);
 }
 
 void DivDbl()
 {
-	PDP1dbl pdp1dbl;
+	PDP1data PDP1data;
 	double dvalue, dvalue1, dvalue2;
 
-	pdp1dbl = ReadPDP1dbl(Params[1]);
-	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[1]);
+	dvalue1 = ConvertDBLPDP1toIEEE754(PDP1data);
 
-	pdp1dbl = ReadPDP1dbl(Params[2]);
-	dvalue2 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[2]);
+	dvalue2 = ConvertDBLPDP1toIEEE754(PDP1data);
 
 	dvalue = dvalue1 / dvalue2;
 
 	// fprintf(stderr, "MPU : DivDbl %f = %f / %f\n", dvalue, dvalue1, dvalue2);
 
-	pdp1dbl = ConvertIEE754toPDP1(dvalue);
-	WritePDP1dbl(Params[0], pdp1dbl);
+	PDP1data = ConvertDblIEEE754toPDP1(dvalue);
+	WritePDP18bytes(Params[0], PDP1data);
 }
 
 void AddDbl()
 {
-	PDP1dbl pdp1dbl;
+	PDP1data PDP1data;
 	double dvalue, dvalue1, dvalue2;
 
-	pdp1dbl = ReadPDP1dbl(Params[1]);
-	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[1]);
+	dvalue1 = ConvertDBLPDP1toIEEE754(PDP1data);
 
-	pdp1dbl = ReadPDP1dbl(Params[2]);
-	dvalue2 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[2]);
+	dvalue2 = ConvertDBLPDP1toIEEE754(PDP1data);
 
 	dvalue = dvalue1 + dvalue2;
 
 	// fprintf(stderr, "MPU : AddltDbl %f = %f + %f\n", dvalue, dvalue1, dvalue2);
 
-	pdp1dbl = ConvertIEE754toPDP1(dvalue);
-	WritePDP1dbl(Params[0], pdp1dbl);
+	PDP1data = ConvertDblIEEE754toPDP1(dvalue);
+	WritePDP18bytes(Params[0], PDP1data);
 }
 
 void SubDbl()
 {
-	PDP1dbl pdp1dbl;
+	PDP1data PDP1data;
 	double dvalue, dvalue1, dvalue2;
 
-	pdp1dbl = ReadPDP1dbl(Params[1]);
-	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[1]);
+	dvalue1 = ConvertDBLPDP1toIEEE754(PDP1data);
 
-	pdp1dbl = ReadPDP1dbl(Params[2]);
-	dvalue2 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[2]);
+	dvalue2 = ConvertDBLPDP1toIEEE754(PDP1data);
 
-	dvalue = dvalue1 * dvalue2;
+	dvalue = dvalue1 - dvalue2;
 
 	// fprintf(stderr, "MPU : SubDbl %f = %f - %f\n", dvalue, dvalue1, dvalue2);
 
-	pdp1dbl = ConvertIEE754toPDP1(dvalue);
-	WritePDP1dbl(Params[0], pdp1dbl);
+	PDP1data = ConvertDblIEEE754toPDP1(dvalue);
+	WritePDP18bytes(Params[0], PDP1data);
 }
 
 void NegDbl()
 {
-	PDP1dbl pdp1dbl;
+	PDP1data PDP1data;
 	double dvalue, dvalue1, dvalue2;
 
-	pdp1dbl = ReadPDP1dbl(Params[1]);
-	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[1]);
+	dvalue1 = ConvertDBLPDP1toIEEE754(PDP1data);
 
 	dvalue = -dvalue1;
 
 	// fprintf(stderr, "MPU : NegDbl %f = %f\n", dvalue, dvalue1);
 
-	pdp1dbl = ConvertIEE754toPDP1(dvalue);
-	WritePDP1dbl(Params[0], pdp1dbl);
+	PDP1data = ConvertDblIEEE754toPDP1(dvalue);
+	WritePDP18bytes(Params[0], PDP1data);
 }
 
 void PowDbl()
 {
-	PDP1dbl pdp1dbl;
+	PDP1data PDP1data;
 	double dvalue, dvalue1, dvalue2;
 
-	pdp1dbl = ReadPDP1dbl(Params[1]);
-	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[1]);
+	dvalue1 = ConvertDBLPDP1toIEEE754(PDP1data);
 
-	pdp1dbl = ReadPDP1dbl(Params[2]);
-	dvalue2 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[2]);
+	dvalue2 = ConvertDBLPDP1toIEEE754(PDP1data);
 
 	dvalue = pow(dvalue1, dvalue2);
 
 	// fprintf(stderr, "MPU : PowDbl %f = pow(%f, %f)\n", dvalue, dvalue1, dvalue2);
 
-	pdp1dbl = ConvertIEE754toPDP1(dvalue);
-	WritePDP1dbl(Params[0], pdp1dbl);
+	PDP1data = ConvertDblIEEE754toPDP1(dvalue);
+	WritePDP18bytes(Params[0], PDP1data);
 }
 
 void SqrtDbl()
 {
-	PDP1dbl pdp1dbl;
+	PDP1data PDP1data;
 	double dvalue, dvalue1, dvalue2;
 
-	pdp1dbl = ReadPDP1dbl(Params[1]);
-	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[1]);
+	dvalue1 = ConvertDBLPDP1toIEEE754(PDP1data);
 
 	dvalue = sqrt(dvalue1);
 
 	// fprintf(stderr, "MPU : SqrtDbl %f = sqrt(%f)\n", dvalue, dvalue1);
 
-	pdp1dbl = ConvertIEE754toPDP1(dvalue);
-	WritePDP1dbl(Params[0], pdp1dbl);
+	PDP1data = ConvertDblIEEE754toPDP1(dvalue);
+	WritePDP18bytes(Params[0], PDP1data);
 }
 
 void ExpDbl()
 {
-	PDP1dbl pdp1dbl;
+	PDP1data PDP1data;
 	double dvalue, dvalue1, dvalue2;
 
-	pdp1dbl = ReadPDP1dbl(Params[1]);
-	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[1]);
+	dvalue1 = ConvertDBLPDP1toIEEE754(PDP1data);
 
 	dvalue = exp(dvalue1);
 
 	// fprintf(stderr, "MPU : ExpDbl %f = exp(%f)\n", dvalue, dvalue1);
 
-	pdp1dbl = ConvertIEE754toPDP1(dvalue);
-	WritePDP1dbl(Params[0], pdp1dbl);
+	PDP1data = ConvertDblIEEE754toPDP1(dvalue);
+	WritePDP18bytes(Params[0], PDP1data);
 }
 
 void LogDbl()
 {
-	PDP1dbl pdp1dbl;
+	PDP1data PDP1data;
 	double dvalue, dvalue1, dvalue2;
 
-	pdp1dbl = ReadPDP1dbl(Params[1]);
-	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[1]);
+	dvalue1 = ConvertDBLPDP1toIEEE754(PDP1data);
 
 	dvalue = log(dvalue1);
 	
 	// fprintf(stderr, "MPU : LogDbl %f = log(%f)\n", dvalue, dvalue1);
 
-	pdp1dbl = ConvertIEE754toPDP1(dvalue);
-	WritePDP1dbl(Params[0], pdp1dbl);
+	PDP1data = ConvertDblIEEE754toPDP1(dvalue);
+	WritePDP18bytes(Params[0], PDP1data);
 }
 
 void Log10Dbl()
 {
-	PDP1dbl pdp1dbl;
+	PDP1data PDP1data;
 	double dvalue, dvalue1, dvalue2;
 
-	pdp1dbl = ReadPDP1dbl(Params[1]);
-	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
+	PDP1data = ReadPDP18bytes(Params[1]);
+	dvalue1 = ConvertDBLPDP1toIEEE754(PDP1data);
 
 	dvalue = log10(dvalue1);
 	
 	// fprintf(stderr, "MPU : Log10Dbl %f = log10(%f)\n", dvalue, dvalue1);
 
-	pdp1dbl = ConvertIEE754toPDP1(dvalue);
-	WritePDP1dbl(Params[0], pdp1dbl);
+	PDP1data = ConvertDblIEEE754toPDP1(dvalue);
+	WritePDP18bytes(Params[0], PDP1data);
+}
+
+void InvDbl()
+{
+	PDP1data PDP1data;
+	double dvalue, dvalue1, dvalue2;
+
+	PDP1data = ReadPDP18bytes(Params[1]);
+	dvalue1 = ConvertDBLPDP1toIEEE754(PDP1data);
+
+	dvalue = 1.0 / dvalue1;
+	
+	// fprintf(stderr, "MPU : InvDbl %f = inv(%f)\n", dvalue, dvalue1);
+
+	PDP1data = ConvertDblIEEE754toPDP1(dvalue);
+	WritePDP18bytes(Params[0], PDP1data);
+}
+
+void ltod()
+{
+	PDP1data PDP1data;
+	long lvalue;
+	double dvalue;
+
+	lvalue = ReadPDP14bytes(Params[1]);
+	dvalue = lvalue;
+
+	// fprintf(stderr, "MPU : lotd %f = %d\n", dvalue, lvalue);
+
+	PDP1data = ConvertDblIEEE754toPDP1(dvalue);
+	WritePDP18bytes(Params[0], PDP1data);
+}
+
+void dtol()
+{
+	PDP1data PDP1data;
+	long lvalue;
+	double dvalue;
+
+	PDP1data = ReadPDP18bytes(Params[1]);
+	dvalue = ConvertDBLPDP1toIEEE754(PDP1data);
+	lvalue = dvalue;
+	PDP1data.lval = lvalue;
+
+	// fprintf(stderr, "MPU : dotl %ld = %lf\n", lvalue, dvalue);
+
+	WritePDP14bytes(Params[0], PDP1data);
+}
+
+void ftod()
+{
+	PDP1data PDP1data;
+	long lvalue;
+	double dvalue;
+
+	lvalue = ReadPDP14bytes(Params[1]);
+	PDP1data.lval = lvalue;
+	PDP1data.bytes[7] = PDP1data.bytes[3];
+	PDP1data.bytes[6] = PDP1data.bytes[2];
+	PDP1data.bytes[5] = PDP1data.bytes[1];
+	PDP1data.bytes[4] = 0;
+	PDP1data.bytes[3] = 0;
+	PDP1data.bytes[2] = 0;
+
+	// dvalue = ConvertDBLPDP1toIEEE754(PDP1data);
+	// fprintf(stderr, "MPU : ftod %f\n", dvalue);
+
+	WritePDP18bytes(Params[0], PDP1data);
+}
+
+void dtof()
+{
+	PDP1data PDP1data;
+	long lvalue;
+	double dvalue;
+
+	PDP1data = ReadPDP18bytes(Params[1]);
+	// dvalue = ConvertDBLPDP1toIEEE754(PDP1data);
+	PDP1data.lval = PDP1data.lval;
+	PDP1data.bytes[3] = PDP1data.bytes[7];
+	PDP1data.bytes[2] = PDP1data.bytes[6];
+	PDP1data.bytes[1] = PDP1data.bytes[5];
+
+	
+	// fprintf(stderr, "MPU : dtof %f\n", dvalue);
+
+	WritePDP14bytes(Params[0], PDP1data);
 }
 
 void ExecuteCommand(unsigned char cmd)
@@ -375,6 +489,10 @@ void ExecuteCommand(unsigned char cmd)
 
 		case CMD_Test:
 			DumpParams();
+		break;
+
+		case CMD_CompareDbl:
+			CompareDbl();
 		break;
 
 		case CMD_MultDbl:
@@ -415,6 +533,26 @@ void ExecuteCommand(unsigned char cmd)
 
 		case CMD_Log10Dbl:
 			Log10Dbl();
+		break;
+
+		case CMD_Inv:
+			InvDbl();
+		break;
+
+		case CMD_ltod:
+			ltod();
+		break;
+
+		case CMD_dtol:
+			dtol();
+		break;
+
+		case CMD_ftod:
+			ftod();
+		break;
+
+		case CMD_dtof:
+			dtof();
 		break;
 
 		default:
