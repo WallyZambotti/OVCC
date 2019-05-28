@@ -5,6 +5,8 @@ TARGET=testlib
 CC=gcc
 # linker
 LD=gcc
+# Resource Compiler
+# RC=windres
 # debug
 DEBUG=#-g
 # optimisation
@@ -12,7 +14,7 @@ OPT=-O2
 # warnings
 WARN=#-Wall
 # Include Path 
-INCDIR=-I../CoCo
+INCDIR=../CoCo
 # Obj Dir
 ODIR = obj
 
@@ -23,33 +25,28 @@ AGARINC=`agar-config --cflags`
 IDIR=$(INCDIR) $(SDLINC) $(AGARINC)
  
 CCFLAGS=$(IDIR) $(DEBUG) $(OPT) $(WARN) -fPIC
- 
+
 SDLLIB=`sdl2-config --libs`
 AGARLIB=`agar-config --libs`
 LIBS=$(AGARLIB) $(SDLLIB) -lregex
 
-LDFLAGS=-shared $(PTHREAD) -s -Wl,--out-implib,libmpu.a
+LDFLAGS=-shared $(PTHREAD) $(LIBS) -Wl,--out-implib,libmpi.a
 
 UNUSEDOBJS= 
 
-_OBJS=mpu.o iniman.o
+_OBJS=mpi.o fileops.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-testlib: obj/testlib.o mpu.dll
+testlib: obj/testlib.o mpi.dll
 	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
 
-$(ODIR):
-	mkdir -p $@
-
-$(OBJS): | $(ODIR)
-
-$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
+$(ODIR)/testlib.o: testlib.c
 	$(CC) -O0 -g -c $(SDLINC) $< -o $@
 
-mpu.dll: $(OBJS)
+mpi.dll: $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
     
-$(ODIR)/mpu.o: mpu.c mpu.h defines.h ../CoCo/fileops.h
+$(ODIR)/mpi.o: mpi.c mpi.h ../CoCo/fileops.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 
 $(ODIR)/fileops.o: ../CoCo/fileops.c ../CoCo/fileops.h
@@ -59,10 +56,10 @@ $(ODIR)/iniman.o: ../CoCo/iniman.c ../Coco/iniman.h
 	$(CC) $(CCFLAGS) -I../CoCo -c $< -o $@
     
 clean:
-	rm -f $(ODIR)/*.o $(TARGET) mpu.dll mpu.a
+	rm -f $(ODIR)/*.o $(TARGET) libmpi.so
 
 install:
-	cp mpu.dll ../CoCo/libs
+	cp mpi.dll ../CoCo/libs
 
 test:
-	.\testlib.exe mpu.dll ModuleName
+	.\testlib.exe mpi.dll ModuleName

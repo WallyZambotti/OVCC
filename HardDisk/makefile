@@ -28,30 +28,31 @@ SDLLIB=`sdl2-config --libs`
 AGARLIB=`agar-config --libs`
 LIBS=$(AGARLIB) $(SDLLIB) -lregex
 
-LDFLAGS=-shared $(PTHREAD) -s -Wl,--out-implib,libmpu.a
+LDFLAGS=-shared $(PTHREAD) -s -Wl,--out-implib,libharddisk.a
 
 UNUSEDOBJS= 
 
-_OBJS=mpu.o iniman.o
+_OBJS=harddisk.o cloud9.o cc3vhd.o fileops.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-testlib: obj/testlib.o mpu.dll
+testlib: obj/testlib.o harddisk.dll
 	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
 
-$(ODIR):
-	mkdir -p $@
-
-$(OBJS): | $(ODIR)
-
-$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
+$(ODIR)/testlib.o: testlib.c
 	$(CC) -O0 -g -c $(SDLINC) $< -o $@
 
-mpu.dll: $(OBJS)
+harddisk.dll: $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
     
-$(ODIR)/mpu.o: mpu.c mpu.h defines.h ../CoCo/fileops.h
+$(ODIR)/harddisk.o: harddisk.c harddisk.h defines.h cloud9.h ../CoCo/fileops.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 
+$(ODIR)/cloud9.o: cloud9.c cloud9.h
+	$(CC) $(CCFLAGS) -c $< -o $@
+
+$(ODIR)/cc3vhd.o: cc3vhd.c cc3vhd.h defines.h harddisk.h ../CoCo/fileops.h
+	$(CC) $(CCFLAGS) -c $< -o $@
+    
 $(ODIR)/fileops.o: ../CoCo/fileops.c ../CoCo/fileops.h
 	$(CC) $(CCFLAGS) -c $< -o $@
     
@@ -59,10 +60,10 @@ $(ODIR)/iniman.o: ../CoCo/iniman.c ../Coco/iniman.h
 	$(CC) $(CCFLAGS) -I../CoCo -c $< -o $@
     
 clean:
-	rm -f $(ODIR)/*.o $(TARGET) mpu.dll mpu.a
+	rm -f $(ODIR)/*.o $(TARGET) harddisk.dll libharddisk.a
 
 install:
-	cp mpu.dll ../CoCo/libs
+	cp harddisk.dll ../CoCo/libs
 
 test:
-	.\testlib.exe mpu.dll ModuleName
+	.\testlib.exe harddisk.dll ModuleName

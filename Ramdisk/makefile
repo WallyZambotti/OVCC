@@ -12,11 +12,11 @@ OPT=-O2
 # warnings
 WARN=#-Wall
 # Include Path 
-INCDIR=-I../CoCo
+INCDIR=
 # Obj Dir
 ODIR = obj
 
-PTHREAD=#-pthread
+PTHREAD=-pthread
 
 SDLINC=`sdl2-config --cflags`
 AGARINC=`agar-config --cflags`
@@ -26,43 +26,35 @@ CCFLAGS=$(IDIR) $(DEBUG) $(OPT) $(WARN) -fPIC
  
 SDLLIB=`sdl2-config --libs`
 AGARLIB=`agar-config --libs`
-LIBS=$(AGARLIB) $(SDLLIB) -lregex
+LIBS=$(AGARLIB) $(SDLLIB) 
 
-LDFLAGS=-shared $(PTHREAD) -s -Wl,--out-implib,libmpu.a
+LDFLAGS=-shared $(PTHREAD) $(LIBS) -Wl,--out-implib,libramdisk.a,--subsystem,console
 
 UNUSEDOBJS= 
 
-_OBJS=mpu.o iniman.o
+_OBJS=	ramdisk.o memboard.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-testlib: obj/testlib.o mpu.dll
+testlib: obj/testlib.o ramdisk.dll
 	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
 
-$(ODIR):
-	mkdir -p $@
-
-$(OBJS): | $(ODIR)
-
-$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
+$(ODIR)/testlib.o: testlib.c
 	$(CC) -O0 -g -c $(SDLINC) $< -o $@
 
-mpu.dll: $(OBJS)
+ramdisk.dll: $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
     
-$(ODIR)/mpu.o: mpu.c mpu.h defines.h ../CoCo/fileops.h
+$(ODIR)/ramdisk.o: ramdisk.c memboard.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 
-$(ODIR)/fileops.o: ../CoCo/fileops.c ../CoCo/fileops.h
-	$(CC) $(CCFLAGS) -c $< -o $@
-    
-$(ODIR)/iniman.o: ../CoCo/iniman.c ../Coco/iniman.h
-	$(CC) $(CCFLAGS) -I../CoCo -c $< -o $@
+$(ODIR)/memboard.o: memboard.c memboard.h
+	$(CC) -c $(CCFLAGS) $< -o $@
     
 clean:
-	rm -f $(ODIR)/*.o $(TARGET) mpu.dll mpu.a
+	rm -f $(ODIR)/*.o $(TARGET) ramdisk.dll
 
 install:
-	cp mpu.dll ../CoCo/libs
+	cp ramdisk.dll ../CoCo/libs
 
 test:
-	.\testlib.exe mpu.dll ModuleName
+	.\testlib.exe ramdisk.dll ModuleName

@@ -28,41 +28,43 @@ SDLLIB=`sdl2-config --libs`
 AGARLIB=`agar-config --libs`
 LIBS=$(AGARLIB) $(SDLLIB) -lregex
 
-LDFLAGS=-shared $(PTHREAD) -s -Wl,--out-implib,libmpu.a
+LDFLAGS=-shared $(PTHREAD) $(LIBS) -Wl,--out-implib,libfd502.a 
 
-UNUSEDOBJS= 
-
-_OBJS=mpu.o iniman.o
+_OBJS=	fd502.o distortc.o wd1793.o fileops.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-testlib: obj/testlib.o mpu.dll
+testlib: obj/testlib.o fd502.dll
 	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
 
-$(ODIR):
-	mkdir -p $@
-
-$(OBJS): | $(ODIR)
-
-$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
+$(ODIR)/testlib.o: testlib.c
 	$(CC) -O0 -g -c $(SDLINC) $< -o $@
 
-mpu.dll: $(OBJS)
+fd502.dll: $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
     
-$(ODIR)/mpu.o: mpu.c mpu.h defines.h ../CoCo/fileops.h
+$(ODIR)/fd502.o: fd502.c fd502.h distortc.h wd1793.h ../CoCo/fileops.h
 	$(CC) -c $(CCFLAGS) $< -o $@
-
+    
+$(ODIR)/distortc.o: distortc.c distortc.h
+	$(CC) -c $(CCFLAGS) $< -o $@
+    
+#$(ODIR)/logger.o: logger.c logger.h ../CoCo/tcc1014mmu.h
+#	$(CC) -c $(CCFLAGS) $< -o $@
+    
+$(ODIR)/wd1793.o: wd1793.c wd1793.h fd502.h defines.h
+	$(CC) -c $(CCFLAGS) $< -o $@
+    
 $(ODIR)/fileops.o: ../CoCo/fileops.c ../CoCo/fileops.h
-	$(CC) $(CCFLAGS) -c $< -o $@
+	$(CC) -c $(CCFLAGS) $< -o $@
     
 $(ODIR)/iniman.o: ../CoCo/iniman.c ../Coco/iniman.h
 	$(CC) $(CCFLAGS) -I../CoCo -c $< -o $@
     
 clean:
-	rm -f $(ODIR)/*.o $(TARGET) mpu.dll mpu.a
+	rm -f $(ODIR)/*.o $(TARGET) fd502.dll
 
 install:
-	cp mpu.dll ../CoCo/libs
+	cp fd502.dll ../CoCo/libs
 
 test:
-	.\testlib.exe mpu.dll ModuleName
+	.\testlib.exe fd502.dll ModuleName

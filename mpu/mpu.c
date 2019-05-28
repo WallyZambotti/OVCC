@@ -185,7 +185,7 @@ void CompareDbl()
 
 	// fprintf(stderr, "MPU : CommpareDbl %d = %f - %f\n", result, dvalue1, dvalue2);
 
-	MemWrite8(result, Param[0]);
+	MemWrite8(result, Params[0]);
 }
 
 void MultDbl()
@@ -307,7 +307,7 @@ void SqrtDbl()
 	pdp1dbl = ReadPDP1dbl(Params[1]);
 	dvalue1 = ConvertPDP1toIEE754(pdp1dbl);
 
-	dvalue = dsqrt(dvalue1);
+	dvalue = sqrt(dvalue1);
 
 	// fprintf(stderr, "MPU : SqrtDbl %f = sqrt(%f)\n", dvalue, dvalue1);
 
@@ -390,7 +390,7 @@ void ExecuteCommand(unsigned char cmd)
 		break;
 
 		case CMD_SubDbl:
-			SUbDbl();
+			SubDbl();
 		break;
 
 		case CMD_NegDbl:

@@ -18,7 +18,7 @@ This file is part of VCC (Virtual Color Computer).
 
 #include <agar/core.h>
 #include <SDL2/SDL.h>
-#include <sys/timerfd.h>
+//#include <sys/timerfd.h>
 #include <sys/time.h>
 #include <time.h>
 #include <sched.h>
@@ -158,28 +158,28 @@ void FrameWait(void)
 	return;
 }
 
-float timems()
-{
-	static struct timeval tval_before, tval_after, tval_result;
-	static int firsttime = 1;
-	float secs, fsecs;
+// float timems()
+// {
+// 	static struct timeval tval_before, tval_after, tval_result;
+// 	static int firsttime = 1;
+// 	float secs, fsecs;
 
-	if (firsttime)
-	{
-		gettimeofday(&tval_before, NULL);
-		firsttime = 0;
-		return 0.0;
-	}
+// 	if (firsttime)
+// 	{
+// 		gettimeofday(&tval_before, NULL);
+// 		firsttime = 0;
+// 		return 0.0;
+// 	}
 
-	gettimeofday(&tval_after, NULL);
-	timersub(&tval_after, &tval_before, &tval_result);
-	memcpy(&tval_before, &tval_after, sizeof(tval_after));
+// 	gettimeofday(&tval_after, NULL);
+// 	timersub(&tval_after, &tval_before, &tval_result);
+// 	memcpy(&tval_before, &tval_after, sizeof(tval_after));
 
-	secs = tval_result.tv_sec;
-	fsecs = (float)tval_result.tv_usec / 1000000.0;
+// 	secs = tval_result.tv_sec;
+// 	fsecs = (float)tval_result.tv_usec / 1000000.0;
 
-	return secs + fsecs;
-}
+// 	return secs + fsecs;
+// }
 
 static float cfps=0;
 

@@ -5,6 +5,8 @@ TARGET=testlib
 CC=gcc
 # linker
 LD=gcc
+# Resource Compiler
+# RC=windres
 # debug
 DEBUG=#-g
 # optimisation
@@ -16,7 +18,7 @@ INCDIR=-I../CoCo
 # Obj Dir
 ODIR = obj
 
-PTHREAD=#-pthread
+PTHREAD=-pthread
 
 SDLINC=`sdl2-config --cflags`
 AGARINC=`agar-config --cflags`
@@ -26,43 +28,33 @@ CCFLAGS=$(IDIR) $(DEBUG) $(OPT) $(WARN) -fPIC
  
 SDLLIB=`sdl2-config --libs`
 AGARLIB=`agar-config --libs`
-LIBS=$(AGARLIB) $(SDLLIB) -lregex
+POSSIBLE_LIBS= -lm -lWinmm -lgdi32 -ldxguid -lddraw -ldsound -ldinput -ldinput8 -lComctl32 -lole32
+LIBS=$(AGARLIB) $(SDLLIB) -lws2_32 -lregex
 
-LDFLAGS=-shared $(PTHREAD) -s -Wl,--out-implib,libmpu.a
+LDFLAGS=-shared $(PTHREAD) $(LIBS) -Wl,--out-implib,libbecker.a,--subsystem,console
 
 UNUSEDOBJS= 
 
-_OBJS=mpu.o iniman.o
+_OBJS=	becker.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-testlib: obj/testlib.o mpu.dll
+testlib: obj/testlib.o becker.dll 
 	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
 
-$(ODIR):
-	mkdir -p $@
-
-$(OBJS): | $(ODIR)
-
-$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
+$(ODIR)/testlib.o: testlib.c
 	$(CC) -O0 -g -c $(SDLINC) $< -o $@
 
-mpu.dll: $(OBJS)
+becker.dll: $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
     
-$(ODIR)/mpu.o: mpu.c mpu.h defines.h ../CoCo/fileops.h
+$(ODIR)/becker.o: becker.c becker.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 
-$(ODIR)/fileops.o: ../CoCo/fileops.c ../CoCo/fileops.h
-	$(CC) $(CCFLAGS) -c $< -o $@
-    
-$(ODIR)/iniman.o: ../CoCo/iniman.c ../Coco/iniman.h
-	$(CC) $(CCFLAGS) -I../CoCo -c $< -o $@
-    
+$(ODIR)/iniman.o: ../CoCo/iniman.c ../CoCo/iniman.h
+	$(CC) -c $(CCFLAGS) $< -o $@
+
 clean:
-	rm -f $(ODIR)/*.o $(TARGET) mpu.dll mpu.a
+	rm -f $(ODIR)/*.o $(TARGET) becker.dll
 
 install:
-	cp mpu.dll ../CoCo/libs
-
-test:
-	.\testlib.exe mpu.dll ModuleName
+	cp becker.dll ../CoCo/libs
