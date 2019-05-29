@@ -29,9 +29,6 @@ This file is part of VCC (Virtual Color Computer).
 #define ADDCALL
 #endif
 
-void MemWrite(unsigned char,unsigned short );
-unsigned char MemRead(unsigned short );
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -52,6 +49,9 @@ void ADDCALL ModuleStatus (char *);
 } // __cplusplus defined.
 #endif
 
+void MemWrite(unsigned char,unsigned short );
+unsigned char MemRead(unsigned short );
+
 void CompareDbl(unsigned short, unsigned short, unsigned short);
 void MultDbl(unsigned short, unsigned short, unsigned short);
 void DivDbl(unsigned short, unsigned short, unsigned short);
@@ -68,5 +68,11 @@ void ltod(unsigned short, unsigned short);
 void dtol(unsigned short, unsigned short);
 void ftod(unsigned short, unsigned short);
 void dtof(unsigned short, unsigned short);
+
+void SetScreen(unsigned short, unsigned short, unsigned short, unsigned short);
+void SetColor(unsigned short );
+void SetPixel(unsigned short, unsigned short);
+void DrawLine(unsigned short, unsigned short, unsigned short, unsigned short);
+
 
 #endif

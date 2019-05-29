@@ -41,20 +41,22 @@ static void SaveConfig(void);
 static void BuildMenu(void);
 static void UpdateMenu(void);
 
-#define MAX_PARAMS 3
+#define MAX_PARAMS 4
 
 unsigned char BaseAddr = 0x60;
 
 enum Registers
 {
-	REG_Command = 0x00,
-	REG_Param0H = 0x01,
-	REG_Param0L = 0x02,
-	REG_Param1H = 0x03,
-	REG_Param1L = 0x04,
-	REG_Param2H = 0x05,
-	REG_Param2L = 0x06,
-	REG_ParamCnt = 0x07
+	REG_Command,
+	REG_Param0H,
+	REG_Param0L,
+	REG_Param1H,
+	REG_Param1L,
+	REG_Param2H,
+	REG_Param2L,
+	REG_Param3H,
+	REG_Param3L,
+	REG_ParamCnt
 };
 
 enum Commands
@@ -76,7 +78,11 @@ enum Commands
 	CMD_ltod,
 	CMD_dtol,
 	CMD_ftod,
-	CMD_dtof
+	CMD_dtof,
+	CMD_SetScreen = 64,
+	CMD_SetColor,
+	CMD_SetPixel,
+	CMD_DrawLine
 };
 
 unsigned short int Params[MAX_PARAMS];
@@ -175,6 +181,22 @@ void ExecuteCommand(unsigned char cmd)
 			dtof(Params[0], Params[1]);
 		break;
 
+		case CMD_SetScreen:
+			SetScreen(Params[0], Params[1], Params[2], Params[3]);
+		break;
+
+		case CMD_SetColor:
+			SetColor(Params[0]);
+		break;
+
+		case CMD_SetPixel:
+			SetPixel(Params[0], Params[1]);
+		break;
+
+		case CMD_DrawLine:
+			DrawLine(Params[0], Params[1], Params[2], Params[3]);
+		break;
+
 		default:
 			fprintf(stderr, "MPU : uknown command %d\n", cmd);
 		break;
@@ -220,7 +242,7 @@ void ADDCALL ModuleName(char *ModName, AG_MenuItem *Temp)
 		BuildMenu();
 	}
 
-	//fprintf(stderr, "MPU : ModuleName\n");
+	// fprintf(stderr, "MPU : ModuleName\n");
 
 	return ;
 }
@@ -263,6 +285,8 @@ void ADDCALL PackPortWrite(unsigned char Port, unsigned char Data)
 		case REG_Param1L:
 		case REG_Param2H:
 		case REG_Param2L:
+		case REG_Param3H:
+		case REG_Param3L:
 		{
 			int idx = (Port-BaseAddr-1)^1;
 			*((unsigned char*)Params+(idx)) = Data;

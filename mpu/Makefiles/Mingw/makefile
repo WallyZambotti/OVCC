@@ -32,7 +32,7 @@ LDFLAGS=-shared $(PTHREAD) -s -Wl,--out-implib,libmpu.a
 
 UNUSEDOBJS= 
 
-_OBJS=mpu.o fpu.o iniman.o
+_OBJS=mpu.o fpu.o gpu.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 testlib: obj/testlib.o mpu.dll
@@ -53,6 +53,9 @@ $(ODIR)/mpu.o: mpu.c mpu.h defines.h ../CoCo/fileops.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 
 $(ODIR)/fpu.o: fpu.c mpu.h
+	$(CC) -c $(CCFLAGS) $< -o $@
+
+$(ODIR)/gpu.o: gpu.c mpu.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 
 $(ODIR)/fileops.o: ../CoCo/fileops.c ../CoCo/fileops.h
