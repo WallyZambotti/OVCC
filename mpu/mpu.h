@@ -69,10 +69,40 @@ void dtol(unsigned short, unsigned short);
 void ftod(unsigned short, unsigned short);
 void dtof(unsigned short, unsigned short);
 
+void QueueGPUrequest(unsigned char, unsigned short, unsigned short, unsigned short, unsigned short);
+void StartGPUQueue();
+void StopGPUqueue();
 void SetScreen(unsigned short, unsigned short, unsigned short, unsigned short);
 void SetColor(unsigned short );
 void SetPixel(unsigned short, unsigned short);
 void DrawLine(unsigned short, unsigned short, unsigned short, unsigned short);
+
+
+enum Commands
+{
+	CMD_Check,
+	CMD_Test,
+	CMD_CompareDbl,
+	CMD_MultDbl,
+	CMD_DivDbl,
+	CMD_AddDbl,
+	CMD_SubDbl,
+	CMD_NegDbl,
+	CMD_PowDbl,
+	CMD_SqrtDbl,
+	CMD_ExpDbl,
+	CMD_LogDbl,
+	CMD_Log10Dbl,
+	CMD_Inv,
+	CMD_ltod,
+	CMD_dtol,
+	CMD_ftod,
+	CMD_dtof,
+	CMD_SetScreen = 64,
+	CMD_SetColor,
+	CMD_SetPixel,
+	CMD_DrawLine
+};
 
 
 #endif

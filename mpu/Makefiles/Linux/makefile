@@ -1,6 +1,6 @@
 TARGET = libmpu.so
  
-CFLAGS += -fPIC
+CFLAGS += -fPIC -pthread
 LDFLAGS += -shared
 INCDIR = -I../CoCo
 

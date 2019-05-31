@@ -59,32 +59,6 @@ enum Registers
 	REG_ParamCnt
 };
 
-enum Commands
-{
-	CMD_Check,
-	CMD_Test,
-	CMD_CompareDbl,
-	CMD_MultDbl,
-	CMD_DivDbl,
-	CMD_AddDbl,
-	CMD_SubDbl,
-	CMD_NegDbl,
-	CMD_PowDbl,
-	CMD_SqrtDbl,
-	CMD_ExpDbl,
-	CMD_LogDbl,
-	CMD_Log10Dbl,
-	CMD_Inv,
-	CMD_ltod,
-	CMD_dtol,
-	CMD_ftod,
-	CMD_dtof,
-	CMD_SetScreen = 64,
-	CMD_SetColor,
-	CMD_SetPixel,
-	CMD_DrawLine
-};
-
 unsigned short int Params[MAX_PARAMS];
 
 AG_MenuItem *menuAnchor = NULL;
@@ -182,19 +156,19 @@ void ExecuteCommand(unsigned char cmd)
 		break;
 
 		case CMD_SetScreen:
-			SetScreen(Params[0], Params[1], Params[2], Params[3]);
+			QueueGPUrequest(cmd, Params[0], Params[1], Params[2], Params[3]);
 		break;
 
 		case CMD_SetColor:
-			SetColor(Params[0]);
+			QueueGPUrequest(cmd, Params[0], 0, 0, 0);
 		break;
 
 		case CMD_SetPixel:
-			SetPixel(Params[0], Params[1]);
+			QueueGPUrequest(cmd, Params[0], Params[1], 0, 0);
 		break;
 
 		case CMD_DrawLine:
-			DrawLine(Params[0], Params[1], Params[2], Params[3]);
+			QueueGPUrequest(cmd, Params[0], Params[1], Params[2], Params[3]);
 		break;
 
 		default:
@@ -244,6 +218,8 @@ void ADDCALL ModuleName(char *ModName, AG_MenuItem *Temp)
 
 	// fprintf(stderr, "MPU : ModuleName\n");
 
+	StartGPUQueue();
+
 	return ;
 }
 
@@ -256,6 +232,7 @@ void ADDCALL ModuleConfig(unsigned char func)
 		// AG_MenuDel(itemLoadHDD);
 		// AG_MenuDel(itemMenu);
 		// AG_MenuDel(itemSeperator);
+		StopGPUqueue();
 		break;
 
 	case 1: // Update ini file
