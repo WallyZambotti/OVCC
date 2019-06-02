@@ -27,6 +27,8 @@ typedef int BOOL;
 #include "defines.h"
 #include "mpu.h"
 
+#define GPU_Nil_Arg ((unsigned short)0)
+
 static char moduleName[4] = { "MPU" };
 
 static char IniFile[MAX_PATH] = { 0 };
@@ -60,6 +62,7 @@ enum Registers
 };
 
 unsigned short int Params[MAX_PARAMS];
+unsigned short int SendModeQueued = 0;
 
 AG_MenuItem *menuAnchor = NULL;
 // AG_MenuItem *itemMenu = NULL;
@@ -156,19 +159,47 @@ void ExecuteCommand(unsigned char cmd)
 		break;
 
 		case CMD_SetScreen:
-			QueueGPUrequest(cmd, Params[0], Params[1], Params[2], Params[3]);
+			if (SendModeQueued)
+			{
+				QueueGPUrequest(cmd, Params[0], Params[1], Params[2], Params[3]);
+			}
+			else
+			{
+				SetScreen(Params[0], Params[1], Params[2], Params[3]);
+			}
 		break;
 
 		case CMD_SetColor:
-			QueueGPUrequest(cmd, Params[0], 0, 0, 0);
+			if (SendModeQueued)
+			{
+				QueueGPUrequest(cmd, Params[0], GPU_Nil_Arg, GPU_Nil_Arg, GPU_Nil_Arg);
+			}
+			else
+			{
+				SetColor(Params[0]);
+			}
 		break;
 
 		case CMD_SetPixel:
-			QueueGPUrequest(cmd, Params[0], Params[1], 0, 0);
+			if (SendModeQueued)
+			{
+				QueueGPUrequest(cmd, Params[0], Params[1], GPU_Nil_Arg, GPU_Nil_Arg);
+			}
+			else
+			{
+				SetPixel(Params[0], Params[1]);
+			}
 		break;
 
 		case CMD_DrawLine:
-			QueueGPUrequest(cmd, Params[0], Params[1], Params[2], Params[3]);
+			if (SendModeQueued)
+			{
+				QueueGPUrequest(cmd, Params[0], Params[1], Params[2], Params[3]);
+			}
+			else
+			{
+				DrawLine(Params[0], Params[1], Params[2], Params[3]);
+			}
 		break;
 
 		default:

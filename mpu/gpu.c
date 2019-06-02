@@ -5,6 +5,8 @@
 
 static pthread_t GPUthread;
 static pthread_mutex_t GPUlock;
+static pthread_cond_t GPUcond;
+static pthread_mutex_t condLock;
 
 struct _queueEntry
 {
@@ -19,6 +21,8 @@ static QueueRequest *GPUqueue = NULL;
 static QueueRequest *GPUqueueEnd = NULL;
 
 static short int queueActive = 1;
+static int queueDepth = 0;
+static short int queueProcessing = 1;
 
 static unsigned short ScreenAddress;
 static unsigned short ScreenWidth;
@@ -48,13 +52,14 @@ unsigned char pixelmasks[4][8] =
 
 static void GPUsigHandler(int signo)
 {
-    fprintf(stderr, "Queue waking\n");
+    // write(0, "!", 1);
 }
 
 void *ProcessGPUqueue(void *ptr)
 {
     int sigdummy;
     sigset_t sigmask;
+    QueueRequest gpuqueue;
 
     sigemptyset(&sigmask);               /* to zero out all bits */
     sigaddset(&sigmask, SIGUSR1);        /* to unblock SIGUSR1 */  
@@ -64,7 +69,6 @@ void *ProcessGPUqueue(void *ptr)
 
     while(queueActive)
     {
-        fprintf(stderr, "Processing GPU queue\n");
         while(GPUqueue != NULL)
         {
             switch (GPUqueue->cmd)
@@ -89,17 +93,21 @@ void *ProcessGPUqueue(void *ptr)
                     fprintf(stderr, "GPU : uknown command %d\n", GPUqueue->cmd);
                 break;
             }
-
             RemoveGPUrequest(GPUqueue);
         }
 
-        sigwait(&sigmask, &sigdummy);
+        //write(0, ">", 1);
+    	pthread_mutex_lock(&condLock);
+	    pthread_cond_wait(&GPUcond, &condLock);
+        pthread_mutex_unlock(&condLock);
+        //write(0, "<", 1);
     }
+
+    // write(2, "GPU stopped\n", 12);
 }
 
 void QueueGPUrequest(unsigned char cmd, unsigned short p1, unsigned short p2, unsigned short p3, unsigned short p4)
 {
-    pthread_mutex_lock(&GPUlock);
     QueueRequest *newGPUrequest = malloc(sizeof(QueueRequest));
 
     newGPUrequest->cmd = cmd;
@@ -108,6 +116,8 @@ void QueueGPUrequest(unsigned char cmd, unsigned short p1, unsigned short p2, un
     newGPUrequest->p3 = p3;
     newGPUrequest->p4 = p4;
     newGPUrequest->nextEntry = NULL;
+
+    pthread_mutex_lock(&GPUlock);
 
     if (GPUqueue == NULL)
     {
@@ -119,38 +129,43 @@ void QueueGPUrequest(unsigned char cmd, unsigned short p1, unsigned short p2, un
         GPUqueueEnd = newGPUrequest;
     }
 
+    queueDepth++;
     pthread_mutex_unlock(&GPUlock);
 
-    fprintf(stderr, "About to Wake GPU queue\n");
-    pthread_kill(GPUthread, SIGUSR1);
+    // Only wake the GPU thread if it is asleep
+    pthread_cond_signal(&GPUcond);
+    // write(0, "+", 1);
 }
 
 void RemoveGPUrequest(QueueRequest *queueRequest)
 {
+    if (queueRequest == NULL)
+    {
+        write(2, "Remove null\n", 12);
+        return;
+    }
+    if (queueDepth == 0)
+    {
+        write(2, "Remove empty\n", 12);
+        return;
+    }
     pthread_mutex_lock(&GPUlock);
     GPUqueue = queueRequest->nextEntry;
-    free(queueRequest);
+    queueDepth--;
     pthread_mutex_unlock(&GPUlock);
+    free(queueRequest);
+    //write(0, "-", 1);
 }
 
 void StartGPUQueue()
 {
-    //sigset_t sigmask;                 
-    //pthread_attr_t attr_obj;             /* a thread attribute variable */
     struct sigaction action;
-
-    /* set up signal mask to block all in main thread */
-    //sigfillset(&sigmask);                /* to turn on all bits */
-    //pthread_sigmask(SIG_BLOCK, &sigmask, (sigset_t *)0);
 
     /* set up signal handlers for SIGINT & SIGUSR1 */
     action.sa_flags = 0;
     action.sa_handler = GPUsigHandler;
     sigaction(SIGUSR1, &action, NULL);
 
-    //pthread_attr_init(&attr_obj);        /* init it to default */
-    //pthread_attr_setdetachstate(&attr_obj, PTHREAD_CREATE_DETACHED);
- 
     pthread_create(&GPUthread, NULL, ProcessGPUqueue, NULL);
 
     if (GPUthread == 0) 
@@ -161,8 +176,9 @@ void StartGPUQueue()
 
 void StopGPUqueue()
 {
-    fprintf(stderr, "GPU queue stopped\n");
+    // write(2, "GPU queue stopping\n", 19);
     queueActive = 0;
+    pthread_cond_signal(&GPUcond);
 }
 
 void SetScreen(unsigned short address, unsigned short width, unsigned short height, unsigned short bitsperpixel)
@@ -195,7 +211,11 @@ void SetPixel(unsigned short x, unsigned short y)
 {
     // fprintf(stderr, "SetPixel %d %d\n", x, y);
     unsigned short pixaddr = ScreenAddress + (y * ScreenPitch) + (x>>PPBshift);
-    if (pixaddr < ScreenAddress || pixaddr > ScreenEnd) return;
+    if (pixaddr < ScreenAddress || pixaddr > ScreenEnd) 
+    {
+        // write(0, "?", 1);
+        return;
+    }
     unsigned short xmodPPB = x%PixelsPerByte;
     unsigned char pixmask = pixelmasks[PPBshift][xmodPPB];
     unsigned char pixelbyte = MemRead(pixaddr) & (pixmask^0xff);
