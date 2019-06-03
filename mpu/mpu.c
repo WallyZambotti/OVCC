@@ -62,7 +62,10 @@ enum Registers
 };
 
 unsigned short int Params[MAX_PARAMS];
-unsigned short int SendModeQueued = 0;
+
+#ifdef GPU_MODE_QUEUE
+#define GPU_MODE_QUEUE
+#endif
 
 AG_MenuItem *menuAnchor = NULL;
 // AG_MenuItem *itemMenu = NULL;
@@ -159,47 +162,35 @@ void ExecuteCommand(unsigned char cmd)
 		break;
 
 		case CMD_SetScreen:
-			if (SendModeQueued)
-			{
-				QueueGPUrequest(cmd, Params[0], Params[1], Params[2], Params[3]);
-			}
-			else
-			{
-				SetScreen(Params[0], Params[1], Params[2], Params[3]);
-			}
+#ifdef GPU_MODE_QUEUE
+			QueueGPUrequest(cmd, Params[0], Params[1], Params[2], Params[3]);
+#else			
+			SetScreen(Params[0], Params[1], Params[2], Params[3]);
+#endif
 		break;
 
 		case CMD_SetColor:
-			if (SendModeQueued)
-			{
-				QueueGPUrequest(cmd, Params[0], GPU_Nil_Arg, GPU_Nil_Arg, GPU_Nil_Arg);
-			}
-			else
-			{
-				SetColor(Params[0]);
-			}
+#ifdef GPU_MODE_QUEUE
+			QueueGPUrequest(cmd, Params[0], GPU_Nil_Arg, GPU_Nil_Arg, GPU_Nil_Arg);
+#else			
+			SetColor(Params[0]);
+#endif
 		break;
 
 		case CMD_SetPixel:
-			if (SendModeQueued)
-			{
-				QueueGPUrequest(cmd, Params[0], Params[1], GPU_Nil_Arg, GPU_Nil_Arg);
-			}
-			else
-			{
-				SetPixel(Params[0], Params[1]);
-			}
+#ifdef GPU_MODE_QUEUE
+			QueueGPUrequest(cmd, Params[0], Params[1], GPU_Nil_Arg, GPU_Nil_Arg);
+#else			
+			SetPixel(Params[0], Params[1]);
+#endif
 		break;
 
 		case CMD_DrawLine:
-			if (SendModeQueued)
-			{
+#ifdef GPU_MODE_QUEUE
 				QueueGPUrequest(cmd, Params[0], Params[1], Params[2], Params[3]);
-			}
-			else
-			{
+#else			
 				DrawLine(Params[0], Params[1], Params[2], Params[3]);
-			}
+#endif
 		break;
 
 		default:
@@ -249,8 +240,9 @@ void ADDCALL ModuleName(char *ModName, AG_MenuItem *Temp)
 
 	// fprintf(stderr, "MPU : ModuleName\n");
 
+#ifdef GPU_MODE_QUEUE
 	StartGPUQueue();
-
+#endif
 	return ;
 }
 
