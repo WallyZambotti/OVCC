@@ -141,8 +141,16 @@ void ExecuteCommand(unsigned char cmd)
 			Log10Dbl(Params[0], Params[1]);
 		break;
 
-		case CMD_Inv:
+		case CMD_InvDbl:
 			InvDbl(Params[0], Params[1]);
+		break;
+
+		case CMD_SinDbl:
+			SinDbl(Params[0], Params[1]);
+		break;
+
+		case CMD_CosDbl:
+			CosDbl(Params[0], Params[1]);
 		break;
 
 		case CMD_ltod:

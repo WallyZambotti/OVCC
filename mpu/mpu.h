@@ -44,6 +44,8 @@ void ADDCALL MemPointers(MEMREAD8, MEMWRITE8);
 unsigned char ADDCALL PakMemRead8 (unsigned short);
 void ADDCALL ModuleStatus (char *);
 //void ADDCALL SetIniPath (char *);
+unsigned char MemRead(unsigned short);
+void MemWrite(unsigned char, unsigned short);
 
 #ifdef __cplusplus
 } // __cplusplus defined.
@@ -64,6 +66,8 @@ void ExpDbl(unsigned short, unsigned short);
 void LogDbl(unsigned short, unsigned short);
 void Log10Dbl(unsigned short, unsigned short);
 void InvDbl(unsigned short, unsigned short);
+void SinDbl(unsigned short, unsigned short);
+void CosDbl(unsigned short, unsigned short);
 void ltod(unsigned short, unsigned short);
 void dtol(unsigned short, unsigned short);
 void ftod(unsigned short, unsigned short);
@@ -93,7 +97,9 @@ enum Commands
 	CMD_ExpDbl,
 	CMD_LogDbl,
 	CMD_Log10Dbl,
-	CMD_Inv,
+	CMD_InvDbl,
+	CMD_SinDbl,
+	CMD_CosDbl,
 	CMD_ltod,
 	CMD_dtol,
 	CMD_ftod,
