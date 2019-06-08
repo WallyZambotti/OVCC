@@ -385,7 +385,7 @@ void ltod(unsigned short param0, unsigned short param1)
 	lvalue = ReadPDP14bytes(param1);
 	dvalue = (double)lvalue;
 
-	fprintf(stderr, "MPU : lotd %f = %d\n", dvalue, lvalue);
+	// fprintf(stderr, "MPU : lotd %f = %d\n", dvalue, lvalue);
 
 	PDP1data = ConvertDblIEEE754toPDP1(dvalue);
 	WritePDP18bytes(param0, PDP1data);
