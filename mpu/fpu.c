@@ -24,14 +24,14 @@ union Data
 {
 	unsigned long long llval;
 	double dval;
-	unsigned long lval;
+	unsigned int lval;
 	unsigned char bytes[8];
 };
 
 typedef union Data PDP1data;
 typedef union Data IEEE754data;
 
-long ReadPDP14bytes(unsigned short int address)
+int ReadPDP14bytes(unsigned short int address)
 {
 	PDP1data pdp1data;
 
@@ -379,13 +379,13 @@ void CosDbl(unsigned short param0, unsigned short param1)
 void ltod(unsigned short param0, unsigned short param1)
 {
 	PDP1data PDP1data;
-	long lvalue;
+	int lvalue;
 	double dvalue;
 
 	lvalue = ReadPDP14bytes(param1);
-	dvalue = lvalue;
+	dvalue = (double)lvalue;
 
-	// fprintf(stderr, "MPU : lotd %f = %d\n", dvalue, lvalue);
+	fprintf(stderr, "MPU : lotd %f = %d\n", dvalue, lvalue);
 
 	PDP1data = ConvertDblIEEE754toPDP1(dvalue);
 	WritePDP18bytes(param0, PDP1data);
@@ -394,15 +394,13 @@ void ltod(unsigned short param0, unsigned short param1)
 void dtol(unsigned short param0, unsigned short param1)
 {
 	PDP1data PDP1data;
-	long lvalue;
 	double dvalue;
 
 	PDP1data = ReadPDP18bytes(param1);
 	dvalue = ConvertDBLPDP1toIEEE754(PDP1data);
-	lvalue = dvalue;
-	PDP1data.lval = lvalue;
+	PDP1data.lval = dvalue;
 
-	// fprintf(stderr, "MPU : dotl %ld = %lf\n", lvalue, dvalue);
+	// fprintf(stderr, "MPU : dotl %ld = %lf\n", PDP1data.lval, dvalue);
 
 	WritePDP14bytes(param0, PDP1data);
 }
