@@ -63,10 +63,13 @@ typedef unsigned char (*PACKPORTREAD)(unsigned char);
 typedef void (*PACKPORTWRITE)(unsigned char,unsigned char);
 typedef void (*ASSERTINTERUPT) (unsigned char,unsigned char);
 typedef unsigned char (*MEMREAD8)(unsigned short);
+typedef unsigned char (*MMUREAD8)(unsigned char, unsigned short);
 typedef void (*SETCART)(unsigned char);
 typedef void (*MEMWRITE8)(unsigned char,unsigned short);
+typedef void (*MMUWRITE8)(unsigned char,unsigned char,unsigned short);
 typedef void (*MODULESTATUS)(char *);
 typedef void (*DMAMEMPOINTERS) ( MEMREAD8,MEMWRITE8);
+typedef void (*MMUMEMPOINTERS) (MMUREAD8, MMUWRITE8);
 typedef void (*SETCARTPOINTER)(SETCART);
 typedef void (*SETINTERUPTCALLPOINTER) (ASSERTINTERUPT);
 typedef unsigned short (*MODULEAUDIOSAMPLE)(void);
@@ -78,6 +81,7 @@ static void (*GetModuleName)(char *, AG_MenuItem *)=NULL;
 static void (*ConfigModule)(unsigned char)=NULL;
 static void (*SetInteruptCallPointer) ( ASSERTINTERUPT)=NULL;
 static void (*DmaMemPointer) (MEMREAD8,MEMWRITE8)=NULL;
+static void (*MmuMemPointer) (MMUREAD8,MMUWRITE8)=NULL;
 static void (*HeartBeat)(void)=NULL;
 static void (*PakPortWrite)(unsigned char,unsigned char)=NULL;
 static unsigned char (*PakPortRead)(unsigned char)=NULL;
@@ -230,6 +234,7 @@ int InsertModule (char *ModulePath)
 		PakPortRead = SDL_LoadFunction(hinstLib, "PackPortRead");
 		SetInteruptCallPointer = SDL_LoadFunction(hinstLib, "AssertInterupt");
 		DmaMemPointer = SDL_LoadFunction(hinstLib, "MemPointers");
+		MmuMemPointer = SDL_LoadFunction(hinstLib, "MmuPointers");
 		HeartBeat = SDL_LoadFunction(hinstLib, "HeartBeat");
 		PakMemWrite8 = SDL_LoadFunction(hinstLib, "PakMemWrite8");
 		PakMemRead8 = SDL_LoadFunction(hinstLib, "PakMemRead8");
@@ -247,9 +252,17 @@ int InsertModule (char *ModulePath)
 		}
 		BankedCartOffset=0;
 		if (DmaMemPointer != NULL)
+		{
 			DmaMemPointer(MemRead8, MemWrite8);
+		}
+		if (MmuMemPointer != NULL)
+		{
+			MmuMemPointer(MmuRead8, MmuWrite8);
+		}
 		if (SetInteruptCallPointer != NULL)
+		{
 			SetInteruptCallPointer(CPUAssertInterupt);
+		}
 
 		//fprintf(stderr, "Insert Module : Calling GetModuleName %lx\n", (unsigned long)GetModuleName);
 		UpdateOnBoot(Modname);
@@ -284,6 +297,11 @@ int InsertModule (char *ModulePath)
 		{
 			ModualParms|=16;
 			strcat(String,"Generates DMA Requests\n");
+		}
+		if (MmuMemPointer!=NULL)
+		{
+			ModualParms|=8192;
+			strcat(String,"Generates MMU Requests\n");
 		}
 		if (HeartBeat!=NULL)
 		{
@@ -406,6 +424,7 @@ void UnloadDll(short int config)
 	PakPortRead=NULL;
 	SetInteruptCallPointer=NULL;
 	DmaMemPointer=NULL;
+	MmuMemPointer=NULL;
 	HeartBeat=NULL;
 	PakMemWrite8=NULL;
 	PakMemRead8=NULL;

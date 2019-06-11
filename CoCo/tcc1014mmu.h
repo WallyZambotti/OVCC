@@ -23,9 +23,13 @@ This file is part of VCC (Virtual Color Computer).
 #ifdef __cplusplus
 extern "C" void MemWrite8(unsigned char,unsigned short );
 extern "C" unsigned char MemRead8(short unsigned int);
+extern "C" void MmuWrite8(unsigned char,unsigned char,unsigned short );
+extern "C" unsigned char MmuRead8(unsigned char,short unsigned int);
 #else
 extern void MemWrite8(unsigned char,unsigned short );
 extern unsigned char MemRead8(short unsigned int);
+extern void MmuWrite8(unsigned char,unsigned char,unsigned short );
+extern unsigned char MmuRead8(unsigned char,short unsigned int);
 #endif
 void MemWrite16(unsigned short,unsigned short );
 

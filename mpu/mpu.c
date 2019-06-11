@@ -35,9 +35,12 @@ static char IniFile[MAX_PATH] = { 0 };
 
 typedef void (*ASSERTINTERUPT) (unsigned char,unsigned char);
 typedef void (*DMAMEMPOINTERS) (MEMREAD8, MEMWRITE8);
+typedef void (*MMUMEMPOINTERS) (MMUREAD8, MMUWRITE8);
 static void (*AssertInt)(unsigned char,unsigned char)=NULL;
 static unsigned char (*MemRead8)(unsigned short)=NULL;
 static void (*MemWrite8)(unsigned char,unsigned short)=NULL;
+static unsigned char (*MmuRead8)(unsigned char, unsigned short)=NULL;
+static void (*MmuWrite8)(unsigned char,unsigned char, unsigned short)=NULL;
 static void LoadConfig(void);
 static void SaveConfig(void);
 static void BuildMenu(void);
@@ -236,6 +239,17 @@ unsigned char MemRead(unsigned short Address)
 	return(MemRead8(Address));
 }
 
+void MmuWrite(unsigned char Data, unsigned char Bank, unsigned short Address)
+{
+	MmuWrite8(Data,Bank,Address);
+	return;
+}
+
+unsigned char MmuRead(unsigned char Bank, unsigned short Address)
+{
+	return(MmuRead8(Bank,Address));
+}
+
 void ADDCALL ModuleName(char *ModName, AG_MenuItem *Temp)
 {
 	menuAnchor = Temp;
@@ -263,7 +277,9 @@ void ADDCALL ModuleConfig(unsigned char func)
 		// AG_MenuDel(itemLoadHDD);
 		// AG_MenuDel(itemMenu);
 		// AG_MenuDel(itemSeperator);
+#ifdef GPU_MODE_QUEUE
 		StopGPUqueue();
+#endif
 		break;
 
 	case 1: // Update ini file
@@ -314,13 +330,23 @@ void ADDCALL PackPortWrite(unsigned char Port, unsigned char Data)
 // 	}
 // }
 
-// //This captures the pointers to the MemRead8 and MemWrite8 functions. This allows the DLL to do DMA xfers with CPU ram.
+// This captures the pointers to the MemRead8 and MemWrite8 functions. This allows the DLL to do DMA xfers with CPU ram.
 
 void ADDCALL MemPointers(MEMREAD8 Temp1, MEMWRITE8 Temp2)
 {
 	MemRead8=Temp1;
 	MemWrite8=Temp2;
-	//fprintf(stderr, "MPU : MemPointers\n");
+	// fprintf(stderr, "MPU : MemPointers\n");
+	return;
+}
+
+// This captures the pointers to the MemRead8 and MemWrite8 functions. This allows the DLL to do DMA xfers with MMU ram.
+
+void ADDCALL MmuPointers(MMUREAD8 Temp1, MMUWRITE8 Temp2)
+{
+	MmuRead8=Temp1;
+	MmuWrite8=Temp2;
+	// fprintf(stderr, "MPU : MmuPointers\n");
 	return;
 }
 

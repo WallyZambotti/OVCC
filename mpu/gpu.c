@@ -33,6 +33,7 @@ static unsigned short BitsPerPixel;
 static unsigned short PixelsPerByte;
 static short PPBshift;
 static unsigned short Color;
+static unsigned char mmu[8];
 
 unsigned char pixelmasks[4][8] = 
 {
@@ -49,6 +50,8 @@ unsigned char pixelmasks[4][8] =
         0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01
     }
 };
+
+#ifdef GPU_MODE_QUEUE
 
 static void GPUsigHandler(int signo)
 {
@@ -180,6 +183,7 @@ void StopGPUqueue()
     queueActive = 0;
     pthread_cond_signal(&GPUcond);
 }
+#endif
 
 void SetScreen(unsigned short address, unsigned short width, unsigned short height, unsigned short bitsperpixel)
 {
@@ -197,6 +201,16 @@ void SetScreen(unsigned short address, unsigned short width, unsigned short heig
 
     PPBshift = -1;
     for(unsigned short int PPB = PixelsPerByte ; PPB ; PPB=PPB>>1) { PPBshift++; }
+
+    // Interegate the MMU and record the current process mmu map
+
+    unsigned char tr = (MemRead(0xFF91) & 0x01)<<3;
+    unsigned short addr = 0xFFA0 + tr;
+
+    for(short i = 0 ; i <  8 ; i++)
+    {
+        mmu[i] = MemRead(addr++);
+    }
 
     // fprintf(stderr, "SetScreen %d %d %d %d\n", PixelsPerByte, ScreenPitch, ScreenEnd, PPBshift);
 }
@@ -219,8 +233,14 @@ void SetPixel(unsigned short x, unsigned short y)
     unsigned short xmodPPB = x%PixelsPerByte;
     unsigned char pixmask = pixelmasks[PPBshift][xmodPPB];
     unsigned char pixelbyte = MemRead(pixaddr) & (pixmask^0xff);
-    pixelbyte |= Color<<(BitsPerPixel*(PixelsPerByte-xmodPPB-1));
+    // unsigned char pixelbyte2 = MmuRead(mmu[pixaddr>>15], pixaddr) & (pixmask^0xff);
+    // if (pixelbyte != pixelbyte2)
+    // {
+    //     fprintf(stderr, "(%x %x)", (int)mmu[pixaddr>>15], pixaddr & 0x1FFF);
+    // }
+    // pixelbyte |= Color<<(BitsPerPixel*(PixelsPerByte-xmodPPB-1));
     MemWrite(pixelbyte, pixaddr);
+    // MmuWrite(pixelbyte, mmu[pixaddr>>15], pixaddr);
 }
 
 void DrawLine(unsigned short x1, unsigned short y1, unsigned short x2, unsigned short y2)

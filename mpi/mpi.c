@@ -35,6 +35,8 @@ static char moduleName[4] = { "MPI" };
 static void (*AssertInt)(unsigned char,unsigned char)=NULL;
 static unsigned char (*MemRead8)(unsigned short)=NULL;
 static void (*MemWrite8)(unsigned char,unsigned short)=NULL;
+static unsigned char (*MmuRead8)(unsigned char,unsigned short)=NULL;
+static void (*MmuWrite8)(unsigned char,unsigned char,unsigned short)=NULL;
 
 static void (*PakSetCart)(unsigned char)=NULL;
 static char ModuleNames[MAXPAX][MAX_LOADSTRING]={"Empty","Empty","Empty","Empty"};	
@@ -63,6 +65,7 @@ static void (*ModuleResetCalls[MAXPAX]) (void)={NULL,NULL,NULL,NULL};
 //Set callbacks for the DLL to call
 static void (*SetInteruptCallPointerCalls[MAXPAX]) ( ASSERTINTERUPT)={NULL,NULL,NULL,NULL};
 static void (*DmaMemPointerCalls[MAXPAX]) (MEMREAD8,MEMWRITE8)={NULL,NULL,NULL,NULL};
+static void (*MmuMemPointerCalls[MAXPAX]) (MMUREAD8,MMUWRITE8)={NULL,NULL,NULL,NULL};
 
 
 void SetCartSlot0(unsigned char);
@@ -124,6 +127,17 @@ void MemWrite(unsigned char Data,unsigned short Address)
 unsigned char MemRead(unsigned short Address)
 {
 	return(MemRead8(Address));
+}
+
+void MmuWrite(unsigned char Data,unsigned char Bank,unsigned short Address)
+{
+	MmuWrite8(Data,Bank,Address);
+	return;
+}
+
+unsigned char MmuRead(unsigned char Bank,unsigned short Address)
+{
+	return(MmuRead8(Bank,Address));
 }
 
 void ADDCALL ModuleName(char *ModName, AG_MenuItem *Temp)
@@ -243,6 +257,14 @@ void ADDCALL HeartBeat(void)
 	for (Temp=0;Temp<4;Temp++)
 		if (HeartBeatCalls[Temp] != NULL)
 			HeartBeatCalls[Temp]();
+	return;
+}
+
+//This captures the pointers to the MmuRead8 and MmuWrite8 functions. This allows the DLL to do DMA xfers with MMU ram.
+void ADDCALL MmuPointers(MMUREAD8 Temp1,MMUWRITE8 Temp2)
+{
+	MmuRead8=Temp1;
+	MmuWrite8=Temp2;
 	return;
 }
 
@@ -482,6 +504,7 @@ unsigned char MountModule(unsigned char Slot,char *ModName)
 		SetInteruptCallPointerCalls[Slot]=(SETINTERUPTCALLPOINTER)SDL_LoadFunction(hinstLib[Slot], "AssertInterupt");
 
 		DmaMemPointerCalls[Slot]=(DMAMEMPOINTERS) SDL_LoadFunction(hinstLib[Slot], "MemPointers");
+		MmuMemPointerCalls[Slot]=(MMUMEMPOINTERS) SDL_LoadFunction(hinstLib[Slot], "MmuPointers");
 		SetCartCalls[Slot]=(SETCARTPOINTER) SDL_LoadFunction(hinstLib[Slot], "SetCart"); //HERE
 		
 		HeartBeatCalls[Slot]=(HEARTBEAT) SDL_LoadFunction(hinstLib[Slot], "HeartBeat");
@@ -509,6 +532,8 @@ unsigned char MountModule(unsigned char Slot,char *ModName)
 			SetInteruptCallPointerCalls[Slot](AssertInt);
 		if (DmaMemPointerCalls[Slot] !=NULL)
 			DmaMemPointerCalls[Slot](MemRead8,MemWrite8);
+		if (MmuMemPointerCalls[Slot] !=NULL)
+			MmuMemPointerCalls[Slot](MmuRead8,MmuWrite8);
 		if (SetIniPathCalls[Slot] != NULL)
 		{
 			//SetIniPathCalls[Slot](IniFile);
@@ -537,6 +562,7 @@ void UnloadModule(unsigned char Slot)
 	PakPortReadCalls[Slot]=NULL;
 	SetInteruptCallPointerCalls[Slot]=NULL;
 	DmaMemPointerCalls[Slot]=NULL;
+	MmuMemPointerCalls[Slot]=NULL;
 	HeartBeatCalls[Slot]=NULL;
 	PakMemWrite8Calls[Slot]=NULL;
 	PakMemRead8Calls[Slot]=NULL;
@@ -630,6 +656,9 @@ void ReadModuleParms(unsigned char Slot,char *String)
 
 	if (DmaMemPointerCalls[Slot]!=NULL)
 		strcat(String,"Generates DMA Requests\n");
+
+	if (MmuMemPointerCalls[Slot]!=NULL)
+		strcat(String,"Generates MMU Requests\n");
 
 	if (HeartBeatCalls[Slot]!=NULL)
 		strcat(String,"Needs Heartbeat\n");

@@ -198,6 +198,17 @@ int load_int_rom(char filename[MAX_PATH])
 }
 
 // Coco3 MMU Code
+unsigned char MmuRead8(unsigned char bank, unsigned short address)
+{
+	return MemPages[bank][address & 0x1FFF];
+}
+
+void MmuWrite8(unsigned char data, unsigned char bank, unsigned short address)
+{
+	MemPages[bank][address & 0x1FFF] = data;
+}
+
+// Coco3 MMU Code
 unsigned char MemRead8(unsigned short address)
 {
 	if (address<0xFE00)

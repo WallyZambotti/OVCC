@@ -45,13 +45,16 @@ typedef void (*PACKPORTWRITE)(unsigned char,unsigned char);
 typedef void (*ASSERTINTERUPT) (unsigned char,unsigned char);
 
 typedef unsigned char (*MEMREAD8)(unsigned short);
+typedef unsigned char (*MMUREAD8)(unsigned char,unsigned short);
 typedef void (*SETCART)(unsigned char);
 
 typedef void (*SETCARTPOINTER)(SETCART);
 typedef void (*MEMWRITE8)(unsigned char,unsigned short);
+typedef void (*MMUWRITE8)(unsigned char,unsigned char,unsigned short);
 typedef void (*MODULESTATUS)(char *);
 
 typedef void (*DMAMEMPOINTERS) ( MEMREAD8,MEMWRITE8);
+typedef void (*MMUMEMPOINTERS) ( MMUREAD8,MMUWRITE8);
 typedef void (*SETINTERUPTCALLPOINTER) (ASSERTINTERUPT);
 typedef unsigned short (*MODULEAUDIOSAMPLE)(void);
 typedef void (*MODULERESET)(void);
