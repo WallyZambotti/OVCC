@@ -33,7 +33,7 @@ static unsigned short BitsPerPixel;
 static unsigned short PixelsPerByte;
 static short PPBshift;
 static unsigned short Color;
-static unsigned char mmu[8];
+static unsigned char taskmmubank[8];
 
 unsigned char pixelmasks[4][8] = 
 {
@@ -68,7 +68,7 @@ void *ProcessGPUqueue(void *ptr)
     sigaddset(&sigmask, SIGUSR1);        /* to unblock SIGUSR1 */  
     pthread_sigmask(SIG_UNBLOCK, &sigmask, NULL);
 
-    fprintf(stderr, "GPU queue alive\n");
+    // fprintf(stderr, "GPU queue alive\n");
 
     while(queueActive)
     {
@@ -202,14 +202,14 @@ void SetScreen(unsigned short address, unsigned short width, unsigned short heig
     PPBshift = -1;
     for(unsigned short int PPB = PixelsPerByte ; PPB ; PPB=PPB>>1) { PPBshift++; }
 
-    // Interegate the MMU and record the current process mmu map
+    // Interegate the taskmmubank and record the current process taskmmubank map
 
     unsigned char tr = (MemRead(0xFF91) & 0x01)<<3;
     unsigned short addr = 0xFFA0 + tr;
 
     for(short i = 0 ; i <  8 ; i++)
     {
-        mmu[i] = MemRead(addr++);
+        taskmmubank[i] = MemRead(addr++);
     }
 
     // fprintf(stderr, "SetScreen %d %d %d %d\n", PixelsPerByte, ScreenPitch, ScreenEnd, PPBshift);
@@ -230,17 +230,14 @@ void SetPixel(unsigned short x, unsigned short y)
         // write(0, "?", 1);
         return;
     }
+    unsigned short bankidx = pixaddr>>13;
     unsigned short xmodPPB = x%PixelsPerByte;
     unsigned char pixmask = pixelmasks[PPBshift][xmodPPB];
-    unsigned char pixelbyte = MemRead(pixaddr) & (pixmask^0xff);
-    // unsigned char pixelbyte2 = MmuRead(mmu[pixaddr>>15], pixaddr) & (pixmask^0xff);
-    // if (pixelbyte != pixelbyte2)
-    // {
-    //     fprintf(stderr, "(%x %x)", (int)mmu[pixaddr>>15], pixaddr & 0x1FFF);
-    // }
-    // pixelbyte |= Color<<(BitsPerPixel*(PixelsPerByte-xmodPPB-1));
-    MemWrite(pixelbyte, pixaddr);
-    // MmuWrite(pixelbyte, mmu[pixaddr>>15], pixaddr);
+    // unsigned char pixelbyte = MemRead(pixaddr) & (pixmask^0xff);
+    unsigned char pixelbyte = MmuRead(taskmmubank[bankidx], pixaddr) & (pixmask^0xff);
+    pixelbyte |= Color<<(BitsPerPixel*(PixelsPerByte-xmodPPB-1));
+    // MemWrite(pixelbyte, pixaddr);
+    MmuWrite(pixelbyte, taskmmubank[bankidx], pixaddr);
 }
 
 void DrawLine(unsigned short x1, unsigned short y1, unsigned short x2, unsigned short y2)

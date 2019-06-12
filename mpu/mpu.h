@@ -34,6 +34,10 @@ extern "C"
 {
 #endif
 
+#ifndef GPU_MODE_QUEUE
+#define GPU_MODE_QUEUE
+#endif
+
 void ADDCALL ModuleName(char *, AG_MenuItem *);
 void ADDCALL ModuleConfig(unsigned char);
 void ADDCALL PackPortWrite(unsigned char, unsigned char);

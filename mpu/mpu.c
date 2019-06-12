@@ -173,11 +173,7 @@ void ExecuteCommand(unsigned char cmd)
 		break;
 
 		case CMD_SetScreen:
-#ifdef GPU_MODE_QUEUE
-			QueueGPUrequest(cmd, Params[0], Params[1], Params[2], Params[3]);
-#else			
 			SetScreen(Params[0], Params[1], Params[2], Params[3]);
-#endif
 		break;
 
 		case CMD_SetColor:
