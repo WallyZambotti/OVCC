@@ -61,6 +61,8 @@ enum Registers
 	REG_Param2L,
 	REG_Param3H,
 	REG_Param3L,
+	REG_Param4H,
+	REG_Param4L,
 	REG_ParamCnt
 };
 
@@ -200,6 +202,11 @@ void ExecuteCommand(unsigned char cmd)
 #endif
 		break;
 
+		case CMD_NewTexture:
+			fprintf(stderr, "param 3 %d\n", Params[3]>>8);
+			NewTexture(Params[0], Params[1], Params[2], (unsigned short)(Params[3]>>8));
+		break;
+
 		default:
 			fprintf(stderr, "MPU : uknown command %d\n", cmd);
 		break;
@@ -307,6 +314,8 @@ void ADDCALL PackPortWrite(unsigned char Port, unsigned char Data)
 		case REG_Param2L:
 		case REG_Param3H:
 		case REG_Param3L:
+		case REG_Param4H:
+		case REG_Param4L:
 		{
 			int idx = (Port-BaseAddr-1)^1;
 			*((unsigned char*)Params+(idx)) = Data;

@@ -51,6 +51,18 @@ unsigned char pixelmasks[4][8] =
     }
 };
 
+unsigned short int ReadCoCo2int(unsigned short int address)
+{
+    return MemRead(address)<<8 | MemRead(address+1);
+}
+
+void WriteCoCoint(unsigned short int address, unsigned short int data)
+{
+	MemWrite(data>>8, address);
+	MemWrite(data & 0xff, address+1);
+}
+
+
 #ifdef GPU_MODE_QUEUE
 
 static void GPUsigHandler(int signo)
@@ -232,9 +244,9 @@ void SetPixel(unsigned short x, unsigned short y)
     }
     unsigned short bankidx = pixaddr>>13;
     unsigned short xmodPPB = x%PixelsPerByte;
-    unsigned char pixmask = pixelmasks[PPBshift][xmodPPB];
+    unsigned char  pixmask = pixelmasks[PPBshift][xmodPPB];
     // unsigned char pixelbyte = MemRead(pixaddr) & (pixmask^0xff);
-    unsigned char pixelbyte = MmuRead(taskmmubank[bankidx], pixaddr) & (pixmask^0xff);
+    unsigned char  pixelbyte = MmuRead(taskmmubank[bankidx], pixaddr) & (pixmask^0xff);
     pixelbyte |= Color<<(BitsPerPixel*(PixelsPerByte-xmodPPB-1));
     // MemWrite(pixelbyte, pixaddr);
     MmuWrite(pixelbyte, taskmmubank[bankidx], pixaddr);
@@ -257,7 +269,8 @@ void DrawLine(unsigned short x1, unsigned short y1, unsigned short x2, unsigned 
 		d = dy*2 - dx;
 		inc1 = dy*2;
 		inc2 = (dy-dx)*2;
-		if (x1 > x2) { x = x2; y = y2; yDir = -1; xEnd = x1; } else { x = x1; y = y1; yDir = 1; xEnd = x2; }
+		if (x1 > x2) { x = x2; y = y2; yDir = -1; xEnd = x1; } 
+        else { x = x1; y = y1; yDir = 1; xEnd = x2; }
 		SetPixel(x, y);
 
 		if (((y2-y1)*yDir) > 0) {
@@ -306,4 +319,120 @@ void DrawLine(unsigned short x1, unsigned short y1, unsigned short x2, unsigned 
 			}
 		}
 	}
+}
+
+struct _Texture
+{
+    unsigned short  id;
+    unsigned short  w, h, pitch, bitmapsize;
+    unsigned short  ppb, bpp, transparencyActive;
+    unsigned char   tranparencyColor, *bitmap;
+    struct _Texture *nextTexture;
+};
+
+typedef struct _Texture Texture;
+
+static Texture *FirstTexture = NULL, *LastTexture = NULL;
+static unsigned short currentID;
+
+void NewTexture(unsigned short idref, unsigned short w, unsigned short h, unsigned short bpp)
+{
+    Texture *NewTexture;
+
+    if (LastTexture == NULL)
+    {
+        NewTexture = LastTexture = FirstTexture = malloc(sizeof(Texture));
+    }
+    else
+    {
+        NewTexture = LastTexture = LastTexture->nextTexture = malloc(sizeof(Texture));
+    }
+
+    NewTexture->id = ++currentID;
+    NewTexture->w = w;
+    NewTexture->h = h;
+    NewTexture->bpp = bpp;
+    NewTexture->ppb = 8 / bpp;
+    NewTexture->pitch = w / NewTexture->ppb;
+    NewTexture->bitmapsize = NewTexture->pitch * h;
+    NewTexture->tranparencyColor = 0;
+    NewTexture->transparencyActive = 0;
+    NewTexture->bitmap = malloc(NewTexture->bitmapsize);
+    NewTexture->nextTexture = NULL;
+
+    // return the id to the caller
+
+    WriteCoCoint(idref, NewTexture->id);
+}
+
+Texture *FindTexture(unsigned short id)
+{
+    for(Texture *texture = FirstTexture ; texture != NULL ; texture = texture->nextTexture)
+    {
+        if (texture->id == id) return texture;
+    }
+
+    return NULL;
+}
+
+void SetTextureTransparency(unsigned short id, unsigned short transparency, unsigned short color)
+{
+    Texture *texture = FindTexture(id);
+
+    if (texture == NULL) return;
+
+    texture->transparencyActive = transparency;
+    texture->tranparencyColor = color;
+}
+
+Texture *FindTexturePlusPrevious(unsigned short id, Texture **previous)
+{
+    *previous = NULL;
+
+    for(Texture *texture = FirstTexture ; texture != NULL ; texture = texture->nextTexture)
+    {
+        if (texture->id == id) return texture;
+        *previous = texture;
+    }
+
+    *previous = NULL;
+    return NULL;
+}
+
+void DestroyTexture(unsigned short int id)
+{
+    Texture *previous;
+    Texture *texture = FindTexturePlusPrevious(id, &previous);
+
+    if (texture == NULL) return;
+
+    if (previous != NULL) 
+    {
+        previous->nextTexture = texture->nextTexture;
+    }
+    else
+    {
+        FirstTexture = texture->nextTexture;
+    }
+    
+    if (texture->nextTexture == NULL)
+    {
+        LastTexture = previous;
+    }
+
+    free(texture->bitmap);
+    free(texture);
+}
+
+void LoadTexture(unsigned short id, unsigned short memaddr)
+{
+    Texture *texture = FindTexture(id);
+
+    if (texture == NULL) return;
+
+    for (unsigned short int i = 0 ; i < texture->bitmapsize ; i++)
+    {
+        unsigned short bankidx = memaddr>>13;
+        texture->bitmap[i] = MmuRead(taskmmubank[bankidx], memaddr++);
+    }
 }

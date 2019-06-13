@@ -86,7 +86,7 @@ void SetScreen(unsigned short, unsigned short, unsigned short, unsigned short);
 void SetColor(unsigned short );
 void SetPixel(unsigned short, unsigned short);
 void DrawLine(unsigned short, unsigned short, unsigned short, unsigned short);
-
+void NewTexture(unsigned short, unsigned short, unsigned short, unsigned short);
 
 enum Commands
 {
@@ -113,7 +113,8 @@ enum Commands
 	CMD_SetScreen = 64,
 	CMD_SetColor,
 	CMD_SetPixel,
-	CMD_DrawLine
+	CMD_DrawLine,
+	CMD_NewTexture
 };
 
 
