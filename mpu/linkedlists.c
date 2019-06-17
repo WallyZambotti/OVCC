@@ -19,7 +19,7 @@ LinkedListItem *AppendListItem(LinkedList *list, LinkedListItem *item)
     }
     else
     {
-        list->ListTail = item;
+        list->ListTail = list->ListTail->nextItem = item;
     }
 
     list->itemCnt++;
@@ -85,10 +85,13 @@ LinkedListItem *RemovelistItem(LinkedList *list, unsigned int id)
     return item;
 }
 
-void RemoveListHead(LinkedList *list)
+LinkedListItem *RemoveListHead(LinkedList *list)
 {
-    if (list == NULL || list->ListHead == NULL) return;
+    if (list == NULL) return NULL;
+    LinkedListItem *item = list->ListHead;
+    if (item == NULL) return NULL;
     list->ListHead = list->ListHead->nextItem;
     list->itemCnt--;
     if (list->ListHead == NULL) list->ListTail = NULL;
+    return item;
 }

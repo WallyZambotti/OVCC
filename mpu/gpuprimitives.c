@@ -1,4 +1,5 @@
 #include "mpu.h"
+#include "gpu.h"
 #include "gpuprimitives.h"
 #include "linkedlists.h"
 
@@ -56,13 +57,14 @@ void NewScreen(unsigned short idref, unsigned short address, unsigned short widt
     }
 
     // fprintf(stderr, "NewScreen %d %d %d %d\n", PixelsPerByte, ScreenPitch, ScreenEnd, PPBshift);
+    // ReportQueue();
 
     WriteCoCoInt(idref, (unsigned short)NewScreen->id);
 }
 
 void DestroyScreen(unsigned short int id)
 {
-    fprintf(stderr, "DestroyScreen %d\n", id);
+    // fprintf(stderr, "DestroyScreen %d\n", id);
 
     Screen *screen = (Screen*)RemovelistItem(&ScreenList, (unsigned int)id);
 

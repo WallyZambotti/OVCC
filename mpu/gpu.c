@@ -50,12 +50,12 @@ void *ProcessGPUqueue(void *ptr)
         while(QueueList.ListHead != NULL)
         {
             QueueRequest *request = (QueueRequest*)(QueueList.ListHead);
-			if (request->cmd == 65) fprintf(stderr, "Found DestroyScreen\n");
+			//if (request->cmd == 65) fprintf(stderr, "Found DestroyScreen\n");
             switch (request->cmd)
             {
-                case CMD_NewScreen:
-                    NewScreen(request->p1, request->p2, request->p3, request->p4, request->p5);
-                break;
+                // case CMD_NewScreen:
+                //     NewScreen(request->p1, request->p2, request->p3, request->p4, request->p5);
+                // break;
 
                 case CMD_DestroyScreen:
 			        //fprintf(stderr, "Calling DestroyScreen\n");
@@ -78,6 +78,7 @@ void *ProcessGPUqueue(void *ptr)
                     fprintf(stderr, "GPU : uknown command %d\n", request->cmd);
                 break;
             }
+            //if (request->cmd == 65) { fprintf(stderr, "Removing 65\n"); }
             RemoveGPUrequest(request);
         }
 
@@ -112,18 +113,19 @@ void QueueGPUrequest(unsigned char cmd, unsigned short p1, unsigned short p2, un
     // Only wake the GPU thread if it is asleep
     pthread_cond_signal(&GPUcond);
 
-    if (cmd == 65) 
-    {
-        fprintf(stderr, "Queued 65 %d\n", QueueList.itemCnt);
-    }
+    // if (cmd == 65) 
+    // {
+    //     fprintf(stderr, "Queued 65 %d\n", QueueList.itemCnt);
+    // }
 }
 
 void RemoveGPUrequest(QueueRequest *queueRequest)
 {
     if (queueRequest == NULL) return;
     pthread_mutex_lock(&GPUlock);
-    RemoveListHead(&QueueList);
+    QueueRequest *request = (QueueRequest*)RemoveListHead(&QueueList);
     pthread_mutex_unlock(&GPUlock);
+    if (queueRequest != request) { fprintf(stderr, "Queue head not = request\n");}
     free(queueRequest);
     //write(0, "-", 1);
 }
@@ -152,3 +154,8 @@ void StopGPUqueue()
     pthread_cond_signal(&GPUcond);
 }
 #endif
+
+void ReportQueue()
+{
+    fprintf(stderr, "GPU Queue depth %d\n", QueueList.itemCnt);
+}

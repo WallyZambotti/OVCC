@@ -12,3 +12,4 @@ typedef union Data IEEE754data;
 void QueueGPUrequest(unsigned char, unsigned short, unsigned short, unsigned short, unsigned short, unsigned short);
 void StartGPUQueue();
 void StopGPUqueue();
+void ReportQueue();

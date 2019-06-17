@@ -21,4 +21,4 @@ LinkedListItem *AppendListItem(LinkedList *, LinkedListItem *);
 LinkedListItem *FindListItemPlusPrevious(LinkedList *, unsigned int, LinkedListItem **);
 LinkedListItem *FindListItem(LinkedList *, unsigned int);
 LinkedListItem *RemovelistItem(LinkedList *, unsigned int);
-void RemoveListHead(LinkedList *);
+LinkedListItem *RemoveListHead(LinkedList *);
