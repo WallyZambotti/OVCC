@@ -2,6 +2,9 @@
 #include <signal.h>
 #include <pthread.h>
 #include "mpu.h"
+#include "gpu.h"
+#include "gpuprimitives.h"
+#include "linkedlists.h"
 
 static pthread_t GPUthread;
 static pthread_mutex_t GPUlock;
@@ -10,58 +13,18 @@ static pthread_mutex_t condLock;
 
 struct _queueEntry
 {
-    unsigned char cmd;
-    unsigned short p1, p2, p3, p4;
+    unsigned int id;
     struct _queueEntry *nextEntry;
+    unsigned char cmd;
+    unsigned short p1, p2, p3, p4, p5;
 };
 
 typedef struct _queueEntry QueueRequest;
 
-static QueueRequest *GPUqueue = NULL;
-static QueueRequest *GPUqueueEnd = NULL;
+static LinkedList QueueList = { NULL, NULL, 0 };
 
 static short int queueActive = 1;
-static int queueDepth = 0;
 static short int queueProcessing = 1;
-
-static unsigned short ScreenAddress;
-static unsigned short ScreenWidth;
-static unsigned short ScreenPitch;
-static unsigned short ScreenHeight;
-static unsigned short ScreenEnd;
-static unsigned short BitsPerPixel;
-static unsigned short PixelsPerByte;
-static short PPBshift;
-static unsigned short Color;
-static unsigned char taskmmubank[8];
-
-unsigned char pixelmasks[4][8] = 
-{
-    {
-        0xff
-    },
-    {
-        0xf0, 0x0f
-    },
-    {
-        0xC0, 0x30, 0x0c, 0x03
-    },
-    {
-        0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01
-    }
-};
-
-unsigned short int ReadCoCo2int(unsigned short int address)
-{
-    return MemRead(address)<<8 | MemRead(address+1);
-}
-
-void WriteCoCoint(unsigned short int address, unsigned short int data)
-{
-	MemWrite(data>>8, address);
-	MemWrite(data & 0xff, address+1);
-}
-
 
 #ifdef GPU_MODE_QUEUE
 
@@ -84,31 +47,38 @@ void *ProcessGPUqueue(void *ptr)
 
     while(queueActive)
     {
-        while(GPUqueue != NULL)
+        while(QueueList.ListHead != NULL)
         {
-            switch (GPUqueue->cmd)
+            QueueRequest *request = (QueueRequest*)(QueueList.ListHead);
+			if (request->cmd == 65) fprintf(stderr, "Found DestroyScreen\n");
+            switch (request->cmd)
             {
-                case CMD_SetScreen:
-                    SetScreen(GPUqueue->p1, GPUqueue->p2, GPUqueue->p3, GPUqueue->p4);
+                case CMD_NewScreen:
+                    NewScreen(request->p1, request->p2, request->p3, request->p4, request->p5);
+                break;
+
+                case CMD_DestroyScreen:
+			        //fprintf(stderr, "Calling DestroyScreen\n");
+                    DestroyScreen(request->p1);
                 break;
 
                 case CMD_SetColor:
-                    SetColor(GPUqueue->p1);
+                    SetColor(request->p1, request->p2);
                 break;
 
                 case CMD_SetPixel:
-                    SetPixel(GPUqueue->p1, GPUqueue->p2);
+                    SetPixel(request->p1, request->p2, request->p3);
                 break;
 
                 case CMD_DrawLine:
-                    DrawLine(GPUqueue->p1, GPUqueue->p2, GPUqueue->p3, GPUqueue->p4);
+                    DrawLine(request->p1, request->p2, request->p3, request->p4, request->p5);
                 break;
 
                 default:
-                    fprintf(stderr, "GPU : uknown command %d\n", GPUqueue->cmd);
+                    fprintf(stderr, "GPU : uknown command %d\n", request->cmd);
                 break;
             }
-            RemoveGPUrequest(GPUqueue);
+            RemoveGPUrequest(request);
         }
 
         //write(0, ">", 1);
@@ -121,52 +91,38 @@ void *ProcessGPUqueue(void *ptr)
     // write(2, "GPU stopped\n", 12);
 }
 
-void QueueGPUrequest(unsigned char cmd, unsigned short p1, unsigned short p2, unsigned short p3, unsigned short p4)
+void QueueGPUrequest(unsigned char cmd, unsigned short p1, unsigned short p2, unsigned short p3, unsigned short p4, unsigned short p5)
 {
     QueueRequest *newGPUrequest = malloc(sizeof(QueueRequest));
+
+    //if (cmd == 65) { fprintf(stderr, "Queue received a Destroy Screen\n");}
 
     newGPUrequest->cmd = cmd;
     newGPUrequest->p1 = p1;
     newGPUrequest->p2 = p2;
     newGPUrequest->p3 = p3;
     newGPUrequest->p4 = p4;
+    newGPUrequest->p5 = p5;
     newGPUrequest->nextEntry = NULL;
 
     pthread_mutex_lock(&GPUlock);
-
-    if (GPUqueue == NULL)
-    {
-        GPUqueue = GPUqueueEnd = newGPUrequest;
-    }
-    else
-    {
-        GPUqueueEnd->nextEntry = newGPUrequest;
-        GPUqueueEnd = newGPUrequest;
-    }
-
-    queueDepth++;
+    AppendListItem(&QueueList, (LinkedListItem*)newGPUrequest);
     pthread_mutex_unlock(&GPUlock);
 
     // Only wake the GPU thread if it is asleep
     pthread_cond_signal(&GPUcond);
-    // write(0, "+", 1);
+
+    if (cmd == 65) 
+    {
+        fprintf(stderr, "Queued 65 %d\n", QueueList.itemCnt);
+    }
 }
 
 void RemoveGPUrequest(QueueRequest *queueRequest)
 {
-    if (queueRequest == NULL)
-    {
-        write(2, "Remove null\n", 12);
-        return;
-    }
-    if (queueDepth == 0)
-    {
-        write(2, "Remove empty\n", 12);
-        return;
-    }
+    if (queueRequest == NULL) return;
     pthread_mutex_lock(&GPUlock);
-    GPUqueue = queueRequest->nextEntry;
-    queueDepth--;
+    RemoveListHead(&QueueList);
     pthread_mutex_unlock(&GPUlock);
     free(queueRequest);
     //write(0, "-", 1);
@@ -196,243 +152,3 @@ void StopGPUqueue()
     pthread_cond_signal(&GPUcond);
 }
 #endif
-
-void SetScreen(unsigned short address, unsigned short width, unsigned short height, unsigned short bitsperpixel)
-{
-    // fprintf(stderr, "SetScreen %x %d %d %d\n", address, width, height, bitsperpixel);
-
-    if (bitsperpixel == 0) return ;
-
-    ScreenAddress = address;
-    ScreenWidth  = width;
-    ScreenHeight = height;
-    BitsPerPixel = bitsperpixel;
-    PixelsPerByte = (8 / BitsPerPixel);
-    ScreenPitch = width / PixelsPerByte;
-    ScreenEnd = ScreenAddress + (ScreenPitch * ScreenHeight);
-
-    PPBshift = -1;
-    for(unsigned short int PPB = PixelsPerByte ; PPB ; PPB=PPB>>1) { PPBshift++; }
-
-    // Interegate the taskmmubank and record the current process taskmmubank map
-
-    unsigned char tr = (MemRead(0xFF91) & 0x01)<<3;
-    unsigned short addr = 0xFFA0 + tr;
-
-    for(short i = 0 ; i <  8 ; i++)
-    {
-        taskmmubank[i] = MemRead(addr++);
-    }
-
-    // fprintf(stderr, "SetScreen %d %d %d %d\n", PixelsPerByte, ScreenPitch, ScreenEnd, PPBshift);
-}
-
-void SetColor(unsigned short color)
-{
-    // fprintf(stderr, "SetColor %d\n", color);
-    Color = color;
-}
-
-void SetPixel(unsigned short x, unsigned short y)
-{
-    // fprintf(stderr, "SetPixel %d %d\n", x, y);
-    unsigned short pixaddr = ScreenAddress + (y * ScreenPitch) + (x>>PPBshift);
-    if (pixaddr < ScreenAddress || pixaddr > ScreenEnd) 
-    {
-        // write(0, "?", 1);
-        return;
-    }
-    unsigned short bankidx = pixaddr>>13;
-    unsigned short xmodPPB = x%PixelsPerByte;
-    unsigned char  pixmask = pixelmasks[PPBshift][xmodPPB];
-    // unsigned char pixelbyte = MemRead(pixaddr) & (pixmask^0xff);
-    unsigned char  pixelbyte = MmuRead(taskmmubank[bankidx], pixaddr) & (pixmask^0xff);
-    pixelbyte |= Color<<(BitsPerPixel*(PixelsPerByte-xmodPPB-1));
-    // MemWrite(pixelbyte, pixaddr);
-    MmuWrite(pixelbyte, taskmmubank[bankidx], pixaddr);
-}
-
-void DrawLine(unsigned short x1, unsigned short y1, unsigned short x2, unsigned short y2)
-{
-    // fprintf(stderr, "DrawLine %x %d %d %d\n", x1, y1, x2, y2);
-	int dx, dy;
-	int inc1, inc2;
-	int x, y, d;
-	int xEnd, yEnd;
-	int xDir, yDir;
-	
-	dx = abs(x2 - x1);
-	dy = abs(y2 - y1);
-
-	if (dy <= dx) 
-    {
-		d = dy*2 - dx;
-		inc1 = dy*2;
-		inc2 = (dy-dx)*2;
-		if (x1 > x2) { x = x2; y = y2; yDir = -1; xEnd = x1; } 
-        else { x = x1; y = y1; yDir = 1; xEnd = x2; }
-		SetPixel(x, y);
-
-		if (((y2-y1)*yDir) > 0) {
-			while (x < xEnd) 
-            {
-				x++;
-				if (d < 0) { d += inc1; } else { y++; d += inc2; }
-				SetPixel(x, y);
-			}
-		} 
-        else 
-        {
-			while (x < xEnd) 
-            {
-				x++;
-				if (d < 0) { d += inc1; } else { y--; d += inc2; }
-				SetPixel(x, y);
-			}
-		}		
-	} 
-    else 
-    {
-		d = dx*2 - dy;
-		inc1 = dx*2;
-		inc2 = (dx-dy)*2;
-		if (y1 > y2) { y = y2; x = x2; yEnd = y1; xDir = -1; } 
-        else { y = y1; x = x1; yEnd = y2; xDir = 1; }
-		SetPixel(x, y);
-
-		if (((x2-x1)*xDir) > 0) 
-        {
-			while (y < yEnd) 
-            {
-				y++;
-				if (d < 0) { d += inc1; } else { x++; d += inc2; }
-				SetPixel(x, y);
-			}
-		} 
-        else 
-        {
-			while (y < yEnd) 
-            {
-				y++;
-				if (d < 0) { d += inc1; } else { x--; d += inc2; }
-				SetPixel(x, y);
-			}
-		}
-	}
-}
-
-struct _Texture
-{
-    unsigned short  id;
-    unsigned short  w, h, pitch, bitmapsize;
-    unsigned short  ppb, bpp, transparencyActive;
-    unsigned char   tranparencyColor, *bitmap;
-    struct _Texture *nextTexture;
-};
-
-typedef struct _Texture Texture;
-
-static Texture *FirstTexture = NULL, *LastTexture = NULL;
-static unsigned short currentID;
-
-void NewTexture(unsigned short idref, unsigned short w, unsigned short h, unsigned short bpp)
-{
-    Texture *NewTexture;
-
-    if (LastTexture == NULL)
-    {
-        NewTexture = LastTexture = FirstTexture = malloc(sizeof(Texture));
-    }
-    else
-    {
-        NewTexture = LastTexture = LastTexture->nextTexture = malloc(sizeof(Texture));
-    }
-
-    NewTexture->id = ++currentID;
-    NewTexture->w = w;
-    NewTexture->h = h;
-    NewTexture->bpp = bpp;
-    NewTexture->ppb = 8 / bpp;
-    NewTexture->pitch = w / NewTexture->ppb;
-    NewTexture->bitmapsize = NewTexture->pitch * h;
-    NewTexture->tranparencyColor = 0;
-    NewTexture->transparencyActive = 0;
-    NewTexture->bitmap = malloc(NewTexture->bitmapsize);
-    NewTexture->nextTexture = NULL;
-
-    // return the id to the caller
-
-    WriteCoCoint(idref, NewTexture->id);
-}
-
-Texture *FindTexture(unsigned short id)
-{
-    for(Texture *texture = FirstTexture ; texture != NULL ; texture = texture->nextTexture)
-    {
-        if (texture->id == id) return texture;
-    }
-
-    return NULL;
-}
-
-void SetTextureTransparency(unsigned short id, unsigned short transparency, unsigned short color)
-{
-    Texture *texture = FindTexture(id);
-
-    if (texture == NULL) return;
-
-    texture->transparencyActive = transparency;
-    texture->tranparencyColor = color;
-}
-
-Texture *FindTexturePlusPrevious(unsigned short id, Texture **previous)
-{
-    *previous = NULL;
-
-    for(Texture *texture = FirstTexture ; texture != NULL ; texture = texture->nextTexture)
-    {
-        if (texture->id == id) return texture;
-        *previous = texture;
-    }
-
-    *previous = NULL;
-    return NULL;
-}
-
-void DestroyTexture(unsigned short int id)
-{
-    Texture *previous;
-    Texture *texture = FindTexturePlusPrevious(id, &previous);
-
-    if (texture == NULL) return;
-
-    if (previous != NULL) 
-    {
-        previous->nextTexture = texture->nextTexture;
-    }
-    else
-    {
-        FirstTexture = texture->nextTexture;
-    }
-    
-    if (texture->nextTexture == NULL)
-    {
-        LastTexture = previous;
-    }
-
-    free(texture->bitmap);
-    free(texture);
-}
-
-void LoadTexture(unsigned short id, unsigned short memaddr)
-{
-    Texture *texture = FindTexture(id);
-
-    if (texture == NULL) return;
-
-    for (unsigned short int i = 0 ; i < texture->bitmapsize ; i++)
-    {
-        unsigned short bankidx = memaddr>>13;
-        texture->bitmap[i] = MmuRead(taskmmubank[bankidx], memaddr++);
-    }
-}

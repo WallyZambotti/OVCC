@@ -26,6 +26,8 @@ typedef int BOOL;
 #include "fileops.h"
 #include "defines.h"
 #include "mpu.h"
+#include "fpu.h"
+#include "gpu.h"
 
 #define GPU_Nil_Arg ((unsigned short)0)
 
@@ -46,7 +48,7 @@ static void SaveConfig(void);
 static void BuildMenu(void);
 static void UpdateMenu(void);
 
-#define MAX_PARAMS 4
+#define MAX_PARAMS 5
 
 unsigned char BaseAddr = 0x60;
 
@@ -174,13 +176,23 @@ void ExecuteCommand(unsigned char cmd)
 			dtof(Params[0], Params[1]);
 		break;
 
-		case CMD_SetScreen:
-			SetScreen(Params[0], Params[1], Params[2], Params[3]);
+		case CMD_NewScreen:
+			NewScreen(Params[0], Params[1], Params[2], Params[3], Params[4]);
+		break;
+
+		case CMD_DestroyScreen:
+#ifdef GPU_MODE_QUEUE
+			//fprintf(stderr, "Queue Destroy Screen\n");
+			QueueGPUrequest(cmd, Params[0], GPU_Nil_Arg, GPU_Nil_Arg, GPU_Nil_Arg, GPU_Nil_Arg);
+			//fprintf(stderr, "Return Queuing\n");
+#else			
+			DestroyScreen(Params[0]);
+#endif
 		break;
 
 		case CMD_SetColor:
 #ifdef GPU_MODE_QUEUE
-			QueueGPUrequest(cmd, Params[0], GPU_Nil_Arg, GPU_Nil_Arg, GPU_Nil_Arg);
+			QueueGPUrequest(cmd, Params[0], Params[1], GPU_Nil_Arg, GPU_Nil_Arg, GPU_Nil_Arg);
 #else			
 			SetColor(Params[0]);
 #endif
@@ -188,7 +200,7 @@ void ExecuteCommand(unsigned char cmd)
 
 		case CMD_SetPixel:
 #ifdef GPU_MODE_QUEUE
-			QueueGPUrequest(cmd, Params[0], Params[1], GPU_Nil_Arg, GPU_Nil_Arg);
+			QueueGPUrequest(cmd, Params[0], Params[1], Params[2], GPU_Nil_Arg, GPU_Nil_Arg);
 #else			
 			SetPixel(Params[0], Params[1]);
 #endif
@@ -196,7 +208,7 @@ void ExecuteCommand(unsigned char cmd)
 
 		case CMD_DrawLine:
 #ifdef GPU_MODE_QUEUE
-				QueueGPUrequest(cmd, Params[0], Params[1], Params[2], Params[3]);
+				QueueGPUrequest(cmd, Params[0], Params[1], Params[2], Params[3], Params[4]);
 #else			
 				DrawLine(Params[0], Params[1], Params[2], Params[3]);
 #endif
