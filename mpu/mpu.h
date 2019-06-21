@@ -38,23 +38,28 @@ extern "C"
 #define GPU_MODE_QUEUE
 #endif
 
+typedef unsigned short ushort;
+typedef unsigned char uchar;
+typedef unsigned short* pushort;
+typedef unsigned char* puchar;
+
 void ADDCALL ModuleName(char *, AG_MenuItem *);
-void ADDCALL ModuleConfig(unsigned char);
-void ADDCALL PackPortWrite(unsigned char, unsigned char);
-unsigned char ADDCALL PackPortRead(unsigned char);
-typedef unsigned char (*MEMREAD8)(unsigned short);
-typedef void (*MEMWRITE8)(unsigned char,unsigned short);
-typedef unsigned char (*MMUREAD8)(unsigned char,unsigned short);
-typedef void (*MMUWRITE8)(unsigned char,unsigned char,unsigned short);
+void ADDCALL ModuleConfig(uchar);
+void ADDCALL PackPortWrite(uchar, uchar);
+unsigned char ADDCALL PackPortRead(uchar);
+typedef unsigned char (*MEMREAD8)(ushort);
+typedef void (*MEMWRITE8)(uchar, ushort);
+typedef unsigned char (*MMUREAD8)(uchar, ushort);
+typedef void (*MMUWRITE8)(uchar, uchar, ushort);
 void ADDCALL MemPointers(MEMREAD8, MEMWRITE8);
 void ADDCALL MmuPointers(MMUREAD8, MMUWRITE8);
-unsigned char ADDCALL PakMemRead8 (unsigned short);
+unsigned char ADDCALL PakMemRead8(ushort);
 void ADDCALL ModuleStatus (char *);
 //void ADDCALL SetIniPath (char *);
-unsigned char MemRead(unsigned short);
-void MemWrite(unsigned char, unsigned short);
-void MmuWrite(unsigned char,unsigned char,unsigned short );
-unsigned char MmuRead(unsigned char,unsigned short );
+unsigned char MemRead(ushort);
+void MemWrite(uchar, ushort);
+void MmuWrite(uchar, uchar, ushort);
+unsigned char MmuRead(uchar, ushort);
 
 #ifdef __cplusplus
 } // __cplusplus defined.
@@ -87,7 +92,11 @@ enum Commands
 	CMD_SetColor,
 	CMD_SetPixel,
 	CMD_DrawLine,
-	CMD_NewTexture
+	CMD_NewTexture,
+	CMD_DestroyTexture,
+	CMD_SetTextureTransparency,
+	CMD_LoadTexture,
+	CMD_RenderTexture
 };
 
 

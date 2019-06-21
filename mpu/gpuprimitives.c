@@ -7,22 +7,6 @@ LinkedList ScreenList = { NULL, NULL, 0 };
 
 static unsigned short currentID;
 
-unsigned char pixelmasks[4][8] = 
-{
-    {
-        0xff
-    },
-    {
-        0xf0, 0x0f
-    },
-    {
-        0xC0, 0x30, 0x0c, 0x03
-    },
-    {
-        0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01
-    }
-};
-
 void NewScreen(unsigned short idref, unsigned short address, unsigned short width, unsigned short height, unsigned short bitsperpixel)
 {
     // fprintf(stderr, "NewScreen %x %d %d %d\n", address, width, height, bitsperpixel);
@@ -90,6 +74,14 @@ void SetColor(unsigned short screenid, unsigned short color)
     Screen *screen = (Screen*)FindListItem(&ScreenList,  (unsigned int)screenid);
 
     if (screen == NULL) return;
+
+    // fprintf(stderr, "SetColor %d\n", color);
+    screen->Color = color;
+}
+
+void SetScreenColor(Screen *screen, unsigned short color)
+{
+    if (screen == NULL) { return; }
 
     // fprintf(stderr, "SetColor %d\n", color);
     screen->Color = color;

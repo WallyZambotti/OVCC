@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdarg.h>
 #include <signal.h>
 #include <pthread.h>
 #include "mpu.h"
@@ -16,7 +17,8 @@ struct _queueEntry
     unsigned int id;
     struct _queueEntry *nextEntry;
     unsigned char cmd;
-    unsigned short p1, p2, p3, p4, p5;
+    unsigned short i1, i2, i3, i4, i5, i6, i7;
+    void *p1, *p2, *p3, *p4, *p5, *p6, *p7;
 };
 
 typedef struct _queueEntry QueueRequest;
@@ -50,60 +52,120 @@ void *ProcessGPUqueue(void *ptr)
         while(QueueList.ListHead != NULL)
         {
             QueueRequest *request = (QueueRequest*)(QueueList.ListHead);
-			//if (request->cmd == 65) fprintf(stderr, "Found DestroyScreen\n");
             switch (request->cmd)
             {
-                // case CMD_NewScreen:
-                //     NewScreen(request->p1, request->p2, request->p3, request->p4, request->p5);
-                // break;
-
                 case CMD_DestroyScreen:
-			        //fprintf(stderr, "Calling DestroyScreen\n");
-                    DestroyScreen(request->p1);
+                    DestroyScreen(request->i1);
                 break;
 
                 case CMD_SetColor:
-                    SetColor(request->p1, request->p2);
+                    SetColor(request->i1, request->i2);
                 break;
 
                 case CMD_SetPixel:
-                    SetPixel(request->p1, request->p2, request->p3);
+                    SetPixel(request->i1, request->i2, request->i3);
                 break;
 
                 case CMD_DrawLine:
-                    DrawLine(request->p1, request->p2, request->p3, request->p4, request->p5);
+                    DrawLine(request->i1, request->i2, request->i3, request->i4, request->i5);
+                break;
+
+                case CMD_DestroyTexture:
+                    DestroyTexture(request->i1);
+                break;
+
+                case CMD_SetTextureTransparency:
+                    SetTextureTransparency(request->i1, request->i2, request->i3);
+                break;
+
+                case CMD_LoadTexture:
+                    LoadTexture(request->i1, request->i2, request->i3);
+                break;
+
+                case CMD_RenderTexture:
+                    QRenderTexture(request->p1, request->p2, request->i1, request->i2, request->p3);
                 break;
 
                 default:
-                    fprintf(stderr, "GPU : uknown command %d\n", request->cmd);
+                    fprintf(stderr, "GPU queue process : unhandled command %d\n", request->cmd);
                 break;
             }
-            //if (request->cmd == 65) { fprintf(stderr, "Removing 65\n"); }
             RemoveGPUrequest(request);
         }
 
-        //write(0, ">", 1);
     	pthread_mutex_lock(&condLock);
 	    pthread_cond_wait(&GPUcond, &condLock);
         pthread_mutex_unlock(&condLock);
-        //write(0, "<", 1);
     }
-
-    // write(2, "GPU stopped\n", 12);
 }
 
-void QueueGPUrequest(unsigned char cmd, unsigned short p1, unsigned short p2, unsigned short p3, unsigned short p4, unsigned short p5)
+void QueueGPUrequest(unsigned char cmd, ...)
 {
+    va_list       ArgumentPointer;
     QueueRequest *newGPUrequest = malloc(sizeof(QueueRequest));
 
     //if (cmd == 65) { fprintf(stderr, "Queue received a Destroy Screen\n");}
 
     newGPUrequest->cmd = cmd;
-    newGPUrequest->p1 = p1;
-    newGPUrequest->p2 = p2;
-    newGPUrequest->p3 = p3;
-    newGPUrequest->p4 = p4;
-    newGPUrequest->p5 = p5;
+
+    switch (cmd)
+    {
+        case CMD_DestroyScreen: // 1 short int - Screen ID
+            va_start(ArgumentPointer, 1);
+            newGPUrequest->i1 = va_arg(ArgumentPointer, int);
+        break;
+        
+        case CMD_SetColor: // 2 short ints - Screen ID, Color
+            va_start(ArgumentPointer, 2);
+            newGPUrequest->i1 = va_arg(ArgumentPointer, int);
+            newGPUrequest->i2 = va_arg(ArgumentPointer, int);
+        break;
+        
+        case CMD_SetPixel: // 3 short ints - Screen ID, x, y
+            va_start(ArgumentPointer, 3);
+            newGPUrequest->i1 = va_arg(ArgumentPointer, int);
+            newGPUrequest->i2 = va_arg(ArgumentPointer, int);
+            newGPUrequest->i3 = va_arg(ArgumentPointer, int);
+        break;
+        
+        case CMD_DrawLine: // 5 short ints - Screen ID, x1, y1, x2, y2
+            va_start(ArgumentPointer, 5);
+            newGPUrequest->i1 = va_arg(ArgumentPointer, int);
+            newGPUrequest->i2 = va_arg(ArgumentPointer, int);
+            newGPUrequest->i3 = va_arg(ArgumentPointer, int);
+            newGPUrequest->i4 = va_arg(ArgumentPointer, int);
+            newGPUrequest->i5 = va_arg(ArgumentPointer, int);
+        break;
+        
+        case CMD_SetTextureTransparency: // 3 short ints - Texture ID, onoff, color
+            va_start(ArgumentPointer, 3);
+            newGPUrequest->i1 = va_arg(ArgumentPointer, int);
+            newGPUrequest->i2 = va_arg(ArgumentPointer, int);
+            newGPUrequest->i3 = va_arg(ArgumentPointer, int);
+        break;
+        
+        case CMD_LoadTexture: // 3 short ints - Screen ID, Texture ID, memaddr
+            va_start(ArgumentPointer, 3);
+            newGPUrequest->i1 = va_arg(ArgumentPointer, int);
+            newGPUrequest->i2 = va_arg(ArgumentPointer, int);
+            newGPUrequest->i3 = va_arg(ArgumentPointer, int);
+        break;
+        
+        case CMD_RenderTexture: // 2 refs + 2 short ints + 1 Ref - Screen*, Texture*, screenx, screeny, Texture_Rectangle*
+            va_start(ArgumentPointer, 5);
+            newGPUrequest->p1 = va_arg(ArgumentPointer, void*);
+            newGPUrequest->p2 = va_arg(ArgumentPointer, void*);
+            newGPUrequest->i1 = va_arg(ArgumentPointer, int);
+            newGPUrequest->i2 = va_arg(ArgumentPointer, int);
+            newGPUrequest->p3 = va_arg(ArgumentPointer, void*);
+        break;
+
+        default:
+            fprintf(stderr, "GPU queue add : unhandled cmd %d\n", cmd);
+        break;
+    }
+
+    va_end(ArgumentPointer);
     newGPUrequest->nextEntry = NULL;
 
     pthread_mutex_lock(&GPUlock);
@@ -112,11 +174,6 @@ void QueueGPUrequest(unsigned char cmd, unsigned short p1, unsigned short p2, un
 
     // Only wake the GPU thread if it is asleep
     pthread_cond_signal(&GPUcond);
-
-    // if (cmd == 65) 
-    // {
-    //     fprintf(stderr, "Queued 65 %d\n", QueueList.itemCnt);
-    // }
 }
 
 void RemoveGPUrequest(QueueRequest *queueRequest)
@@ -127,7 +184,6 @@ void RemoveGPUrequest(QueueRequest *queueRequest)
     pthread_mutex_unlock(&GPUlock);
     if (queueRequest != request) { fprintf(stderr, "Queue head not = request\n");}
     free(queueRequest);
-    //write(0, "-", 1);
 }
 
 void StartGPUQueue()

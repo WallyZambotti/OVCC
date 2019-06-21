@@ -65,6 +65,12 @@ enum Registers
 	REG_Param3L,
 	REG_Param4H,
 	REG_Param4L,
+	REG_Param5H,
+	REG_Param5L,
+	REG_Param6H,
+	REG_Param6L,
+	REG_Param7H,
+	REG_Param7L,
 	REG_ParamCnt
 };
 
@@ -182,9 +188,7 @@ void ExecuteCommand(unsigned char cmd)
 
 		case CMD_DestroyScreen:
 #ifdef GPU_MODE_QUEUE
-			//fprintf(stderr, "Queue Destroy Screen\n");
-			QueueGPUrequest(cmd, Params[0], GPU_Nil_Arg, GPU_Nil_Arg, GPU_Nil_Arg, GPU_Nil_Arg);
-			//fprintf(stderr, "Return Queuing\n");
+			QueueGPUrequest(cmd, Params[0]);
 #else			
 			DestroyScreen(Params[0]);
 #endif
@@ -192,17 +196,17 @@ void ExecuteCommand(unsigned char cmd)
 
 		case CMD_SetColor:
 #ifdef GPU_MODE_QUEUE
-			QueueGPUrequest(cmd, Params[0], Params[1], GPU_Nil_Arg, GPU_Nil_Arg, GPU_Nil_Arg);
+			QueueGPUrequest(cmd, Params[0], Params[1]);
 #else			
-			SetColor(Params[0]);
+			SetColor(Params[0], Params[1]);
 #endif
 		break;
 
 		case CMD_SetPixel:
 #ifdef GPU_MODE_QUEUE
-			QueueGPUrequest(cmd, Params[0], Params[1], Params[2], GPU_Nil_Arg, GPU_Nil_Arg);
+			QueueGPUrequest(cmd, Params[0], Params[1], Params[2]);
 #else			
-			SetPixel(Params[0], Params[1]);
+			SetPixel(Params[0], Params[1], Params[2]);
 #endif
 		break;
 
@@ -210,13 +214,40 @@ void ExecuteCommand(unsigned char cmd)
 #ifdef GPU_MODE_QUEUE
 				QueueGPUrequest(cmd, Params[0], Params[1], Params[2], Params[3], Params[4]);
 #else			
-				DrawLine(Params[0], Params[1], Params[2], Params[3]);
+				DrawLine(Params[0], Params[1], Params[2], Params[3]), Params[4];
 #endif
 		break;
 
 		case CMD_NewTexture:
-			fprintf(stderr, "param 3 %d\n", Params[3]>>8);
-			NewTexture(Params[0], Params[1], Params[2], (unsigned short)(Params[3]>>8));
+			NewTexture(Params[0], Params[1], Params[2], Params[3]);
+		break;
+
+		case CMD_DestroyTexture:
+#ifdef GPU_MODE_QUEUE
+			QueueGPUrequest(cmd, Params[0]);
+#else			
+			DestroyTexture(Params[0]);
+#endif
+		break;
+
+		case CMD_SetTextureTransparency:
+#ifdef GPU_MODE_QUEUE
+			QueueGPUrequest(cmd, Params[0], Params[1], Params[2]);
+#else			
+			SetTextureTransparency(Params[0], Params[1], Params[2]);
+#endif
+		break;
+
+		case CMD_LoadTexture:
+#ifdef GPU_MODE_QUEUE
+			QueueGPUrequest(cmd, Params[0], Params[1], Params[2]);
+#else			
+			LoadTexture(Params[0], Params[1], Params[2]);
+#endif
+		break;
+
+		case CMD_RenderTexture:
+			RenderTexture(Params[0], Params[1], Params[2], Params[3], Params[4]);
 		break;
 
 		default:
