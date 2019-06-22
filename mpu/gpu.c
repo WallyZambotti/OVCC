@@ -5,6 +5,7 @@
 #include "mpu.h"
 #include "gpu.h"
 #include "gpuprimitives.h"
+// #include "gputextures.h"
 #include "linkedlists.h"
 
 static pthread_t GPUthread;
@@ -83,6 +84,8 @@ void *ProcessGPUqueue(void *ptr)
                 break;
 
                 case CMD_RenderTexture:
+                    // fprintf(stderr, "ProcessGPUqueue : RenderTexture %d %d %d %d\n",
+                    //     ((Rect*)(request->p3))->x, ((Rect*)(request->p3))->y, ((Rect*)(request->p3))->w, ((Rect*)(request->p3))->h);
                     QRenderTexture(request->p1, request->p2, request->i1, request->i2, request->p3);
                 break;
 
@@ -103,8 +106,6 @@ void QueueGPUrequest(unsigned char cmd, ...)
 {
     va_list       ArgumentPointer;
     QueueRequest *newGPUrequest = malloc(sizeof(QueueRequest));
-
-    //if (cmd == 65) { fprintf(stderr, "Queue received a Destroy Screen\n");}
 
     newGPUrequest->cmd = cmd;
 
@@ -137,6 +138,11 @@ void QueueGPUrequest(unsigned char cmd, ...)
             newGPUrequest->i5 = va_arg(ArgumentPointer, int);
         break;
         
+        case CMD_DestroyTexture: // 1 short int1 - Texture ID
+            va_start(ArgumentPointer, 1);
+            newGPUrequest->i1 = va_arg(ArgumentPointer, int);
+        break;
+
         case CMD_SetTextureTransparency: // 3 short ints - Texture ID, onoff, color
             va_start(ArgumentPointer, 3);
             newGPUrequest->i1 = va_arg(ArgumentPointer, int);
@@ -158,6 +164,8 @@ void QueueGPUrequest(unsigned char cmd, ...)
             newGPUrequest->i1 = va_arg(ArgumentPointer, int);
             newGPUrequest->i2 = va_arg(ArgumentPointer, int);
             newGPUrequest->p3 = va_arg(ArgumentPointer, void*);
+            // fprintf(stderr, "QueueGPUrequest : RenderTexture %d %d %d %d\n",
+            //     ((Rect*)(newGPUrequest->p3))->x, ((Rect*)(newGPUrequest->p3))->y, ((Rect*)(newGPUrequest->p3))->w, ((Rect*)(newGPUrequest->p3))->h);
         break;
 
         default:

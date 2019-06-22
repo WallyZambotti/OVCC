@@ -91,11 +91,16 @@ void RenderTexture(ushort screenid, ushort textureid, ushort sx, ushort sy, usho
 
     if (texture == NULL) return;
 
-    Rect *rect = malloc(sizeof(Rect));
-    Data bytes = ReadCoCo8bytes(rectref);
-    *rect = *((Rect*)&bytes);
+    Rect *rect = NULL;
 
-    fprintf(stderr, "RenderTexture %d %d %d %d %x %d %d %d %d\n", screenid, textureid, sx, sy, rectref, rect->x, rect->y, rect->w, rect->h);
+    if (rectref != NULL)
+    {
+        rect = malloc(sizeof(Rect));
+        Data bytes = ReadCoCo8bytes(rectref);
+        *rect = *((Rect*)&bytes);
+    }
+
+    // fprintf(stderr, "RenderTexture %d %d %d %d %d %d %d %d\n", screenid, textureid, sx, sy, rect->x, rect->y, rect->w, rect->h);
 
     QueueGPUrequest(CMD_RenderTexture, screen, texture, sx, sy, rect);
 }
@@ -103,32 +108,55 @@ void RenderTexture(ushort screenid, ushort textureid, ushort sx, ushort sy, usho
 void QRenderTexture(Screen *screen, Texture *texture, ushort sx, ushort sy, Rect *rect)
 {
     ushort tmpsx = sx;
-    ushort tw = rect->x + (rect->w == 0 ? texture->w : rect->w);
-    ushort th = rect->y + (rect->h == 0 ? texture->h : rect->h);
-    uchar *ta = texture->bitmap + (rect->y * texture->pitch) + (rect->x>>texture->ppbshift);
+    ushort rx, ry, rw, rh;
+
+    if (rect == NULL)
+    {
+        rx = ry = 0; rw = texture->w; rh = texture->h;
+    }
+    else 
+    {
+        rx = rect->x; ry = rect->y; rw = rect->w; rh = rect->h;
+    }
+    
+    fprintf(stderr, "QRenderTexture %d %d %d %d %d %d %d %d %d %d\n", screen->id, texture->id, sx, sy, screen->ScreenWidth, screen->ScreenHeight, rx, ry, rw, rh);
+    ushort tw = rx + rw;
+    ushort th = ry + rh;
+
+    if(rect) { free(rect); }
+
+    if (tw > texture->w || th > texture->h)
+    {
+        fprintf(stderr, "QRenderTexture tw or th to large %d %d %d %d\n", tw, th, texture->w, texture->h);
+        return; 
+    }
+
+    uchar *ta = texture->bitmap + (ry * texture->pitch) + (rx>>texture->ppbshift);
     // uchar *sa = screen->ScreenAddress + (sy * screen->ScreenPitch) + (sx>>screen->PPBshift);
     uchar *tmpta = ta;
 
-    if ((rect->x + rect->w) >= texture->w || (rect->y + rect->h) >= texture->h) { free(rect); return; }
+    // fprintf(stderr, "ppbshift %d, ppb %d, bpp %d\n", texture->ppbshift, texture->ppb, texture->bpp);
 
-    for (ushort y = rect->y ; y < th ; y++)
+    for (ushort y = ry ; y < th ; y++)
     {
         if (sy >= screen->ScreenHeight) break;
 
-        for  (ushort x = rect->x ; x < tw ; x++)
+        for  (ushort x = rx ; x < tw ; x++)
         {
             if (sx >= screen->ScreenWidth) break;
 
             ushort xmodPPB = x%texture->ppb;
             uchar  pixmask = pixelmasks[texture->ppbshift][xmodPPB];
-            uchar  pixelbyte = *ta & (pixmask^0xff);
-            uchar  pixel = pixelbyte>>(texture->bpp*(texture->ppb-(texture->ppb-xmodPPB-1)));
+            uchar  pixelbyte = *ta & pixmask;
+            uchar  pixel = pixelbyte>>texture->bpp*(texture->ppb-xmodPPB-1);
+            // fprintf(stderr, "(%02x)", pixel);
 
             if (texture->transparencyActive == 0 || pixel != texture->tranparencyColor)
             {
                 SetScreenColor(screen, pixel);
                 SetScreenPixel(screen, sx, sy);
-            }
+                fprintf(stderr, "(%03d-%03d:%02x)", (int)sx, (int)sy, (int)pixel); 
+           }
 
             if (((x+1)%texture->ppb) == 0) { ta++; }
             sx++;
@@ -139,6 +167,5 @@ void QRenderTexture(Screen *screen, Texture *texture, ushort sx, ushort sy, Rect
         sy++;
         sx = tmpsx;
     }
-
-    free(rect);
+    write(2, "\n", 1);
 }

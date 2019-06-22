@@ -38,9 +38,10 @@ void NewScreen(unsigned short idref, unsigned short address, unsigned short widt
     for(short i = 0 ; i <  8 ; i++)
     {
         NewScreen->taskmmubank[i] = MemRead(addr++);
+        //fprintf(stderr, "%02x ", NewScreen->taskmmubank[i]);
     }
-
-    // fprintf(stderr, "NewScreen %d %d %d %d\n", PixelsPerByte, ScreenPitch, ScreenEnd, PPBshift);
+    // write(2, "\n",1);
+    // fprintf(stderr, "NewScreen %d %d %d %d\n", NewScreen->PixelsPerByte, NewScreen->ScreenPitch, NewScreen->ScreenEnd, NewScreen->PPBshift);
     // ReportQueue();
 
     WriteCoCoInt(idref, (unsigned short)NewScreen->id);

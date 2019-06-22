@@ -11,7 +11,7 @@ typedef struct _Texture Texture;
 
 struct _rect
 {
-    unsigned short w, h, x, y;
+    unsigned short h, w, y, x;
 };
 
 typedef struct _rect Rect;
