@@ -10,7 +10,7 @@ static ushort currentID;
 
 void NewTexture(ushort idref, ushort w, ushort h, ushort bpp)
 {
-    fprintf(stderr, "NewTexture %x %d %d %d\n", idref, w, h, bpp);
+    // fprintf(stderr, "NewTexture %x %d %d %d\n", idref, w, h, bpp);
 
     if (bpp == 0) { WriteCoCoInt(idref, 0xFFFF); return ; };
 
@@ -40,7 +40,7 @@ void NewTexture(ushort idref, ushort w, ushort h, ushort bpp)
 
 void DestroyTexture(ushort id)
 {
-    fprintf(stderr, "DestroyTexture %d\n", id);
+    // fprintf(stderr, "DestroyTexture %d\n", id);
 
     Texture *texture = (Texture*)RemovelistItem(&TextureList, (unsigned int)id);
 
@@ -52,7 +52,7 @@ void DestroyTexture(ushort id)
 
 void LoadTexture(ushort screenid, ushort textureid, ushort memaddr)
 {
-    fprintf(stderr, "LoadTexture %d %d %x\n", screenid, textureid, memaddr);
+    // fprintf(stderr, "LoadTexture %d %d %x\n", screenid, textureid, memaddr);
 
     Screen *screen = GetScreen(screenid);
 
@@ -71,7 +71,7 @@ void LoadTexture(ushort screenid, ushort textureid, ushort memaddr)
 
 void SetTextureTransparency(ushort id, ushort transparencyonoff, ushort color)
 {
-    fprintf(stderr, "SetTextureTransparency %d %d %d\n", id, transparencyonoff, color);
+    // fprintf(stderr, "SetTextureTransparency %d %d %d\n", id, transparencyonoff, color);
 
     Texture *texture = (Texture*)FindListItem(&TextureList,  (unsigned int)id);
 
@@ -119,7 +119,7 @@ void QRenderTexture(Screen *screen, Texture *texture, ushort sx, ushort sy, Rect
         rx = rect->x; ry = rect->y; rw = rect->w; rh = rect->h;
     }
     
-    fprintf(stderr, "QRenderTexture %d %d %d %d %d %d %d %d %d %d\n", screen->id, texture->id, sx, sy, screen->ScreenWidth, screen->ScreenHeight, rx, ry, rw, rh);
+    // fprintf(stderr, "QRenderTexture %d %d %d %d %d %d %d %d %d %d\n", screen->id, texture->id, sx, sy, screen->ScreenWidth, screen->ScreenHeight, rx, ry, rw, rh);
     ushort tw = rx + rw;
     ushort th = ry + rh;
 
@@ -127,7 +127,7 @@ void QRenderTexture(Screen *screen, Texture *texture, ushort sx, ushort sy, Rect
 
     if (tw > texture->w || th > texture->h)
     {
-        fprintf(stderr, "QRenderTexture tw or th to large %d %d %d %d\n", tw, th, texture->w, texture->h);
+        // fprintf(stderr, "QRenderTexture tw or th to large %d %d %d %d\n", tw, th, texture->w, texture->h);
         return; 
     }
 
@@ -155,7 +155,7 @@ void QRenderTexture(Screen *screen, Texture *texture, ushort sx, ushort sy, Rect
             {
                 SetScreenColor(screen, pixel);
                 SetScreenPixel(screen, sx, sy);
-                fprintf(stderr, "(%03d-%03d:%02x)", (int)sx, (int)sy, (int)pixel); 
+                // fprintf(stderr, "(%03d-%03d:%02x)", (int)sx, (int)sy, (int)pixel); 
            }
 
             if (((x+1)%texture->ppb) == 0) { ta++; }
@@ -167,5 +167,5 @@ void QRenderTexture(Screen *screen, Texture *texture, ushort sx, ushort sy, Rect
         sy++;
         sx = tmpsx;
     }
-    write(2, "\n", 1);
+    // write(2, "\n", 1);
 }
