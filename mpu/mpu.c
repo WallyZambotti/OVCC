@@ -28,6 +28,7 @@ typedef int BOOL;
 #include "mpu.h"
 #include "fpu.h"
 #include "gpu.h"
+#include "gpuclock.h"
 
 #define GPU_Nil_Arg ((unsigned short)0)
 
@@ -180,6 +181,10 @@ void ExecuteCommand(unsigned char cmd)
 
 		case CMD_dtof:
 			dtof(Params[0], Params[1]);
+		break;
+
+		case CMD_GetTicks:
+			GetHighResTicks(Params[0]);
 		break;
 
 		case CMD_NewScreen:
