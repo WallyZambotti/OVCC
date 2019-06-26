@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include "mpu.h"
 #include "gpu.h"
+#include "dma.h"
 #include "gpuprimitives.h"
 // #include "gputextures.h"
 #include "linkedlists.h"
@@ -222,4 +223,13 @@ void StopGPUqueue()
 void ReportQueue()
 {
     fprintf(stderr, "GPU Queue depth %d\n", QueueList.itemCnt);
+}
+
+void GetQueueLen(ushort lenref)
+{
+    ushort len;
+
+    len = QueueList.itemCnt;
+
+    WriteCoCoInt(lenref, len);
 }

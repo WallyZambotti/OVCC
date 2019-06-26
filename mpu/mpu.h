@@ -87,6 +87,7 @@ enum Commands
 	CMD_dtol,
 	CMD_ftod,
 	CMD_dtof,
+	CMD_GetQueueLen = 62,
 	CMD_GetTicks = 63,
 	CMD_NewScreen = 64,
 	CMD_DestroyScreen,

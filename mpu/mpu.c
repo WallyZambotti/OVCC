@@ -183,6 +183,10 @@ void ExecuteCommand(unsigned char cmd)
 			dtof(Params[0], Params[1]);
 		break;
 
+		case CMD_GetQueueLen:
+			GetQueueLen(Params[0]);
+		break;
+
 		case CMD_GetTicks:
 			GetHighResTicks(Params[0]);
 		break;
