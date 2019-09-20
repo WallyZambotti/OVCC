@@ -6065,7 +6065,7 @@ int HD6309Exec(int CycleFor)
 		}
 
 		if (SyncWaiting == 1)	//Abort the run nothing happens asyncronously from the CPU
-			return(0);
+			break; //return(0); // WDZ - Experimental SyncWaiting should still return used cycles (and not zero) by breaking from loop
 
 		JmpVec1[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 	}//End While

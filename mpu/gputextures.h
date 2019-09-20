@@ -4,7 +4,10 @@ struct _Texture
     struct _Texture *nextTexture;
     ushort  w, h, pitch, bitmapsize;
     ushort  ppb, bpp, ppbshift, transparencyActive;
-    uchar   tranparencyColor, *bitmap;
+    uchar   tranparencyColor;
+    uchar   *bitmap;
+    ushort  smx, smy, smw, smh;
+    uchar   *savemap;
 };
 
 typedef struct _Texture Texture;
