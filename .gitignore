@@ -14,3 +14,5 @@ CoCo/vhds/*
 CoCo/dsks/*
 CoCo/*.rom
 >>>>>>> Stashed changes
+CoCo/ovcc_clang
+CoCo/ovcc_gcc

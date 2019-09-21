@@ -2747,7 +2747,7 @@ void Divq_M(void)
 	temp32 = Q_REG;
 	stemp32 = (signed int)temp32 / (signed short int)postword;
 
-	if ((stemp32 > 65535) | (stemp16 < -65536)) //Abort
+	if ((stemp32 > 65535) || (stemp32 < -65536)) //Abort
 	{
 		cc[V] = 1;
 		cc[N] = 0;
@@ -2759,7 +2759,7 @@ void Divq_M(void)
 
 	D_REG = (unsigned short)((signed int)temp32 % (signed short int)postword);
 	W_REG = stemp32;
-	if ((stemp16 > 32767) | (stemp16 < -32768)) 
+	if ((stemp16 > 32767) || (stemp16 < -32768)) 
 	{
 		cc[V] = 1;
 		cc[N] = 1;
@@ -2917,19 +2917,19 @@ void Divq_D(void)
 	temp32 = Q_REG;
 	stemp32 = (signed int)temp32 / (signed short int)postword;
 
-	if ((stemp32 > 65535) | (stemp16 < -65536)) //Abort
+	if ((stemp32 > 65535) || (stemp32 < -65536)) //Abort
 	{
 		cc[V] = 1;
 		cc[N] = 0;
 		cc[Z] = 0;
 		cc[C] = 0;
-		CycleCounter+=CycleCounter+=InsCycles[md[NATIVE6309]][M3635]-21;
+		CycleCounter+=InsCycles[md[NATIVE6309]][M3635]-21;
 		return;
 	}
 
 	D_REG = (unsigned short)((signed int)temp32 % (signed short int)postword);
 	W_REG = stemp32;
-	if ((stemp16 > 32767) | (stemp16 < -32768)) 
+	if ((stemp16 > 32767) || (stemp32 < -32768)) 
 	{
 		cc[V] = 1;
 		cc[N] = 1;
@@ -3086,7 +3086,7 @@ void Divq_X(void)
   temp32 = Q_REG;
   stemp32 = (signed int)temp32 / (signed short int)postword;
 
-  if ((stemp32 > 65535) | (stemp16 < -65536)) //Abort
+  if ((stemp32 > 65535) || (stemp32 < -65536)) //Abort
   {
     cc[V] = 1;
     cc[N] = 0;
@@ -3098,7 +3098,7 @@ void Divq_X(void)
 
   D_REG = (unsigned short)((signed int)temp32 % (signed short int)postword);
   W_REG = stemp32;
-  if ((stemp16 > 32767) | (stemp16 < -32768))
+  if ((stemp16 > 32767) || (stemp16 < -32768))
   {
     cc[V] = 1;
     cc[N] = 1;
@@ -3264,7 +3264,7 @@ void Divq_E(void)
   temp32 = Q_REG;
   stemp32 = (signed int)temp32 / (signed short int)postword;
 
-  if ((stemp32 > 65535) | (stemp16 < -65536)) //Abort
+  if ((stemp32 > 65535) || (stemp32 < -65536)) //Abort
   {
     cc[V] = 1;
     cc[N] = 0;
@@ -3276,7 +3276,7 @@ void Divq_E(void)
 
   D_REG = (unsigned short)((signed int)temp32 % (signed short int)postword);
   W_REG = stemp32;
-  if ((stemp16 > 32767) | (stemp16 < -32768))
+  if ((stemp16 > 32767) || (stemp16 < -32768))
   {
     cc[V] = 1;
     cc[N] = 1;
