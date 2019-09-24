@@ -8,10 +8,13 @@ else
     LIBDIR = $(DESTDIR)$(prefix)/lib/ovcc
 endif
 
+# assembler
+ASM=jwasm
+
 ODIR = obj
 
-DEBUG=#-g
-OPT=-O2 # -Og
+DEBUG=-g
+OPT=-O0 # -Og
 WARN = -w # -Wall
 PTHREAD = -pthread
 

@@ -366,12 +366,12 @@ void ConfigOKApply(int close)
 {
 	EmuState2.ResetPending=4;
 
-	if ((CurrentConfig.RamSize != TempConfig.RamSize) | (CurrentConfig.CpuType != TempConfig.CpuType))
+	if ((CurrentConfig.RamSize != TempConfig.RamSize) || (CurrentConfig.CpuType != TempConfig.CpuType))
 	{
 		EmuState2.ResetPending=2;
 	}
 
-	if ((CurrentConfig.SndOutDev != TempConfig.SndOutDev) | (CurrentConfig.AudioRate != TempConfig.AudioRate))
+	if ((CurrentConfig.SndOutDev != TempConfig.SndOutDev) || (CurrentConfig.AudioRate != TempConfig.AudioRate))
 	{
 		SoundInitSDL(SoundCards[TempConfig.SndOutDev].sdlID, TempConfig.AudioRate);
 	}

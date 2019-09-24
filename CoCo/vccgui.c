@@ -333,11 +333,11 @@ void CPUChange(AG_Event *event)
     //int newSelection = AG_INT(1);
     extern void CPUConfigCPU(int);
 
-    if (CPU > 1)
-    {
-        AG_TextMsg(AG_MSG_INFO, "(Coming Soon) Feature only available on Intel");
-        CPU = 1;
-    }
+    // if (CPU > 1)
+    // {
+    //     AG_TextMsg(AG_MSG_INFO, "(Coming Soon) Feature only available on Intel");
+    //     CPU = 1;
+    // }
     CPUConfigCPU(CPU);
 }
 

@@ -23,6 +23,12 @@ This file is part of VCC (Virtual Color Computer).
 #include "tcc1014mmu.h"
 #include "logger.h"
 
+#if defined(_WIN64)
+#define MSABI 
+#else
+#define MSABI __attribute__((ms_abi))
+#endif
+
 //Global variables for CPU Emulation-----------------------
 #define NTEST8(r) r>0x7F;
 #define NTEST16(r) r>0x7FFF;
@@ -7341,6 +7347,7 @@ unsigned int MemRead32(unsigned short Address)
 	return ( (MemRead16(Address)<<16) | MemRead16(Address+2) );
 
 }
+
 void MemWrite32(unsigned int data,unsigned short Address)
 {
 	MemWrite16( data>>16,Address);

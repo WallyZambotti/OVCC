@@ -320,23 +320,32 @@ void DoHardReset(SystemState2* const HRState)
 		fprintf(stderr,"Can't allocate enough RAM, Out of memory\n");
 		exit(0);
 	}
-	if (HRState->CpuType==1)
+	switch (HRState->CpuType)
 	{
+		case 2: // 6309 Turbo
+		CPUInit=HD6309Init_s;
+		CPUExec=HD6309Exec_s;
+		CPUReset=HD6309Reset_s;
+		CPUAssertInterupt=HD6309AssertInterupt_s;
+		CPUDeAssertInterupt=HD6309DeAssertInterupt_s;
+		CPUForcePC=HD6309ForcePC_s;
+		break;
+		case 1: // 6309
 		CPUInit=HD6309Init;
 		CPUExec=HD6309Exec;
 		CPUReset=HD6309Reset;
 		CPUAssertInterupt=HD6309AssertInterupt;
 		CPUDeAssertInterupt=HD6309DeAssertInterupt;
 		CPUForcePC=HD6309ForcePC;
-	}
-	else
-	{
+		break;
+		case 0: // 6809
 		CPUInit=MC6809Init;
 		CPUExec=MC6809Exec;
 		CPUReset=MC6809Reset;
 		CPUAssertInterupt=MC6809AssertInterupt;
 		CPUDeAssertInterupt=MC6809DeAssertInterupt;
 		CPUForcePC=MC6809ForcePC;
+		break;
 	}
 	PiaReset();
 	mc6883_reset();	//Captures interal rom pointer for CPU Interupt Vectors
@@ -403,6 +412,11 @@ unsigned char SetCpuType( unsigned char Tmp)
 	case 1:
 		EmuState2.CpuType=1;
 		strcpy(CpuName,"HD6309");
+		break;
+
+	case 2:
+		EmuState2.CpuType=2;
+		strcpy(CpuName,"HD6309X");
 		break;
 	}
 	return(EmuState2.CpuType);

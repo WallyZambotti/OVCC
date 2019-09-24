@@ -1,4 +1,5 @@
 export TARGETOS = Linux
+export TARGETARCH = AMD
 
 DIRS = CoCo becker FD502 HardDisk mpi orch90 Ramdisk SuperIDE mpu
 
