@@ -679,133 +679,134 @@ void HD6309Init_s(void)
 
 short instcyclemu0[] = 
 {
-	6, // Neg_D
-	6, // Oim_D
-	6, // Aim_D
-	6, // Com_D
-	6, // Lsr_D
-	6, // Eim_D
-	6, // Ror_D
-	6, // Asr_D
-	6, // Asl_D
-	6, // Rol_D
-	6, // Dec_D
-	6, // Tim_D
-	6, // Inc_D
-	6, // Tst_D
-	3, // Jmp_D
-	6, // Clr_D
-	0, // Page2
-	0, // Page3
-	2, // Nop
-	0, // Sync
-	4, // Sexw
-	1, // Invalid
-	5, // Lbra
-	9, // Lbsr
-	2, // Invalid
-	2, // Daa
-	3, // Orcc
-	2, // Invalid
-	3, // Andcc
-	2, // Sex
-	8, // Exg
-	6, // Tfr
-	3, // Bra
-	3, // Brn
-	3, // Bhi
-	3, // Bls
-	3, // Bhs
-	3, // Blo
-	3, // Bne
-	3, // Beq
-	3, // Bvc
-	3, // Bvs
-	3, // Bpl
-	3, // Bmi
-	3, // Bge
-	3, // Blt
-	3, // Bgt
-	3, // Ble
-	4, // Leax
-	4, // Leay
-	4, // Leas
-	4, // Leau
-	5, // Pshs
-	5, // Puls
-	5, // Pshu
-	5, // Puls
-	2, // Invalid
-	5, // Rts
-	3, // Abx
-	6, // Rti
-	22, // Cwai
-	11, // Mul_I
-	2, // Invalid
-	19, // Swi1
-	2, // Nega_I
-	2, // Invalid
-	2, // Invalid
-	2, // Coma_I
-	2, // Lsra_I
-	2, // Rora_I
-	2, // Asra_I
-	2, // Asla_I
-	2, // Rola_I
-	2, // Deca_I
-	2, // Invalid
-	2, // Inca_I
-	2, // Tsta_I
-	2, // Invalid
-	2, // Clra_I
-	2, // Negb_I
-	2, // Invalid
-	2, // Invalid
-	2, // Comb_I
-	2, // Lsrb_I
-	2, // Invalid
-	2, // Rorb_I
-	2, // Asrb_I
-	2, // Aslb_I
-	2, // Rolb_I
-	2, // Decb_I
-	2, // Invalid
-	2, // Incb_I
-	2, // Tstb_I
-	2, // Invalid
-	2, // Clrb_I
-	6, // Neg_X
-	7, // Oim_X
-	7, // Aim_X
-	6, // Com_X
-	6, // Lsr_X
-	7, // Eim_X
-	6, // Ror_X
-	6, // Asr_X
-	6, // Asl_X
-	6, // Rol_X
-	6, // Dec_X
-	7, // Tim_X
-	6, // Inc_X
-	6, // Tst_X
-	3, // Jmp_X
-	6, // Clr_X
-	7, // Neg_E
-	7, // Oim_E
-	7, // Aim_E
-	7, // Com_E
-	7, // Lsr_E
-	7, // Eim_E
-	7, // Ror_E
-	7, // Asr_E
-	7, // Asl_E
-	7, // Rol_E
-	7, // Dec_E
-	7, // Tim_E
-	7, // Inc_E
-	7, // Tst_E
-	4, // Jmp_E
-	7, // Clr_E
+	6, // Neg_D 00
+	6, // Oim_D 01
+	6, // Aim_D 02
+	6, // Com_D 03
+	6, // Lsr_D 04
+	6, // Eim_D 05
+	6, // Ror_D 06
+	6, // Asr_D 07
+	6, // Asl_D 08
+	6, // Rol_D 09
+	6, // Dec_D 0A
+	6, // Tim_D 0B
+	6, // Inc_D 0C
+	6, // Tst_D 0D
+	3, // Jmp_D 0E
+	6, // Clr_D 0F
+	0, // Page2 10
+	0, // Page3 11
+	2, // Nop 12
+	0, // Sync 13
+	4, // Sexw 14
+	1, // Invalid 15
+	5, // Lbra 16
+	9, // Lbsr 17
+	2, // Invalid 18
+	2, // Daa 19
+	3, // Orcc 1A
+	2, // Invalid 1B
+	3, // Andcc 1C
+	2, // Sex 1D
+	8, // Exg 1E
+	6, // Tfr 1F
+	3, // Bra 20
+	3, // Brn 21
+	3, // Bhi 22
+	3, // Bls 23
+	3, // Bhs 24
+	3, // Blo 25
+	3, // Bne 26
+	3, // Beq 27
+	3, // Bvc 28
+	3, // Bvs 29
+	3, // Bpl 2A
+	3, // Bmi 2B
+	3, // Bge 2C
+	3, // Blt 2D
+	3, // Bgt 2E
+	3, // Ble 2F
+	4, // Leax 30
+	4, // Leay 31
+	4, // Leas 32
+	4, // Leau 33
+	5, // Pshs 34
+	5, // Puls 35
+	5, // Pshu 36
+	5, // Puls 37
+	2, // Invalid 38
+	5, // Rts 39
+	3, // Abx 3A
+	6, // Rti 3B
+	22, // Cwai 3C
+	11, // Mul_I 3D
+	2, // Invalid 3E
+	19, // Swi1 3F
+	2, // Nega_I 40
+	2, // Invalid 41
+	2, // Invalid 42
+	2, // Coma_I 43
+	2, // Lsra_I 44
+	2, // Invalid 45
+	2, // Rora_I 46
+	2, // Asra_I 47
+	2, // Asla_I 48
+	2, // Rola_I 49
+	2, // Deca_I 4A
+	2, // Invalid 4B
+	2, // Inca_I 4C
+	2, // Tsta_I 4D
+	2, // Invalid 4E
+	2, // Clra_I 4F
+	2, // Negb_I 50
+	2, // Invalid 51
+	2, // Invalid 52
+	2, // Comb_I 53
+	2, // Lsrb_I 54
+	2, // Invalid 55
+	2, // Rorb_I 56
+	2, // Asrb_I 57
+	2, // Aslb_I 58
+	2, // Rolb_I 59
+	2, // Decb_I 5A
+	2, // Invalid 5B
+	2, // Incb_I 5C
+	2, // Tstb_I 5D
+	2, // Invalid 5E
+	2, // Clrb_I 5F
+	6, // Neg_X 60
+	7, // Oim_X 61
+	7, // Aim_X 62
+	6, // Com_X 63
+	6, // Lsr_X 64
+	7, // Eim_X 65
+	6, // Ror_X 66
+	6, // Asr_X 67
+	6, // Asl_X 68
+	6, // Rol_X 69
+	6, // Dec_X 6A
+	7, // Tim_X 6B
+	6, // Inc_X 6C
+	6, // Tst_X 6D
+	3, // Jmp_X 6E
+	6, // Clr_X 6F
+	7, // Neg_E 70
+	7, // Oim_E 71
+	7, // Aim_E 72
+	7, // Com_E 73
+	7, // Lsr_E 74
+	7, // Eim_E 75
+	7, // Ror_E 76
+	7, // Asr_E 77 
+	7, // Asl_E 78
+	7, // Rol_E 79
+	7, // Dec_E 7A
+	7, // Tim_E 7B
+	7, // Inc_E 7C
+	7, // Tst_E 7D
+	4, // Jmp_E 7E
+	7, // Clr_E 7F
 };
 
 short instcyclnat0[] =
@@ -879,6 +880,7 @@ short instcyclnat0[] =
 	1, // Invalid
 	1, // Coma_I
 	1, // Lsra_I
+	1, // Invalid
 	1, // Rora_I
 	1, // Asra_I
 	1, // Asla_I
