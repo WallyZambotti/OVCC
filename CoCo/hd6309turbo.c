@@ -583,7 +583,7 @@ unsigned char cc_s[8];
 //static unsigned char ccbits,mdbits;
 unsigned char ccbits_s, mdbits_s;
 //static unsigned short *xfreg16[8];
-static int CycleCounter=0;
+int CycleCounter=0;
 //static unsigned int SyncWaiting=0;
 unsigned short temp16;
 static signed short stemp16;
@@ -598,7 +598,7 @@ static short unsigned postword=0;
 static signed char *spostbyte=(signed char *)&postbyte;
 static signed short *spostword=(signed short *)&postword;
 char InInterupt_s=0;
-static int gCycleFor;
+int gCycleFor;
 //END Global variables for CPU Emulation-------------------
 
 //Fuction Prototypes---------------------------------------
@@ -677,6 +677,268 @@ void HD6309Init_s(void)
 	return;
 }
 
+short instcyclemu0[] = 
+{
+	6, // Neg_D
+	6, // Oim_D
+	6, // Aim_D
+	6, // Com_D
+	6, // Lsr_D
+	6, // Eim_D
+	6, // Ror_D
+	6, // Asr_D
+	6, // Asl_D
+	6, // Rol_D
+	6, // Dec_D
+	6, // Tim_D
+	6, // Inc_D
+	6, // Tst_D
+	3, // Jmp_D
+	6, // Clr_D
+	0, // Page2
+	0, // Page3
+	2, // Nop
+	0, // Sync
+	4, // Sexw
+	1, // Invalid
+	5, // Lbra
+	9, // Lbsr
+	2, // Invalid
+	2, // Daa
+	3, // Orcc
+	2, // Invalid
+	3, // Andcc
+	2, // Sex
+	8, // Exg
+	6, // Tfr
+	3, // Bra
+	3, // Brn
+	3, // Bhi
+	3, // Bls
+	3, // Bhs
+	3, // Blo
+	3, // Bne
+	3, // Beq
+	3, // Bvc
+	3, // Bvs
+	3, // Bpl
+	3, // Bmi
+	3, // Bge
+	3, // Blt
+	3, // Bgt
+	3, // Ble
+	4, // Leax
+	4, // Leay
+	4, // Leas
+	4, // Leau
+	5, // Pshs
+	5, // Puls
+	5, // Pshu
+	5, // Puls
+	2, // Invalid
+	5, // Rts
+	3, // Abx
+	6, // Rti
+	22, // Cwai
+	11, // Mul_I
+	2, // Invalid
+	19, // Swi1
+	2, // Nega_I
+	2, // Invalid
+	2, // Invalid
+	2, // Coma_I
+	2, // Lsra_I
+	2, // Rora_I
+	2, // Asra_I
+	2, // Asla_I
+	2, // Rola_I
+	2, // Deca_I
+	2, // Invalid
+	2, // Inca_I
+	2, // Tsta_I
+	2, // Invalid
+	2, // Clra_I
+	2, // Negb_I
+	2, // Invalid
+	2, // Invalid
+	2, // Comb_I
+	2, // Lsrb_I
+	2, // Invalid
+	2, // Rorb_I
+	2, // Asrb_I
+	2, // Aslb_I
+	2, // Rolb_I
+	2, // Decb_I
+	2, // Invalid
+	2, // Incb_I
+	2, // Tstb_I
+	2, // Invalid
+	2, // Clrb_I
+	6, // Neg_X
+	7, // Oim_X
+	7, // Aim_X
+	6, // Com_X
+	6, // Lsr_X
+	7, // Eim_X
+	6, // Ror_X
+	6, // Asr_X
+	6, // Asl_X
+	6, // Rol_X
+	6, // Dec_X
+	7, // Tim_X
+	6, // Inc_X
+	6, // Tst_X
+	3, // Jmp_X
+	6, // Clr_X
+	7, // Neg_E
+	7, // Oim_E
+	7, // Aim_E
+	7, // Com_E
+	7, // Lsr_E
+	7, // Eim_E
+	7, // Ror_E
+	7, // Asr_E
+	7, // Asl_E
+	7, // Rol_E
+	7, // Dec_E
+	7, // Tim_E
+	7, // Inc_E
+	7, // Tst_E
+	4, // Jmp_E
+	7, // Clr_E
+};
+
+short instcyclnat0[] =
+{
+	5, // Neg_D
+	6, // Oim_D
+	6, // Aim_D
+	5, // Com_D
+	5, // Lsr_D
+	6, // Eim_D
+	5, // Ror_D
+	5, // Asr_D
+	5, // Asl_D
+	5, // Rol_D
+	5, // Dec_D
+	6, // Tim_D
+	5, // Inc_D
+	4, // Tst_D
+	2, // Jmp_D
+	5, // Clr_D
+	0, // Page2
+	0, // Page3
+	1, // Nop
+	0, // Sync
+	4, // Sexw
+	1, // Invalid
+	4, // Lbra
+	7, // Lbsr
+	1, // Invalid
+	1, // Daa
+	3, // Orcc
+	1, // Invalid
+	3, // Andcc
+	1, // Sex
+	5, // Exg
+	4, // Tfr
+	3, // Bra
+	3, // Brn
+	3, // Bhi
+	3, // Bls
+	3, // Bhs
+	3, // Blo
+	3, // Bne
+	3, // Beq
+	3, // Bvc
+	3, // Bvs
+	3, // Bpl
+	3, // Bmi
+	3, // Bge
+	3, // Blt
+	3, // Bgt
+	3, // Ble
+	4, // Leax
+	4, // Leay
+	4, // Leas
+	4, // Leau
+	4, // Pshs
+	4, // Puls
+	4, // Pshu
+	4, // Puls
+	1, // Invalid
+	4, // Rts
+	1, // Abx
+	6, // Rti
+	20, // Cwai
+	10, // Mul_I
+	1, // Invalid
+	20, // Swi1
+	1, // Nega_I
+	1, // Invalid
+	1, // Invalid
+	1, // Coma_I
+	1, // Lsra_I
+	1, // Rora_I
+	1, // Asra_I
+	1, // Asla_I
+	1, // Rola_I
+	1, // Deca_I
+	1, // Invalid
+	1, // Inca_I
+	1, // Tsta_I
+	1, // Invalid
+	1, // Clra_I
+	1, // Negb_I
+	1, // Invalid
+	1, // Invalid
+	1, // Comb_I
+	1, // Lsrb_I
+	1, // Invalid
+	1, // Rorb_I
+	1, // Asrb_I
+	1, // Aslb_I
+	1, // Rolb_I
+	1, // Decb_I
+	1, // Invalid
+	1, // Incb_I
+	1, // Tstb_I
+	1, // Invalid
+	1, // Clrb_I
+	6, // Neg_X
+	7, // Oim_X
+	7, // Aim_X
+	6, // Com_X
+	6, // Lsr_X
+	7, // Eim_X
+	6, // Ror_X
+	6, // Asr_X
+	6, // Asl_X
+	6, // Rol_X
+	6, // Dec_X
+	7, // Tim_X
+	6, // Inc_X
+	5, // Tst_X
+	3, // Jmp_X
+	6, // Clr_X
+	6, // Neg_X
+	7, // Oim_E
+	7, // Aim_E
+	6, // Com_E
+	6, // Lsr_E
+	7, // Eim_E
+	6, // Ror_E
+	6, // Asr_E
+	6, // Asl_E
+	6, // Rol_E
+	6, // Dec_E
+	7, // Tim_E
+	6, // Inc_E
+	5, // Tst_E
+	3, // Jmp_E
+	6, // Clr_E
+};
+
 void(*JmpVec1_s[256])(void) = {
 	Neg_D_A,		// 00
 	Oim_D_A,		// 01
@@ -740,27 +1002,27 @@ void(*JmpVec1_s[256])(void) = {
 	Rti_I_A,		// 3B
 	Cwai_I_A,		// 3C
 	Mul_I_A,		// 3D
-	IgnoreInsHandler,	// Reset,		// 3E
+	InvalidInsHandler,	// Reset,		// 3E
 	Swi1_I_A,		// 3F
 	Nega_I_A,		// 40
-	IgnoreInsHandler,	// InvalidInsHandler,	// 41
-	IgnoreInsHandler,	// InvalidInsHandler,	// 42
+	InvalidInsHandler,	// InvalidInsHandler,	// 41
+	InvalidInsHandler,	// InvalidInsHandler,	// 42
 	Coma_I_A,		// 43
 	Lsra_I_A,		// 44
-	IgnoreInsHandler,	// InvalidInsHandler,	// 45
+	InvalidInsHandler,	// InvalidInsHandler,	// 45
 	Rora_I_A,		// 46
 	Asra_I_A,		// 47
 	Asla_I_A,		// 48
 	Rola_I_A,		// 49
 	Deca_I_A,		// 4A
-	IgnoreInsHandler,	// InvalidInsHandler,	// 4B
+	InvalidInsHandler,	// InvalidInsHandler,	// 4B
 	Inca_I_A,		// 4C
 	Tsta_I_A,		// 4D
-	IgnoreInsHandler,	// InvalidInsHandler,	// 4E
+	InvalidInsHandler,	// InvalidInsHandler,	// 4E
 	Clra_I_A,		// 4F
 	Negb_I_A,		// 50
-	IgnoreInsHandler,	// InvalidInsHandler,	// 51
-	IgnoreInsHandler,	// InvalidInsHandler,	// 52
+	InvalidInsHandler,	// InvalidInsHandler,	// 51
+	InvalidInsHandler,	// InvalidInsHandler,	// 52
 	Comb_I_A,		// 53
 	Lsrb_I_A,		// 54
 	InvalidInsHandler,	// 55
@@ -772,7 +1034,7 @@ void(*JmpVec1_s[256])(void) = {
 	InvalidInsHandler,	// 5B
 	Incb_I_A,		// 5C
 	Tstb_I_A,		// 5D
-	IgnoreInsHandler,	// InvalidInsHandler,	// 5E
+	InvalidInsHandler,	// InvalidInsHandler,	// 5E
 	Clrb_I_A,		// 5F
 	Neg_X_A,		// 60
 	Oim_X_A,		// 61
