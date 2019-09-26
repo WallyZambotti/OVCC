@@ -939,7 +939,92 @@ short instcyclemu0[256] =
 	6, // Ldd_E FC
 	6, // Std_E FD
 	6, // Ldu_E FE
-	6, // Stu_E FF
+	6 // Stu_E FF
+};
+
+short instcyclemu1[256] =
+{
+	2, // Invalid 00
+	2, // Invalid 01
+	2, // Invalid 02
+	2, // Invalid 03
+	2, // Invalid 04
+	2, // Invalid 05
+	2, // Invalid 06
+	2, // Invalid 07
+	2, // Invalid 08
+	2, // Invalid 09
+	2, // Invalid 0A
+	2, // Invalid 0B
+	2, // Invalid 0C
+	2, // Invalid 0D
+	2, // Invalid 0E
+	2, // Invalid 0F
+	2, // Invalid 10
+	2, // Invalid 11
+	2, // Invalid 12
+	2, // Invalid 13
+	2, // Invalid 14
+	2, // Invalid 15
+	2, // Invalid 16
+	2, // Invalid 17
+	2, // Invalid 18
+	2, // Invalid 19
+	2, // Invalid 1A
+	2, // Invalid 1B
+	2, // Invalid 1C
+	2, // Invalid 1D
+	2, // Invalid 1E
+	2, // Invalid 1F
+	2, // Invalid 20
+	5, // Lbrn 21
+	5, // Lbhi 22
+	5, // Lbls 23
+	5, // Lbhs 24
+	5, // Lbcs 25
+	5, // Lbne 26
+	5, // Lbeq 27
+	5, // Lbvc 28
+	5, // Lbvs 29
+	5, // Lbpl 2A
+	5, // Lbmi 2B
+	5, // Lbge 2C
+	5, // Lblt 2D
+	5, // Lbgt 2E
+	5, // Lble 2F
+	4, // Addr 30
+	4, // Adcr 31
+	4, // Subr 32
+	4, // Sbcr 33
+	4, // Andr 34
+	4, // Orr 35
+	4, // Eorr 36
+	4, // Cmpr 37
+	6, // pshsw 38
+	6, // pulsw 39
+	6, // pshuw 3A
+	6, // puluw 3B
+	2, // Invalid 3C
+	2, // Invalid 3D
+	2, // Invalid 3E
+	20, // Swi2 3F
+	3, // Negd 40
+	2, // Invalid 41
+	2, // Invalid 42
+	3, // Comd 43
+	3, // Lsrd 44
+	2, // Invalid 45
+	3, // Rord 46
+	3, // Asrd 47
+	3, // Asld 48
+	3, // Rold 49
+	3, // Decd 4A
+	2, // Invalid 4B
+	3, // Incd 4C
+	3, // Tstd 4D
+	2, // Invalid 4E
+	3, // Clrd 4F
+
 };
 
 short instcyclnat0[256] =
@@ -1200,6 +1285,89 @@ short instcyclnat0[256] =
 	5, // Std_E FD
 	5, // Ldu_E FE
 	5, // Stu_E FF
+};
+
+short instcyclnat1[256] =
+{
+	1, // Invalid 00
+	1, // Invalid 01
+	1, // Invalid 02
+	1, // Invalid 03
+	1, // Invalid 04
+	1, // Invalid 05
+	1, // Invalid 06
+	1, // Invalid 07
+	1, // Invalid 08
+	1, // Invalid 09
+	1, // Invalid 0A
+	1, // Invalid 0B
+	1, // Invalid 0C
+	1, // Invalid 0D
+	1, // Invalid 0E
+	1, // Invalid 0F
+	1, // Invalid 10
+	1, // Invalid 11
+	1, // Invalid 12
+	1, // Invalid 13
+	1, // Invalid 14
+	1, // Invalid 15
+	1, // Invalid 16
+	1, // Invalid 17
+	1, // Invalid 18
+	1, // Invalid 19
+	1, // Invalid 1A
+	1, // Invalid 1B
+	1, // Invalid 1C
+	1, // Invalid 1D
+	1, // Invalid 1E
+	1, // Invalid 1F
+	5, // Lbrn 21
+	5, // Lbhi 22
+	5, // Lbls 23
+	5, // Lbhs 24
+	5, // Lbcs 25
+	5, // Lbne 26
+	5, // Lbeq 27
+	5, // Lbvc 28
+	5, // Lbvs 29
+	5, // Lbpl 2A
+	5, // Lbmi 2B
+	5, // Lbge 2C
+	5, // Lblt 2D
+	5, // Lbgt 2E
+	5, // Lble 2F
+	4, // Addr 30
+	4, // Adcr 31
+	4, // Subr 32
+	4, // Sbcr 33
+	4, // Andr 34
+	4, // Orr 35
+	4, // Eorr 36
+	4, // Cmpr 37
+	6, // pshsw 38
+	6, // pulsw 39
+	6, // pshuw 3A
+	6, // puluw 3B
+	2, // Invalid 3C
+	2, // Invalid 3D
+	2, // Invalid 3E
+	22, // Swi2 3F
+	2, // Negd 40
+	1, // Invalid 41
+	1, // Invalid 42
+	2, // Comd 43
+	2, // Lsrd 44
+	1, // Invalid 45
+	2, // Rord 46
+	2, // Asrd 47
+	2, // Asld 48
+	2, // Rold 49
+	2, // Decd 4A
+	1, // Invalid 4B
+	2, // Incd 4C
+	2, // Tstd 4D
+	1, // Invalid 4E
+	2, // Clrd 4F
 };
 
 void(*JmpVec1_s[256])(void) = {
