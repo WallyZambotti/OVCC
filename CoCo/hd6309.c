@@ -5043,7 +5043,7 @@ void Cmpx_D(void)
 	CycleCounter+=InsCycles[md[NATIVE6309]][M64];
 }
 
-void Bsr_D(void)
+void Jsr_D(void)
 { //9D
 	temp16 = DPADDRESS(PC_REG++);
 	S_REG--;
@@ -5209,7 +5209,7 @@ void Cmpx_X(void)
 	CycleCounter+=InsCycles[md[NATIVE6309]][M65];
 }
 
-void Bsr_X(void)
+void Jsr_X(void)
 { //AD
 	temp16=INDADDRESS(PC_REG++);
 	S_REG--;
@@ -6232,7 +6232,7 @@ void(*JmpVec1[256])(void) = {
 	Ora_D,		// 9A
 	Adda_D,		// 9B
 	Cmpx_D,		// 9C
-	Bsr_D,		// 9D
+	Jsr_D,		// 9D
 	Ldx_D,		// 9E
 	Stx_D,		// 9A
 	Suba_X,		// A0
@@ -6248,7 +6248,7 @@ void(*JmpVec1[256])(void) = {
 	Ora_X,		// AA
 	Adda_X,		// AB
 	Cmpx_X,		// AC
-	Bsr_X,		// AD
+	Jsr_X,		// AD
 	Ldx_X,		// AE
 	Stx_X,		// AF
 	Suba_E,		// B0

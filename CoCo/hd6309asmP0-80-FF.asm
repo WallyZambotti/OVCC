@@ -537,8 +537,8 @@ Cmpx_D_A PROC
 	ret
 Cmpx_D_A ENDP
 
-PUBLIC Bsr_D_A ; Op 9D - Branch to Subroutine
-Bsr_D_A PROC
+PUBLIC Jsr_D_A ; Op 9D - Jump to Subroutine
+Jsr_D_A PROC
 	push rbx
 	sub rsp, 20h
 	; Calc Address by Adding the Byte at [PC++] with DP reg
@@ -562,7 +562,7 @@ Bsr_D_A PROC
 	add rsp, 20h
 	pop rbx
 	ret
-Bsr_D_A ENDP
+Jsr_D_A ENDP
 
 PUBLIC Ldx_D_A ; Op 9E - Load X from DP Memory
 Ldx_D_A PROC
@@ -836,8 +836,8 @@ Cmpx_X_A PROC
 	ret
 Cmpx_X_A ENDP
 
-PUBLIC Bsr_X_A ; Op AD - Branch to Indexed Subroutine
-Bsr_X_A PROC
+PUBLIC Jsr_X_A ; Op AD - Jump to Indexed Subroutine
+Jsr_X_A PROC
 	push rbx
 	sub rsp, 20h
 	call CalcEA_A
@@ -857,7 +857,7 @@ Bsr_X_A PROC
 	add rsp, 20h
 	pop rbx
 	ret
-Bsr_X_A ENDP
+Jsr_X_A ENDP
 
 PUBLIC Ldx_X_A ; Op AE - Load X from Indexed Memory
 Ldx_X_A PROC
@@ -1162,8 +1162,8 @@ Cmpx_E_A PROC
 	ret
 Cmpx_E_A ENDP
 
-PUBLIC Bsr_E_A ; Op BD - Branch to Indexed Subroutine
-Bsr_E_A PROC
+PUBLIC Jsr_E_A ; Op BD - Jump to Indexed Subroutine
+Jsr_E_A PROC
 	push rbx
 	sub rsp, 20h
 	; Get immediate two bytes at PC
@@ -1186,7 +1186,7 @@ Bsr_E_A PROC
 	add rsp, 20h
 	pop rbx
 	ret
-Bsr_E_A ENDP
+Jsr_E_A ENDP
 
 PUBLIC Ldx_E_A ; Op BE - Load X from Indexed Memory
 Ldx_E_A PROC
