@@ -7104,14 +7104,17 @@ static unsigned short CalculateEA(unsigned char postbyte)
 			case 1:
 				ea = W_REG + IMMADDRESS(PC_REG);
 				PC_REG += 2;
+				CycleCounter += 2;
 				break;
 			case 2:
 				ea = W_REG;
 				W_REG += 2;
+				CycleCounter += 1;
 				break;
 			case 3:
 				W_REG -= 2;
 				ea = W_REG;
+				CycleCounter += 1;
 				break;
 			}
 			break;
@@ -7122,18 +7125,22 @@ static unsigned short CalculateEA(unsigned char postbyte)
 			{
 			case 0:
 				ea = MemRead16(W_REG);
+				CycleCounter += 3;
 				break;
 			case 1:
 				ea = MemRead16(W_REG + IMMADDRESS(PC_REG));
 				PC_REG += 2;
+				CycleCounter += 5;
 				break;
 			case 2:
 				ea = MemRead16(W_REG);
 				W_REG += 2;
+				CycleCounter += 4;
 				break;
 			case 3:
 				W_REG -= 2;
 				ea = MemRead16(W_REG);
+				CycleCounter += 4;
 				break;
 			}
 			break;

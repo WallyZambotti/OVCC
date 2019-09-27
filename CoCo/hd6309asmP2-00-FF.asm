@@ -698,6 +698,8 @@ Ldmd_M_A PROC
 	call MemRead8_s ; ax holds immediate byte
   and al, 03h ; mask away top 6 bits
   mov byte ptr [mdbits_s], al
+	movsx cx, al ; trigger any emulator requirements
+	call setmd_s ; trigger any emulator requirements
   add rsp, 28h
   ret
 Ldmd_M_A ENDP

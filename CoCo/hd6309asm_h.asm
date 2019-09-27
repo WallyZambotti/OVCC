@@ -78,4 +78,5 @@ EXTERN	MemWrite16_s: PROC
 EXTERN	MemWrite32_s: PROC
 EXTERN  InvalidInsHandler_s: PROC
 EXTERN  DivbyZero_s: PROC
+EXTERN  setmd_s: PROC
 EXTERN	DumpReg_s: PROC

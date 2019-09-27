@@ -68,6 +68,7 @@ ceacase100: ; Post-inc by 1
 	movzx rax, word ptr [rdx]
 ;	(*xfreg16_s[Register])++;
 	inc word ptr [rdx]
+	add dword ptr [CycleCounter], 2
 	jmp cearet
 ceacase101: ; Post-inc by 2
 ;	ea = (*xfreg16_s[Register]);
@@ -76,6 +77,7 @@ ceacase101: ; Post-inc by 2
 	movzx rax, word ptr [rdx]
 ;	(*xfreg16_s[Register])+=2;
 	add word ptr [rdx], 2
+	add dword ptr [CycleCounter], 3
 	jmp cearet
 ceacase102: ; Pre-dec by 1
 ;	ea = (*xfreg16_s[Register]);
@@ -84,6 +86,7 @@ ceacase102: ; Pre-dec by 1
 ;	(*xfreg16_s[Register])-=1;
 	dec word ptr [rcx]
 	movzx rax, word ptr [rcx]
+	add dword ptr [CycleCounter], 2
 	jmp cearet
 ceacase103: ; Pre-dec by 2
 ;	ea = (*xfreg16_s[Register]);
@@ -92,6 +95,7 @@ ceacase103: ; Pre-dec by 2
 ;	(*xfreg16_s[Register])-=2;
 	sub word ptr [rcx], 2
 	movzx rax, word ptr [rcx]
+	add dword ptr [CycleCounter], 3
 	jmp cearet
 ceacase104: ; No offset
 ;	ea = (*xfreg16_s[Register]);
@@ -106,6 +110,7 @@ ceacase105: ; B.reg offset
 	movzx rax, word ptr [rcx]
 	movsx dx, byte ptr [q_s+BREG]
 	add ax, dx
+	add dword ptr [CycleCounter], 1
 	jmp cearet
 ceacase106: ; A.reg offset
 ;	ea = (*xfreg16_s[Register]) + ((signed char)q_s.Byte.lswmsb);
@@ -114,6 +119,7 @@ ceacase106: ; A.reg offset
 	movzx rax, word ptr [rcx]
 	movsx dx, byte ptr [q_s+AREG]
 	add ax, dx
+	add dword ptr [CycleCounter], 1
 	jmp cearet
 ceacase107: ; E.reg offset
 ;	ea = (*xfreg16_s[Register]) + ((signed char)q_s.Byte.mswmsb);
@@ -122,6 +128,7 @@ ceacase107: ; E.reg offset
 	movzx rax, word ptr [rcx]
 	movsx dx, byte ptr [q_s+EREG]
 	add ax, dx
+	add dword ptr [CycleCounter], 1
 	jmp cearet
 ceacase108: ; 8 bit offset
 ;	ea = (*xfreg16_s[Register]) + (signed char)MemRead8_s(pc_s.Reg++);
@@ -135,6 +142,7 @@ ceacase108: ; 8 bit offset
 	mov rcx, qword ptr [rcx+rbx*8]
 	movzx rcx, word ptr [rcx]
 	add ax, cx
+	add dword ptr [CycleCounter], 1
 	jmp cearet
 ceacase109: ; 16 bit offset
 ;	ea = (*xfreg16_s[Register]) + (signed char)MemRead8_s(pc_s.Reg++);
@@ -147,6 +155,7 @@ ceacase109: ; 16 bit offset
 	mov rcx, qword ptr [rcx+rbx*8]
 	movzx rcx, word ptr [rcx]
 	add ax, cx
+	add dword ptr [CycleCounter], 4
 	jmp cearet
 ceacase10A: ; F.reg offset
 ;	ea = (*xfreg16_s[Register]) + ((signed char)q_s.Byte.mswlsb);
@@ -155,6 +164,7 @@ ceacase10A: ; F.reg offset
 	movzx rax, word ptr [rcx]
 	movsx dx, byte ptr [q_s+FREG]
 	add ax, dx
+	add dword ptr [CycleCounter], 1
 	jmp cearet
 ceacase10B: ; D.reg offset
 ;	ea = (*xfreg16_s[Register]) + q_s.Word.lsw;
@@ -163,6 +173,7 @@ ceacase10B: ; D.reg offset
 	movzx rax, word ptr [rcx]
 	mov dx, word ptr [q_s+DREG]
 	add ax, dx
+	add dword ptr [CycleCounter], 4
 	jmp cearet
 ceacase10C: ; 8 bit PC relative
 ;	ea = (signed short)pc_s.Reg + (signed char)MemRead8_s(pc_s.Reg) + 1;
@@ -173,6 +184,7 @@ ceacase10C: ; 8 bit PC relative
 	movzx rcx, word ptr [pc_s]
 	movsx ax, al
 	add ax, cx
+	add dword ptr [CycleCounter], 1
 	jmp cearet
 ceacase10D: ; 16 bit PC relative
 ;	ea = (signed short)pc_s.Reg + (signed char)MemRead8_s(pc_s.Reg) + 2;
@@ -182,6 +194,7 @@ ceacase10D: ; 16 bit PC relative
 	call MemRead16_s
 	movzx rcx, word ptr [pc_s]
 	add ax, cx
+	add dword ptr [CycleCounter], 5
 	jmp cearet
 ceacase10E: ; W.reg offset
 ;	ea = (*xfreg16_s[Register]) + q_s.Word.msw;
@@ -190,6 +203,7 @@ ceacase10E: ; W.reg offset
 	movzx rax, word ptr [rcx]
 	mov dx, word ptr [q_s+WREG]
 	add ax, dx
+	add dword ptr [CycleCounter], 4
 	jmp cearet
 ceacase10F: ; W.reg
 	; switch((postbyte >> 5) & 3)
@@ -213,14 +227,17 @@ ceacase201: ; 16 bit offset from W.reg
 	call MemRead16_s
 	movzx rcx, word ptr [q_s+WREG]
 	add ax, cx
+	add dword ptr [CycleCounter], 2
 	jmp cearet
 ceacase202: ; Post-inc by 2 from W.reg
 	movzx rax, word ptr [q_s+WREG]
 	add word ptr [q_s+WREG], 2
+	add dword ptr [CycleCounter], 1
 	jmp cearet
 ceacase203: ; Pre-dec by 2 from W.reg
 	sub word ptr [q_s+WREG], 2
 	movzx rax, word ptr [q_s+WREG]
+	add dword ptr [CycleCounter], 1
 	jmp cearet
 ;   end switch 2
 ceacase110: ; W.reg
@@ -238,6 +255,7 @@ ceaswtch3:
 ceacase300: ; Indirect no offset from W.reg
 	movzx rcx, word ptr [q_s+WREG]
 	call MemRead16_s
+	add dword ptr [CycleCounter], 3
 	jmp cearet
 ceacase301: ; Indirect 16 bit offset from W.reg
 	mov cx, word ptr [q_s+WREG]
@@ -248,16 +266,19 @@ ceacase301: ; Indirect 16 bit offset from W.reg
 	add word ptr [pc_s], 2
 	call MemRead16_s
 	add ax, dx
+	add dword ptr [CycleCounter], 5
 	jmp cearet
 ceacase302: ; Indirect post-inc by 2 from W.reg
 	mov cx, word ptr [q_s+WREG]
 	add word ptr [q_s+WREG], 2
 	call MemRead16_s
+	add dword ptr [CycleCounter], 4
 	jmp cearet
 ceacase303: ;  Indirect pre-dec by 2 from W.reg
 	sub word ptr [q_s+WREG], 2
 	mov cx, word ptr [q_s+WREG]
 	call MemRead16_s
+	add dword ptr [CycleCounter], 4
 	jmp cearet
 	; end switch 3
 ceacase111: ; Indirect post-inc by 2
@@ -269,6 +290,7 @@ ceacase111: ; Indirect post-inc by 2
 	add word ptr [rdx], 2
 ;	ea = MemRead16(ea)
 	call MemRead16_s
+	add dword ptr [CycleCounter], 6
 	jmp cearet
 ceacase113: ; Indirect pre-dec by 2
 ;	ea = (*xfreg16_s[Register]);
@@ -279,6 +301,7 @@ ceacase113: ; Indirect pre-dec by 2
 	movzx rcx, word ptr [rdx]
 ;	ea = MemRead16(ea)
 	call MemRead16_s
+	add dword ptr [CycleCounter], 6
 	jmp cearet
 ceacase114: ; Indirect no offset
 ;	ea = (*xfreg16_s[Register]);
@@ -287,6 +310,7 @@ ceacase114: ; Indirect no offset
 	movzx rcx, word ptr [rdx]
 ;	ea = MemRead16(ea)
 	call MemRead16_s
+	add dword ptr [CycleCounter], 3
 	jmp cearet
 ceacase115: ; Indirect B.reg offset
 ;	ea = (*xfreg16_s[Register]);
@@ -298,6 +322,7 @@ ceacase115: ; Indirect B.reg offset
 	add cx, dx
 ;	ea = MemRead16(ea)
 	call MemRead16_s
+	add dword ptr [CycleCounter], 4
 	jmp cearet
 ceacase116: ; Indirect A.reg offset
 ;	ea = (*xfreg16_s[Register]);
@@ -309,6 +334,7 @@ ceacase116: ; Indirect A.reg offset
 	add cx, dx
 ;	ea = MemRead16(ea)
 	call MemRead16_s
+	add dword ptr [CycleCounter], 4
 	jmp cearet
 ceacase117: ; Indirect E.reg offset
 ;	ea = (*xfreg16_s[Register]);
@@ -320,6 +346,7 @@ ceacase117: ; Indirect E.reg offset
 	add cx, dx
 ;	ea = MemRead16(ea)
 	call MemRead16_s
+	add dword ptr [CycleCounter], 4
 	jmp cearet
 ceacase118: ; Indirect 8 bit offset
 ;	ea = (*xfreg16_s[Register]) + (signed char)MemRead8_s(pc_s.Reg++);
@@ -335,6 +362,7 @@ ceacase118: ; Indirect 8 bit offset
 	add cx, ax
 ;	ea = MemRead16(ea)
 	call MemRead16_s
+	add dword ptr [CycleCounter], 4
 	jmp cearet
 ceacase119: ; 16 bit offset
 ;	ea = (*xfreg16_s[Register]) + (signed char)MemRead8_s(pc_s.Reg++);
@@ -349,6 +377,7 @@ ceacase119: ; 16 bit offset
 	add cx, ax
 ;	ea = MemRead16(ea)
 	call MemRead16_s
+	add dword ptr [CycleCounter], 7
 	jmp cearet
 ceacase11A: ; Indirect F.reg offset
 ;	ea = (*xfreg16_s[Register]);
@@ -360,6 +389,7 @@ ceacase11A: ; Indirect F.reg offset
 	add cx, dx
 ;	ea = MemRead16(ea)
 	call MemRead16_s
+	add dword ptr [CycleCounter], 4
 	jmp cearet
 ceacase11B: ; Indirect D.reg offset
 ;	ea = (*xfreg16_s[Register]);
@@ -371,6 +401,7 @@ ceacase11B: ; Indirect D.reg offset
 	add cx, dx
 ;	ea = MemRead16(ea)
 	call MemRead16_s
+	add dword ptr [CycleCounter], 7
 	jmp cearet
 ceacase11C: ; Indirect 8 bit PC relative
 ;	ea = (signed short)pc_s.Reg + (signed char)MemRead8_s(pc_s.Reg) + 1;
@@ -382,6 +413,7 @@ ceacase11C: ; Indirect 8 bit PC relative
 	add cx, ax
 ;	ea = MemRead16(ea)
 	call MemRead16_s
+	add dword ptr [CycleCounter], 4
 	jmp cearet
 ceacase11D: ; Indirect 16 bit PC relative
 ;	ea = (signed short)pc_s.Reg + MemRead16_s(pc_s.Reg) + 2;
@@ -392,6 +424,7 @@ ceacase11D: ; Indirect 16 bit PC relative
 	add cx, ax
 ;	ea = MemRead16(ea)
 	call MemRead16_s
+	add dword ptr [CycleCounter], 8
 	jmp cearet
 ceacase11E: ; Indirect W.reg offset
 ;	ea = (*xfreg16_s[Register]) + q_s.Word.msw;
@@ -402,6 +435,7 @@ ceacase11E: ; Indirect W.reg offset
 	add cx, dx
 ;	ea = MemRead16(ea)
 	call MemRead16_s
+	add dword ptr [CycleCounter], 7
 	jmp cearet
 ceacase11F: ; Indirect extended
 ;	ea = MemRead16_s(pc_s.Reg);
@@ -412,8 +446,9 @@ ceacase11F: ; Indirect extended
 ;	ea = MemRead16_s(ea)
 	call MemRead16_s
 	jmp cearet
+	add dword ptr [CycleCounter], 8
 	; end switch 1
-ceaelse1:
+ceaelse1: ; 5 bit offset
 ;	ea = (*xfreg16_s[Register]) + (signed)postbyte[bits 4-0];
 	lea rcx, word ptr [xfreg16_s]
 	mov rcx, qword ptr [rcx+rax*8]
@@ -422,6 +457,7 @@ ceaelse1:
 	shl dx, 11
 	sar dx, 11
 	add ax, dx
+	add dword ptr [CycleCounter], 1
 cearet:
 	add rsp, 20h
 	pop rbx

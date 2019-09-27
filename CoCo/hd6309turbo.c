@@ -608,7 +608,7 @@ void MSABI DivbyZero_s(void);
 void MSABI ErrorVector_s(void);
 void setcc_s(UINT8);
 UINT8 getcc_s(void);
-void setmd_s(UINT8);
+void MSABI setmd_s(UINT8);
 UINT8 getmd_s(void);
 static void cpu_firq_s(void);
 static void cpu_irq_s(void);
@@ -625,6 +625,7 @@ void MSABI MemWrite32_s(unsigned int, unsigned short);
 extern UINT8 /*MemRead8(UINT16),*/ MSABI MemRead8_s(UINT16);
 extern UINT16 /*MemRead16(UINT16),*/ MSABI MemRead16_s(UINT16);
 extern UINT32 /*MemRead32(UINT16),*/ MSABI MemRead32_s(UINT16);
+short *instcycl1, *instcycl2, *instcycl3;
 
 //unsigned char GetDestReg(unsigned char);
 //END Fuction Prototypes-----------------------------------
@@ -639,8 +640,9 @@ void HD6309Reset_s(void)
 	x86Flags = 0;
 	//for(index=0;index<=7;index++)
 	//	md_s[index]=0;
-	mdbits_s =getmd_s();
+	mdbits_s = getmd_s();
 	mdbits_s = 0;
+	setmd_s(mdbits_s);
 	dp_s.Reg=0;
 	cc_s[I]=1;
 	cc_s[F]=1;
@@ -682,7 +684,7 @@ void Reset_s(void) // 3E
 	HD6309Reset_s();
 }
 
-short instcyclemu0[256] = 
+short instcyclemu1[256] = 
 {
 	6, // Neg_D 00
 	6, // Oim_D 01
@@ -705,13 +707,13 @@ short instcyclemu0[256] =
 	2, // Nop 12
 	0, // Sync 13
 	4, // Sexw 14
-	1, // Invalid 15
+	20, // Invalid 15
 	5, // Lbra 16
 	9, // Lbsr 17
-	2, // Invalid 18
+	19, // Invalid 18
 	2, // Daa 19
 	3, // Orcc 1A
-	2, // Invalid 1B
+	19, // Invalid 1B
 	3, // Andcc 1C
 	2, // Sex 1D
 	8, // Exg 1E
@@ -740,45 +742,45 @@ short instcyclemu0[256] =
 	5, // Puls 35
 	5, // Pshu 36
 	5, // Puls 37
-	2, // Invalid 38
+	19, // Invalid 38
 	5, // Rts 39
 	3, // Abx 3A
 	6, // Rti 3B
 	22, // Cwai 3C
 	11, // Mul_I 3D
-	2, // Invalid 3E
+	19, // Invalid 3E
 	19, // Swi1 3F
 	2, // Nega_I 40
-	2, // Invalid 41
-	2, // Invalid 42
+	19, // Invalid 41
+	19, // Invalid 42
 	2, // Coma_I 43
 	2, // Lsra_I 44
-	2, // Invalid 45
+	19, // Invalid 45
 	2, // Rora_I 46
 	2, // Asra_I 47
 	2, // Asla_I 48
 	2, // Rola_I 49
 	2, // Deca_I 4A
-	2, // Invalid 4B
+	19, // Invalid 4B
 	2, // Inca_I 4C
 	2, // Tsta_I 4D
-	2, // Invalid 4E
+	19, // Invalid 4E
 	2, // Clra_I 4F
 	2, // Negb_I 50
-	2, // Invalid 51
-	2, // Invalid 52
+	19, // Invalid 51
+	19, // Invalid 52
 	2, // Comb_I 53
 	2, // Lsrb_I 54
-	2, // Invalid 55
+	19, // Invalid 55
 	2, // Rorb_I 56
 	2, // Asrb_I 57
 	2, // Aslb_I 58
 	2, // Rolb_I 59
 	2, // Decb_I 5A
-	2, // Invalid 5B
+	19, // Invalid 5B
 	2, // Incb_I 5C
 	2, // Tstb_I 5D
-	2, // Invalid 5E
+	19, // Invalid 5E
 	2, // Clrb_I 5F
 	6, // Neg_X 60
 	7, // Oim_X 61
@@ -819,7 +821,7 @@ short instcyclemu0[256] =
 	2, // Anda_M 84
 	2, // Bita_M 85
 	2, // Lda_M 86
-	2, // Invalid 87
+	19, // Invalid 87
 	2, // Eora_M 88
 	2, // Adca_M 89
 	2, // Ora_M 8A
@@ -827,7 +829,7 @@ short instcyclemu0[256] =
 	4, // Cmpx_M 8C
 	7, // Bsr 8D
 	3, // Ldx_M 8E
-	2, // Invalid 8F
+	19, // Invalid 8F
 	4, // Suba_D 90
 	4, // Cmpa_D 91
 	4, // Sbca_D 92
@@ -883,7 +885,7 @@ short instcyclemu0[256] =
 	2, // Andb_M C4
 	2, // Bitb_M C5
 	2, // Ldb_M C6
-	2, // Invalid C7
+	19, // Invalid C7
 	2, // Eorb_M C8
 	2, // Adcb_M C9
 	2, // Orb_M CA
@@ -891,7 +893,7 @@ short instcyclemu0[256] =
 	3, // Ldd_M CC
 	5, // Ldq_M CD
 	3, // Ldu_M CE
-	2, // Invalid CF
+	19, // Invalid CF
 	4, // Subb_D D0
 	4, // Cmpb_D D1
 	4, // Sbcb_D D2
@@ -942,92 +944,7 @@ short instcyclemu0[256] =
 	6 // Stu_E FF
 };
 
-short instcyclemu1[256] =
-{
-	2, // Invalid 00
-	2, // Invalid 01
-	2, // Invalid 02
-	2, // Invalid 03
-	2, // Invalid 04
-	2, // Invalid 05
-	2, // Invalid 06
-	2, // Invalid 07
-	2, // Invalid 08
-	2, // Invalid 09
-	2, // Invalid 0A
-	2, // Invalid 0B
-	2, // Invalid 0C
-	2, // Invalid 0D
-	2, // Invalid 0E
-	2, // Invalid 0F
-	2, // Invalid 10
-	2, // Invalid 11
-	2, // Invalid 12
-	2, // Invalid 13
-	2, // Invalid 14
-	2, // Invalid 15
-	2, // Invalid 16
-	2, // Invalid 17
-	2, // Invalid 18
-	2, // Invalid 19
-	2, // Invalid 1A
-	2, // Invalid 1B
-	2, // Invalid 1C
-	2, // Invalid 1D
-	2, // Invalid 1E
-	2, // Invalid 1F
-	2, // Invalid 20
-	5, // Lbrn 21
-	5, // Lbhi 22
-	5, // Lbls 23
-	5, // Lbhs 24
-	5, // Lbcs 25
-	5, // Lbne 26
-	5, // Lbeq 27
-	5, // Lbvc 28
-	5, // Lbvs 29
-	5, // Lbpl 2A
-	5, // Lbmi 2B
-	5, // Lbge 2C
-	5, // Lblt 2D
-	5, // Lbgt 2E
-	5, // Lble 2F
-	4, // Addr 30
-	4, // Adcr 31
-	4, // Subr 32
-	4, // Sbcr 33
-	4, // Andr 34
-	4, // Orr 35
-	4, // Eorr 36
-	4, // Cmpr 37
-	6, // pshsw 38
-	6, // pulsw 39
-	6, // pshuw 3A
-	6, // puluw 3B
-	2, // Invalid 3C
-	2, // Invalid 3D
-	2, // Invalid 3E
-	20, // Swi2 3F
-	3, // Negd 40
-	2, // Invalid 41
-	2, // Invalid 42
-	3, // Comd 43
-	3, // Lsrd 44
-	2, // Invalid 45
-	3, // Rord 46
-	3, // Asrd 47
-	3, // Asld 48
-	3, // Rold 49
-	3, // Decd 4A
-	2, // Invalid 4B
-	3, // Incd 4C
-	3, // Tstd 4D
-	2, // Invalid 4E
-	3, // Clrd 4F
-
-};
-
-short instcyclnat0[256] =
+short instcyclnat1[256] =
 {
 	5, // Neg_D 00
 	6, // Oim_D 01
@@ -1050,13 +967,13 @@ short instcyclnat0[256] =
 	1, // Nop 12
 	0, // Sync 13
 	4, // Sexw 14
-	1, // Invalid 15
+	20, // Invalid 15
 	4, // Lbra 16
 	7, // Lbsr 17
-	1, // Invalid 18
+	20, // Invalid 18
 	1, // Daa 19
 	3, // Orcc 1A
-	1, // Invalid 1B
+	20, // Invalid 1B
 	3, // Andcc 1C
 	1, // Sex 1D
 	5, // Exg 1E
@@ -1085,45 +1002,45 @@ short instcyclnat0[256] =
 	4, // Puls 35
 	4, // Pshu 36
 	4, // Puls 37
-	1, // Invalid 38
+	20, // Invalid 38
 	4, // Rts 39
 	1, // Abx 3A
 	6, // Rti 3B
 	20, // Cwai 3C
 	10, // Mul_I 3D
-	1, // Invalid 3E
+	20, // Invalid 3E
 	20, // Swi1 3F
 	1, // Nega_I 40
-	1, // Invalid 41
-	1, // Invalid 42
+	20, // Invalid 41
+	20, // Invalid 42
 	1, // Coma_I 43
 	1, // Lsra_I 44
-	1, // Invalid 45
+	20, // Invalid 45
 	1, // Rora_I 46
 	1, // Asra_I 47
 	1, // Asla_I 48
 	1, // Rola_I 49
 	1, // Deca_I 4A
-	1, // Invalid 4B
+	20, // Invalid 4B
 	1, // Inca_I 4C
 	1, // Tsta_I 4D
-	1, // Invalid 4E
+	20, // Invalid 4E
 	1, // Clra_I 4F
 	1, // Negb_I 50
-	1, // Invalid 51
-	1, // Invalid 52
+	20, // Invalid 51
+	20, // Invalid 52
 	1, // Comb_I 53
 	1, // Lsrb_I 54
-	1, // Invalid 55
+	20, // Invalid 55
 	1, // Rorb_I 56
 	1, // Asrb_I 57
 	1, // Aslb_I 58
 	1, // Rolb_I 59
 	1, // Decb_I 5A
-	1, // Invalid 5B
+	20, // Invalid 5B
 	1, // Incb_I 5C
 	1, // Tstb_I 5D
-	1, // Invalid 5E
+	20, // Invalid 5E
 	1, // Clrb_I 5F
 	6, // Neg_X 60
 	7, // Oim_X 61
@@ -1164,7 +1081,7 @@ short instcyclnat0[256] =
 	2, // Anda_M 84
 	2, // Bita_M 85
 	2, // Lda_M 86
-	1, // Invalid 87
+	20, // Invalid 87
 	2, // Eora_M 88
 	2, // Adca_M 89
 	2, // Ora_M 8A
@@ -1172,7 +1089,7 @@ short instcyclnat0[256] =
 	3, // Cmpx_M 8C
 	6, // Bsr 8D
 	3, // Ldx_M 8E
-	1, // Invalid 8F
+	20, // Invalid 8F
 	3, // Suba_D 90
 	3, // Cmpa_D 91
 	3, // Sbca_D 92
@@ -1228,7 +1145,7 @@ short instcyclnat0[256] =
 	2, // Andb_M C4
 	2, // Bitb_M C5
 	2, // Ldb_M C6
-	1, // Invalid C7
+	20, // Invalid C7
 	2, // Eorb_M C8
 	2, // Adcb_M C9
 	2, // Orb_M CA
@@ -1236,7 +1153,7 @@ short instcyclnat0[256] =
 	3, // Ldd_M CC
 	5, // Ldq_M CD
 	3, // Ldu_M CE
-	1, // Invalid CF
+	20, // Invalid CF
 	3, // Subb_D D0
 	3, // Cmpb_D D1
 	3, // Sbcb_D D2
@@ -1287,88 +1204,6 @@ short instcyclnat0[256] =
 	5, // Stu_E FF
 };
 
-short instcyclnat1[256] =
-{
-	1, // Invalid 00
-	1, // Invalid 01
-	1, // Invalid 02
-	1, // Invalid 03
-	1, // Invalid 04
-	1, // Invalid 05
-	1, // Invalid 06
-	1, // Invalid 07
-	1, // Invalid 08
-	1, // Invalid 09
-	1, // Invalid 0A
-	1, // Invalid 0B
-	1, // Invalid 0C
-	1, // Invalid 0D
-	1, // Invalid 0E
-	1, // Invalid 0F
-	1, // Invalid 10
-	1, // Invalid 11
-	1, // Invalid 12
-	1, // Invalid 13
-	1, // Invalid 14
-	1, // Invalid 15
-	1, // Invalid 16
-	1, // Invalid 17
-	1, // Invalid 18
-	1, // Invalid 19
-	1, // Invalid 1A
-	1, // Invalid 1B
-	1, // Invalid 1C
-	1, // Invalid 1D
-	1, // Invalid 1E
-	1, // Invalid 1F
-	5, // Lbrn 21
-	5, // Lbhi 22
-	5, // Lbls 23
-	5, // Lbhs 24
-	5, // Lbcs 25
-	5, // Lbne 26
-	5, // Lbeq 27
-	5, // Lbvc 28
-	5, // Lbvs 29
-	5, // Lbpl 2A
-	5, // Lbmi 2B
-	5, // Lbge 2C
-	5, // Lblt 2D
-	5, // Lbgt 2E
-	5, // Lble 2F
-	4, // Addr 30
-	4, // Adcr 31
-	4, // Subr 32
-	4, // Sbcr 33
-	4, // Andr 34
-	4, // Orr 35
-	4, // Eorr 36
-	4, // Cmpr 37
-	6, // pshsw 38
-	6, // pulsw 39
-	6, // pshuw 3A
-	6, // puluw 3B
-	2, // Invalid 3C
-	2, // Invalid 3D
-	2, // Invalid 3E
-	22, // Swi2 3F
-	2, // Negd 40
-	1, // Invalid 41
-	1, // Invalid 42
-	2, // Comd 43
-	2, // Lsrd 44
-	1, // Invalid 45
-	2, // Rord 46
-	2, // Asrd 47
-	2, // Asld 48
-	2, // Rold 49
-	2, // Decd 4A
-	1, // Invalid 4B
-	2, // Incd 4C
-	2, // Tstd 4D
-	1, // Invalid 4E
-	2, // Clrd 4F
-};
 
 void(*JmpVec1_s[256])(void) = {
 	Neg_D_A,		// 00
@@ -1629,6 +1464,530 @@ void(*JmpVec1_s[256])(void) = {
 	Stu_E_A,		// FF
 };
 
+short instcyclemu2[256] =
+{
+	19, // Invalid 00
+	19, // Invalid 01
+	19, // Invalid 02
+	19, // Invalid 03
+	19, // Invalid 04
+	19, // Invalid 05
+	19, // Invalid 06
+	19, // Invalid 07
+	19, // Invalid 08
+	19, // Invalid 09
+	19, // Invalid 0A
+	19, // Invalid 0B
+	19, // Invalid 0C
+	19, // Invalid 0D
+	19, // Invalid 0E
+	19, // Invalid 0F
+	19, // Invalid 10
+	19, // Invalid 11
+	19, // Invalid 12
+	19, // Invalid 13
+	19, // Invalid 14
+	19, // Invalid 15
+	19, // Invalid 16
+	19, // Invalid 17
+	19, // Invalid 18
+	19, // Invalid 19
+	19, // Invalid 1A
+	19, // Invalid 1B
+	19, // Invalid 1C
+	19, // Invalid 1D
+	19, // Invalid 1E
+	19, // Invalid 1F
+	19, // Invalid 20
+	5, // Lbrn 21
+	5, // Lbhi 22
+	5, // Lbls 23
+	5, // Lbhs 24
+	5, // Lbcs 25
+	5, // Lbne 26
+	5, // Lbeq 27
+	5, // Lbvc 28
+	5, // Lbvs 29
+	5, // Lbpl 2A
+	5, // Lbmi 2B
+	5, // Lbge 2C
+	5, // Lblt 2D
+	5, // Lbgt 2E
+	5, // Lble 2F
+	4, // Addr 30
+	4, // Adcr 31
+	4, // Subr 32
+	4, // Sbcr 33
+	4, // Andr 34
+	4, // Orr 35
+	4, // Eorr 36
+	4, // Cmpr 37
+	6, // pshsw 38
+	6, // pulsw 39
+	6, // pshuw 3A
+	6, // puluw 3B
+	19, // Invalid 3C
+	19, // Invalid 3D
+	19, // Invalid 3E
+	20, // Swi2 3F
+	3, // Negd 40
+	19, // Invalid 41
+	19, // Invalid 42
+	3, // Comd 43
+	3, // Lsrd 44
+	19, // Invalid 45
+	3, // Rord 46
+	3, // Asrd 47
+	3, // Asld 48
+	3, // Rold 49
+	3, // Decd 4A
+	19, // Invalid 4B
+	3, // Incd 4C
+	3, // Tstd 4D
+	19, // Invalid 4E
+	3, // Clrd 4F
+	19, // Invalid 50
+	19, // Invalid 51
+	19, // Invalid 52
+	3, // Comw 53
+	3, // Lsrw 54
+	19, // Invalid 55
+	3, // Rorw 56
+	19, // Invalid 57
+	19, // Invalid 58
+	3, // Rolw 59
+	3, // Decw 5A
+	19, // Invalid 5B
+	3, // Incw 5C
+	3, // Tstw 5D
+	19, // Invalid 5E
+	3, // Clrw 5F
+	19, // Invalid 60
+	19, // Invalid 61
+	19, // Invalid 62
+	19, // Invalid 63
+	19, // Invalid 64
+	19, // Invalid 65
+	19, // Invalid 66
+	19, // Invalid 67
+	19, // Invalid 68
+	19, // Invalid 69
+	19, // Invalid 6A
+	19, // Invalid 6B
+	19, // Invalid 6C
+	19, // Invalid 6D
+	19, // Invalid 6E
+	19, // Invalid 6F
+	19, // Invalid 70
+	19, // Invalid 71
+	19, // Invalid 72
+	19, // Invalid 73
+	19, // Invalid 74
+	19, // Invalid 75
+	19, // Invalid 76
+	19, // Invalid 77
+	19, // Invalid 78
+	19, // Invalid 79
+	19, // Invalid 7A
+	19, // Invalid 7B
+	19, // Invalid 7C
+	19, // Invalid 7D
+	19, // Invalid 7E
+	19, // Invalid 7F
+	5, // Subw_M 80
+	5, // Cmpw_M 81
+	5, // Sbcw_M 82
+	5, // Cmpd_M 83
+	5, // Andd_M 84
+	5, // Bitd_M 85
+	4, // Ldw_M 86
+	19, // Invalid 87
+	5, // Eord_M 88
+	5, // Adcd_M 89
+	5, // Ord_M 8A
+	5, // Addw_M 8B
+	5, // Cmpy_M 8C
+	19, // Invalid 8D
+	4, // Ldy_M 8E
+	19, // Invalid 8F
+	7, // Subw_D 90
+	7, // Cmpw_D 91
+	7, // Sbcd_D 92
+	7, // Cmpd_D 93
+	7, // Andd_D 94
+	7, // Bitd_D 95
+	6, // Ldw_D 96
+	6, // Stw_D 97
+	7, // Eord_D 98
+	7, // Adcd_D 99
+	7, // Ord_D 9A
+	7, // Addw_D 9B
+	7, // Cmpy_D 9C
+	19, // Invalid 9D
+	6, // ldy_D 9E
+	6, // Sty_D 9F
+	7, // Subw_X A0
+	7, // Cmpw_X A1
+	7, // Sbcd_X A2
+	7, // Cmpd_X A3
+	7, // Andd_X A4
+	7, // Bitd_X A5
+	6, // Ldw_X A6
+	6, // Stw_X A7
+	7, // Eord_X A8
+	7, // Adcd_X A9
+	7, // Ord_X AA
+	7, // Addw_X AB
+	7, // Cmpy_X AC
+	19, // Invalid AD
+	6, // Ldy_X AE
+	6, // Sty_X AF
+	8, // Subw_E B0
+	8, // Cmpw_E B1
+	8, // Sbcd_E B2
+	8, // Cmpd_E B3
+	8, // Andd_E B4
+	8, // Bitd_E B5
+	7, // Ldw_E B6
+	7, // Stw_E B7
+	8, // Eord_E B8
+	8, // Adcd_E B9
+	8, // Ord_E BA
+	8, // Addw_E BB
+	8, // Cmpy_E BC
+	19, // Invalid BD
+	7, // Ldy_E BE
+	7, // Sty_E BF
+	19, // Invalid C0
+	19, // Invalid C1
+	19, // Invalid C2
+	19, // Invalid C3
+	19, // Invalid C4
+	19, // Invalid C5
+	19, // Invalid C6
+	19, // Invalid C7
+	19, // Invalid C8
+	19, // Invalid C9
+	19, // Invalid CA
+	19, // Invalid CB
+	19, // Invalid CC
+	19, // Invalid CD
+	4, // Lds_M CE
+	19, // Invalid DF
+	19, // Invalid D0
+	19, // Invalid D1
+	19, // Invalid D2
+	19, // Invalid D3
+	19, // Invalid D4
+	19, // Invalid D5
+	19, // Invalid D6
+	19, // Invalid D7
+	19, // Invalid D8
+	19, // Invalid D9
+	19, // Invalid DA
+	19, // Invalid DB
+	8, // Ldq_D DC
+	8, // Stq_D DD
+	6, // Lds_D DE
+	6, // Sts_D DF
+	19, // Invalid EF
+	19, // Invalid E0
+	19, // Invalid E1
+	19, // Invalid E2
+	19, // Invalid E3
+	19, // Invalid E4
+	19, // Invalid E5
+	19, // Invalid E6
+	19, // Invalid E7
+	19, // Invalid E8
+	19, // Invalid E9
+	19, // Invalid EA
+	19, // Invalid EB
+	8, // Ldq_X EC
+	8, // Stq_X ED
+	6, // Lds_X EE
+	6, // Sts_X EF
+	19, // Invalid FF
+	19, // Invalid F0
+	19, // Invalid F1
+	19, // Invalid F2
+	19, // Invalid F3
+	19, // Invalid F4
+	19, // Invalid F5
+	19, // Invalid F6
+	19, // Invalid F7
+	19, // Invalid F8
+	19, // Invalid F9
+	19, // Invalid FA
+	19, // Invalid FB
+	9, // Ldq_E FC
+	9, // Stq_E FD
+	7, // Lds_E FE
+	7 // Sts_E FF
+};
+
+short instcyclnat2[256] =
+{
+	20, // Invalid 00
+	20, // Invalid 01
+	20, // Invalid 02
+	20, // Invalid 03
+	20, // Invalid 04
+	20, // Invalid 05
+	20, // Invalid 06
+	20, // Invalid 07
+	20, // Invalid 08
+	20, // Invalid 09
+	20, // Invalid 0A
+	20, // Invalid 0B
+	20, // Invalid 0C
+	20, // Invalid 0D
+	20, // Invalid 0E
+	20, // Invalid 0F
+	20, // Invalid 10
+	20, // Invalid 11
+	20, // Invalid 12
+	20, // Invalid 13
+	20, // Invalid 14
+	20, // Invalid 15
+	20, // Invalid 16
+	20, // Invalid 17
+	20, // Invalid 18
+	20, // Invalid 19
+	20, // Invalid 1A
+	20, // Invalid 1B
+	20, // Invalid 1C
+	20, // Invalid 1D
+	20, // Invalid 1E
+	20, // Invalid 1F
+	20, // Invalid 20
+	5, // Lbrn 21
+	5, // Lbhi 22
+	5, // Lbls 23
+	5, // Lbhs 24
+	5, // Lbcs 25
+	5, // Lbne 26
+	5, // Lbeq 27
+	5, // Lbvc 28
+	5, // Lbvs 29
+	5, // Lbpl 2A
+	5, // Lbmi 2B
+	5, // Lbge 2C
+	5, // Lblt 2D
+	5, // Lbgt 2E
+	5, // Lble 2F
+	4, // Addr 30
+	4, // Adcr 31
+	4, // Subr 32
+	4, // Sbcr 33
+	4, // Andr 34
+	4, // Orr 35
+	4, // Eorr 36
+	4, // Cmpr 37
+	6, // pshsw 38
+	6, // pulsw 39
+	6, // pshuw 3A
+	6, // puluw 3B
+	19, // Invalid 3C
+	19, // Invalid 3D
+	19, // Invalid 3E
+	22, // Swi2 3F
+	2, // Negd 40
+	20, // Invalid 41
+	20, // Invalid 42
+	2, // Comd 43
+	2, // Lsrd 44
+	20, // Invalid 45
+	2, // Rord 46
+	2, // Asrd 47
+	2, // Asld 48
+	2, // Rold 49
+	2, // Decd 4A
+	20, // Invalid 4B
+	2, // Incd 4C
+	2, // Tstd 4D
+	20, // Invalid 4E
+	2, // Clrd 4F
+	20, // Invalid 50
+	20, // Invalid 51
+	20, // Invalid 52
+	2, // Comw 53
+	2, // Lsrw 54
+	20, // Invalid 55
+	2, // Rorw 56
+	20, // Invalid 57
+	20, // Invalid 58
+	2, // Rolw 59
+	2, // Decw 5A
+	20, // Invalid 5B
+	2, // Incw 5C
+	2, // Tstw 5D
+	10, // Invalid 5E
+	2, // Clrw 5F
+	20, // Invalid 60
+	20, // Invalid 61
+	20, // Invalid 62
+	20, // Invalid 63
+	20, // Invalid 64
+	20, // Invalid 65
+	20, // Invalid 66
+	20, // Invalid 67
+	20, // Invalid 68
+	20, // Invalid 69
+	20, // Invalid 6A
+	20, // Invalid 6B
+	20, // Invalid 6C
+	20, // Invalid 6D
+	20, // Invalid 6E
+	20, // Invalid 6F
+	20, // Invalid 70
+	20, // Invalid 71
+	20, // Invalid 72
+	20, // Invalid 73
+	20, // Invalid 74
+	20, // Invalid 75
+	20, // Invalid 76
+	20, // Invalid 77
+	20, // Invalid 78
+	20, // Invalid 79
+	20, // Invalid 7A
+	20, // Invalid 7B
+	20, // Invalid 7C
+	20, // Invalid 7D
+	20, // Invalid 7E
+	20, // Invalid 7F
+	4, // Subw_M 80
+	4, // Cmpw_M 81
+	4, // Sbcw_M 82
+	4, // Cmpw_M 83
+	4, // Andd_M 84
+	4, // Bitd_M 85
+	4, // Ldw_M 86
+	20, // Invalid 87
+	4, // Eord_M 88
+	4, // Adcd_M 89
+	4, // Ord_M 8A
+	4, // Addw_M 8B
+	4, // Cmpy_M 8C
+	20, // Invalid 8D
+	4, // Ldy_M 8E
+	20, // Invalid 8F
+	5, // Subw_D 90
+	5, // Cmpw_D 91
+	5, // Sbcd_D 92
+	5, // Cmpd_D 93
+	5, // Andd_D 94
+	5, // Bitd_D 95
+	5, // Ldw_D 96
+	5, // Stw_D 97
+	5, // Eord_D 98
+	5, // Adcd_D 99
+	5, // Ord_D 9A
+	5, // Addw_D 9B
+	5, // Cmpy_D 9C
+	20, // Invalid 9D
+	5, // ldy_D 9E
+	5, // Sty_D 9F
+	6, // Subw_X A0
+	6, // Cmpw_X A1
+	6, // Sbcd_X A2
+	6, // Cmpd_X A3
+	6, // Andd_X A4
+	6, // Bitd_X A5
+	6, // Ldw_X A6
+	6, // Stw_X A7
+	6, // Eord_X A8
+	6, // Adcd_X A9
+	6, // Ord_X AA
+	6, // Addw_X AB
+	6, // Cmpy_X AC
+	20, // Invalid AD
+	6, // Ldy_X AE
+	6, // Sty_X AF
+	6, // Subw_E B0
+	6, // Cmpw_E B1
+	6, // Sbcd_E B2
+	6, // Cmpd_E B3
+	6, // Andd_E B4
+	6, // Bitd_E B5
+	6, // Ldw_E B6
+	6, // Stw_E B7
+	6, // Eord_E B8
+	6, // Adcd_E B9
+	6, // Ord_E BA
+	6, // Addw_E BB
+	6, // Cmpy_E BC
+	20, // Invalid DD
+	6, // Ldy_E BE
+	6, // Sty_E BF
+	20, // Invalid C0
+	20, // Invalid C1
+	20, // Invalid C2
+	20, // Invalid C3
+	20, // Invalid C4
+	20, // Invalid C5
+	20, // Invalid C6
+	20, // Invalid C7
+	20, // Invalid C8
+	20, // Invalid C9
+	20, // Invalid CA
+	20, // Invalid CB
+	20, // Invalid CC
+	20, // Invalid CD
+	4, // Lds_M CE
+	20, // Invalid DF
+	20, // Invalid D0
+	20, // Invalid D1
+	20, // Invalid D2
+	20, // Invalid D3
+	20, // Invalid D4
+	20, // Invalid D5
+	20, // Invalid D6
+	20, // Invalid D7
+	20, // Invalid D8
+	20, // Invalid D9
+	20, // Invalid DA
+	20, // Invalid DB
+	7, // Ldq_D DC
+	7, // Stq_D DD
+	5, // Lds_D DE
+	5, // Sts_D DF
+	20, // Invalid EF
+	20, // Invalid E0
+	20, // Invalid E1
+	20, // Invalid E2
+	20, // Invalid E3
+	20, // Invalid E4
+	20, // Invalid E5
+	20, // Invalid E6
+	20, // Invalid E7
+	20, // Invalid E8
+	20, // Invalid E9
+	20, // Invalid EA
+	20, // Invalid EB
+	8, // Ldq_X EC
+	8, // Stq_X ED
+	6, // Lds_X EE
+	6, // Sts_X EF
+	20, // Invalid FF
+	20, // Invalid F0
+	20, // Invalid F1
+	20, // Invalid F2
+	20, // Invalid F3
+	20, // Invalid F4
+	20, // Invalid F5
+	20, // Invalid F6
+	20, // Invalid F7
+	20, // Invalid F8
+	20, // Invalid F9
+	20, // Invalid FA
+	20, // Invalid FB
+	8, // Ldq_E FC
+	8, // Stq_E FD
+	6, // Lds_E FE
+	6 // Sts_E FF
+};
+
 void(*JmpVec2_s[256])(void) = {
 	InvalidInsHandler_s,		// 00
 	InvalidInsHandler_s,		// 01
@@ -1886,6 +2245,526 @@ void(*JmpVec2_s[256])(void) = {
 	Stq_E_A,		// FD
 	Lds_E_A,		// FE
 	Sts_E_A,		// FF
+};
+
+short instcyclemu3[256] =
+{
+	19, // Invalid 00
+	19, // Invalid 01
+	19, // Invalid 02
+	19, // Invalid 03
+	19, // Invalid 04
+	19, // Invalid 05
+	19, // Invalid 06
+	19, // Invalid 07
+	19, // Invalid 08
+	19, // Invalid 09
+	19, // Invalid 0A
+	19, // Invalid 0B
+	19, // Invalid 0C
+	19, // Invalid 0D
+	19, // Invalid 0E
+	19, // Invalid 0F
+	19, // Invalid 10
+	19, // Invalid 11
+	19, // Invalid 12
+	19, // Invalid 13
+	19, // Invalid 14
+	19, // Invalid 15
+	19, // Invalid 16
+	19, // Invalid 17
+	19, // Invalid 18
+	19, // Invalid 19
+	19, // Invalid 1A
+	19, // Invalid 1B
+	19, // Invalid 1C
+	19, // Invalid 1D
+	19, // Invalid 1E
+	19, // Invalid 1F
+	19, // Invalid 20
+	19, // Invalid 21
+	19, // Invalid 22
+	19, // Invalid 23
+	19, // Invalid 24
+	19, // Invalid 25
+	19, // Invalid 26
+	19, // Invalid 27
+	19, // Invalid 28
+	19, // Invalid 29
+	19, // Invalid 2A
+	19, // Invalid 2B
+	19, // Invalid 2C
+	19, // Invalid 2D
+	19, // Invalid 2E
+	19, // Invalid 2F
+	7, // Band 30
+	7, // Biand 31
+	7, // Bor 32
+	7, // Bior 33
+	7, // Beor 34
+	7, // Bieor 35
+	7, // Ldbt 36
+	8, // Stbt 37
+	6, // Tfm1 38
+	6, // Tfm2 39
+	6, // Tfm3 3A
+	6, // Tfm4 3B
+	4, // Bitmd 3C
+	5, // ldmd 3D
+	19, // Invalid 3E
+	20, // Swi3 3F
+	19, // Invalid 40
+	19, // Invalid 41
+	19, // Invalid 42
+	3, // Come_I 43
+	19, // Invalid 44
+	19, // Invalid 45
+	19, // Invalid 46
+	19, // Invalid 47
+	19, // Invalid 48
+	19, // Invalid 49
+	3, // Dece_I 4A
+	19, // Invalid 4B
+	3, // Ince_I 4C
+	3, // Tste_I 4D
+	19, // Invalid 4E
+	3, // Clre_I 4F
+	19, // Invalid 50
+	19, // Invalid 51
+	19, // Invalid 52
+	3, // Comf_I 53
+	19, // Invalid 54
+	19, // Invalid 55
+	19, // Invalid 56
+	19, // Invalid 57
+	19, // Invalid 58
+	19, // Invalid 59
+	3, // Decf_I 5A
+	19, // Invalid 5B
+	3, // Incf_I 5C
+	3, // Tstf_I 5D
+	19, // Invalid 5E
+	3, // Clrf_I 5F
+	19, // Invalid 60
+	19, // Invalid 61
+	19, // Invalid 62
+	19, // Invalid 63
+	19, // Invalid 64
+	19, // Invalid 65
+	19, // Invalid 66
+	19, // Invalid 67
+	19, // Invalid 68
+	19, // Invalid 69
+	19, // Invalid 6A
+	19, // Invalid 6B
+	19, // Invalid 6C
+	19, // Invalid 6D
+	19, // Invalid 6E
+	19, // Invalid 6F
+	19, // Invalid 70
+	19, // Invalid 71
+	19, // Invalid 72
+	19, // Invalid 73
+	19, // Invalid 74
+	19, // Invalid 75
+	19, // Invalid 76
+	19, // Invalid 77
+	19, // Invalid 78
+	19, // Invalid 79
+	19, // Invalid 7A
+	19, // Invalid 7B
+	19, // Invalid 7C
+	19, // Invalid 7D
+	19, // Invalid 7E
+	19, // Invalid 7F
+	3, // Sube_M 80
+	3, // Cmpe_M 81
+	19, // Invalid 82
+	5, // Cmpu_M 83
+	19, // Invalid 84
+	19, // Invalid 85
+	3, // Lde_M 86
+	19, // Invalid 87
+	19, // Invalid 88
+	19, // Invalid 89
+	19, // Invalid 8A
+	3, // Adde_M 8B
+	5, // Cmps_M 8C
+	0, // Divd_M 8D + does own cycles
+	0, // Divq_M 8E + does own cycles
+	28, // Muld 8F
+	5, // Sube_D 90
+	5, // Cmpe_D 91
+	19, // Invalid 92
+	7, // Cmpu_D 93
+	19, // Invalid 94
+	19, // Invalid 95
+	5, // Lde_D 96
+	5, // Ste_D 97
+	19, // Invalid 98
+	19, // Invalid 99
+	19, // Invalid 9A
+	5, // Adde_D 9B
+	7, // Cmps_D 9C
+	0, // Divd_D 9D + does own cycles
+	0, // Divq_D 9E + does own cycles
+	30, // Muld_D 9F
+	5, // Sube_X A0
+	5, // Cmpe_X A1
+	19, // Invalid A2
+	7, // Cmpu_X A3
+	19, // Invalid A4
+	19, // Invalid A5
+	5, // lde_X A6
+	5, // Ste_X A7
+	19, // Invalid A8
+	19, // Invalid A9
+	19, // Invalid AA
+	5, // Adde_X AB
+	7, // Cmps_X AC
+	0, // Divd_D AD + does own cycles
+	0, // Divq_D AE + does own cycles
+	30, // Muld_D AF
+	6, // Sube_E B0
+	6, // Cmpe_E B1
+	19, // Invalid B2
+	8, // Cmpu_E B3
+	19, // Invalid B4
+	19, // Invalid B5
+	6, // Lde_E B6
+	6, // Ste_E B7
+	19, // Invalid B8
+	19, // Invalid B9
+	19, // Invalid BA
+	6, // Adde_E BB
+	6, // Cmpe_E BC
+	0, // Divd_D BD + does own cycles
+	0, // Divq_D BE + does own cycles
+	31, // Muld_D BF
+	3, // Subf_M C0
+	3, // Cmpf_M C1
+	19, // Invalid C2
+	19, // Invalid C3
+	19, // Invalid C4
+	19, // Invalid C5
+	3, // Ldf_M C6
+	19, // Invalid C7
+	19, // Invalid C8
+	19, // Invalid C9
+	19, // Invalid CA
+	3, // Addf_M CB
+	19, // Invalid CC
+	19, // Invalid CD
+	19, // Invalid CE
+	19, // Invalid CF
+	5, // Subf_D D0
+	5, // Cmpf_D D1
+	19, // Invalid D2
+	19, // Invalid D3
+	19, // Invalid D4
+	19, // Invalid D5
+	5, // Ldf_D D6
+	5, // Stf_D D7
+	19, // Invalid D8
+	19, // Invalid D9
+	19, // Invalid DA
+	5, // Addf_D DB
+	19, // Invalid DC
+	19, // Invalid DD
+	19, // Invalid DE
+	19, // Invalid DF
+	5, // Subf_X E0
+	5, // Cmpf_X E1
+	19, // Invalid E2
+	19, // Invalid E3
+	19, // Invalid E4
+	19, // Invalid E5
+	5, // Ldf_X E6
+	5, // Stf_X E7
+	19, // Invalid E8
+	19, // Invalid E9
+	19, // Invalid EA
+	5, // Addf_X EB
+	19, // Invalid EC
+	19, // Invalid ED
+	19, // Invalid EE
+	19, // Invalid EF
+	6, // Subf_E F0
+	6, // Cmpf_E F1
+	19, // Invalid F2
+	19, // Invalid F3
+	19, // Invalid F4
+	19, // Invalid F5
+	6, // Ldf_E F6
+	6, // Stf_E F7
+	19, // Invalid F8
+	19, // Invalid F9
+	19, // Invalid FA
+	6, // Addf_E FB
+	19, // Invalid FC
+	19, // Invalid FD
+	19, // Invalid FE
+	19, // Invalid FF
+};
+
+short instcyclnat3[256] = 
+{
+	20, // Invalid 00
+	20, // Invalid 01
+	20, // Invalid 02
+	20, // Invalid 03
+	20, // Invalid 04
+	20, // Invalid 05
+	20, // Invalid 06
+	20, // Invalid 07
+	20, // Invalid 08
+	20, // Invalid 09
+	20, // Invalid 0A
+	20, // Invalid 0B
+	20, // Invalid 0C
+	20, // Invalid 0D
+	20, // Invalid 0E
+	20, // Invalid 0F
+	20, // Invalid 10
+	20, // Invalid 11
+	20, // Invalid 12
+	20, // Invalid 13
+	20, // Invalid 14
+	20, // Invalid 15
+	20, // Invalid 16
+	20, // Invalid 17
+	20, // Invalid 18
+	20, // Invalid 19
+	20, // Invalid 1A
+	20, // Invalid 1B
+	20, // Invalid 1C
+	20, // Invalid 1D
+	20, // Invalid 1E
+	20, // Invalid 1F
+	20, // Invalid 20
+	20, // Invalid 21
+	20, // Invalid 22
+	20, // Invalid 23
+	20, // Invalid 24
+	20, // Invalid 25
+	20, // Invalid 26
+	20, // Invalid 27
+	20, // Invalid 28
+	20, // Invalid 29
+	20, // Invalid 2A
+	20, // Invalid 2B
+	20, // Invalid 2C
+	20, // Invalid 2D
+	20, // Invalid 2E
+	20, // Invalid 2F
+	6, // Band 30
+	6, // Biand 31
+	6, // Bor 32
+	6, // Bior 33
+	6, // Beor 34
+	6, // Bieor 35
+	6, // Ldbt 36
+	7, // Stbt 37
+	6, // Tfm1 38
+	6, // Tfm2 39
+	6, // Tfm3 3A
+	6, // Tfm4 3B
+	4, // Bitmd 3C
+	5, // ldmd 3D
+	20, // Invalid 3E
+	22, // Swi3 3F
+	20, // Invalid 40
+	20, // Invalid 41
+	20, // Invalid 42
+	2, // Come_I 43
+	20, // Invalid 44
+	20, // Invalid 45
+	20, // Invalid 46
+	20, // Invalid 47
+	20, // Invalid 48
+	20, // Invalid 49
+	2, // Dece_I 4A
+	20, // Invalid 4B
+	2, // Ince_I 4C
+	2, // Tste_I 4D
+	20, // Invalid 4E
+	2, // Clrf_I 4F
+	20, // Invalid 50
+	20, // Invalid 51
+	20, // Invalid 52
+	2, // Comf_I 53
+	20, // Invalid 54
+	20, // Invalid 55
+	20, // Invalid 56
+	20, // Invalid 57
+	20, // Invalid 58
+	20, // Invalid 59
+	2, // Decf_I 5A
+	20, // Invalid 5B
+	2, // Incf_I 5C
+	2, // Tstf_I 5D
+	20, // Invalid 5E
+	2, // Clrf_I 5F
+	20, //Invalid 60
+	20, //Invalid 61
+	20, //Invalid 62
+	20, //Invalid 63
+	20, //Invalid 64
+	20, //Invalid 65
+	20, //Invalid 66
+	20, //Invalid 67
+	20, //Invalid 68
+	20, //Invalid 69
+	20, //Invalid 6A
+	20, //Invalid 6B
+	20, //Invalid 6C
+	20, //Invalid 6D
+	20, //Invalid 6E
+	20, //Invalid 6F
+	20, //Invalid 70
+	20, //Invalid 71
+	20, //Invalid 72
+	20, //Invalid 73
+	20, //Invalid 74
+	20, //Invalid 75
+	20, //Invalid 76
+	20, //Invalid 77
+	20, //Invalid 78
+	20, //Invalid 79
+	20, //Invalid 7A
+	20, //Invalid 7B
+	20, //Invalid 7C
+	20, //Invalid 7D
+	20, //Invalid 7E
+	20, //Invalid 7F
+	3, // Sube_M 80
+	3, // Cmpe_M 81
+	20, //Invalid 82
+	4, // Cmpu_M 83
+	20, //Invalid 84
+	20, //Invalid 85
+	3, // Lde_M 86
+	20, //Invalid 87
+	20, //Invalid 88
+	20, //Invalid 89
+	20, //Invalid 8A
+	3, // Adde_M 8B
+	4, // Cmps_M 8C
+	0, // Divd_M 8D + does own cycles
+	0, // Divq_M 8E + does own cycles
+	28, // Muld 8F
+	4, // Sube_D 90
+	4, // Cmpe_D 91
+	20, //Invalid 92
+	4, // Cmpu_D 93
+	20, //Invalid 94
+	20, //Invalid 95
+	4, // Lde_D 96
+	4, // Ste_D 97
+	20, //Invalid 98
+	20, //Invalid 99
+	20, //Invalid 9A
+	4, // Adde_D 9B
+	5, // Cmps_D 9C
+	0, // Divd_D 9D + does own cycles
+	0, // Divq_D 9E + does own cycles
+	29, // Muld_D 9F
+	5, // Sube_X A0
+	5, // Cmpe_X A1
+	20, //Invalid A2
+	6, // Cmpu_X A3
+	20, //Invalid A4
+	20, //Invalid A5
+	5, // lde_X A6
+	5, // Ste_X A7
+	20, //Invalid A8
+	20, //Invalid A9
+	20, //Invalid AA
+	5, // Adde_X AB
+	6, // Cmps_X AC
+	0, // Divd_D AD + does own cycles
+	0, // Divq_D AE + does own cycles
+	30, // Muld_D AF
+	5, // Sube_E B0
+	5, // Cmpe_E B1
+	20, //Invalid B2
+	6, // Cmpu_E B3
+	20, //Invalid B4
+	20, //Invalid B5
+	5, // Lde_E B6
+	5, // Ste_E B7
+	20, //Invalid B8
+	20, //Invalid B9
+	20, //Invalid BA
+	5, // Adde_E BB
+	5, // Cmpe_E BC
+	0, // Divd_D BD + does own cycles
+	0, // Divq_D BE + does own cycles
+	30, // Muld_D BF
+	3, // Subf_M C0
+	3, // Cmpf_M C1
+	20, // Invalid C2
+	20, // Invalid C3
+	20, // Invalid C4
+	20, // Invalid C5
+	3, // Ldf_M C6
+	20, // Invalid C7
+	20, // Invalid C8
+	20, // Invalid C9
+	20, // Invalid CA
+	3, // Addf_M CB
+	20, // Invalid CC
+	20, // Invalid CD
+	20, // Invalid CE
+	20, // Invalid CF
+	4, // Subf_D D0
+	4, // Cmpf_D D1
+	20, // Invalid D2
+	20, // Invalid D3
+	20, // Invalid D4
+	20, // Invalid D5
+	4, // Ldf_D D6
+	4, // Stf_D D7
+	20, // Invalid D8
+	20, // Invalid D9
+	20, // Invalid DA
+	4, // Addf_D DB
+	20, // Invalid DC
+	20, // Invalid DD
+	20, // Invalid DE
+	20, // Invalid DF
+	5, // Subf_X E0
+	5, // Cmpf_X E1
+	20, // Invalid E2
+	20, // Invalid E3
+	20, // Invalid E4
+	20, // Invalid E5
+	5, // Ldf_X E6
+	5, // Stf_X E7
+	20, // Invalid E8
+	20, // Invalid E9
+	20, // Invalid EA
+	5, // Addf_X EB
+	20, // Invalid EC
+	20, // Invalid ED
+	20, // Invalid EE
+	20, // Invalid EF
+	5, // Subf_E F0
+	5, // Cmpf_E F1
+	20, // Invalid F2
+	20, // Invalid F3
+	20, // Invalid F4
+	20, // Invalid F5
+	5, // Ldf_E F6
+	5, // Stf_E F7
+	20, // Invalid F8
+	20, // Invalid F9
+	20, // Invalid FA
+	5, // Addf_E FB
+	20, // Invalid FC
+	20, // Invalid FD
+	20, // Invalid FE
+	20, // Invalid FF
 };
 
 void(*JmpVec3_s[256])(void) = {
@@ -2177,7 +3056,7 @@ int HD6309Exec_s(int CycleFor)
 
 		unsigned char memByte = MemRead8_s(PC_REG++);
 		JmpVec1_s[memByte](); // Execute instruction pointed to by PC_REG
-		CycleCounter += 5;
+		CycleCounter += instcyclnat1[memByte]; // Add instruction cycles
 	}//End While
 
 	return(CycleFor - CycleCounter);
@@ -2185,12 +3064,16 @@ int HD6309Exec_s(int CycleFor)
 
 void Page_2_s(void) //10
 {
-	//JmpVec2[MemRead8_s(PC_REG++)](); // Execute instruction pointed to by PC_REG
+	unsigned char memByte = MemRead8_s(PC_REG++);
+	JmpVec2_s[memByte](); // Execute instruction pointed to by PC_REG
+	CycleCounter += instcyclnat2[memByte]; // Add instruction cycles
 }
 
 void Page_3_s(void) //11
 {
-	//JmpVec3[MemRead8_s(PC_REG++)](); // Execute instruction pointed to by PC_REG
+	unsigned char memByte = MemRead8_s(PC_REG++);
+	JmpVec3_s[memByte](); // Execute instruction pointed to by PC_REG
+	CycleCounter += instcyclnat3[memByte]; // Add instruction cycles
 }
 
 void cpu_firq_s(void)
@@ -2401,14 +3284,17 @@ void cpu_nmi_s(void)
 // 			case 1: // 16 bit offset from W.reg
 // 				ea = q_s.Word.msw + IMMADDRESS(pc_s.Reg);
 // 				pc_s.Reg += 2;
+// 			  CycleCounter += 2;
 // 				break;
 // 			case 2: // Post-inc by 2 from W.reg
 // 				ea = q_s.Word.msw;
 // 				q_s.Word.msw += 2;
+// 			  CycleCounter += 1;
 // 				break;
 // 			case 3: // Pre-dec by 2 from W.reg
 // 				q_s.Word.msw -= 2;
 // 				ea = q_s.Word.msw;
+// 			  CycleCounter += 1;
 // 				break;
 // 			}
 // 			break;
@@ -2419,17 +3305,21 @@ void cpu_nmi_s(void)
 // 			{
 // 			case 0: // Indirect no offset from W.reg
 // 				ea = MemRead16_s(q_s.Word.msw);
+// 			  CycleCounter += 3;
 // 				break;
 // 			case 1: // Indirect 16 bit offset from W.reg
 // 				ea = MemRead16_s(q_s.Word.msw + IMMADDRESS(pc_s.Reg));
 // 				pc_s.Reg += 2;
+// 			  CycleCounter += 5;
 // 				break;
 // 			case 2: // Indirect post-inc by 2 from W.reg
 // 				ea = MemRead16_s(q_s.Word.msw);
 // 				q_s.Word.msw += 2;
+// 			  CycleCounter += 4;
 // 				break;
 // 			case 3: // Indirect pre-dec by 2 from W.reg
 // 				q_s.Word.msw -= 2;
+// 			  CycleCounter += 4;
 // 				ea = MemRead16_s(q_s.Word.msw);
 // 				break;
 // 			}
@@ -2597,12 +3487,29 @@ void cpu_nmi_s(void)
 //	return bincc;
 //}
 
-void setmd_s (UINT8 binmd)
+void MSABI setmd_s (UINT8 binmd)
 {
 	//unsigned char bit;
 	//for (bit=0;bit<=7;bit++)
 	//	md_s[bit]=!!(binmd & (1<<bit));
-	mdbits_s = binmd & 3;
+	
+	// mdbits_s = binmd & 3;
+	
+	// Point to correct cycle tables
+
+	if (binmd & 1) // In nativemode
+	{
+		instcycl1 = instcyclnat1;
+		instcycl2 = instcyclnat2;
+		instcycl3 = instcyclnat3;
+	}
+	else // emulation mode
+	{
+		instcycl1 = instcyclemu1;
+		instcycl2 = instcyclemu2;
+		instcycl3 = instcyclemu3;
+	}
+	
 	return;
 }
 
