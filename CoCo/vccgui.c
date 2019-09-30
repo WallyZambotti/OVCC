@@ -32,6 +32,8 @@ This file is part of VCC (Virtual Color Computer).
 #define Ulong unsigned long
 #endif
 
+void SetStatusBarText(const char *, SystemState2 *);
+
 extern STRConfig CurrentConfig;
 extern JoyStick	LeftSDL;
 extern JoyStick RightSDL;

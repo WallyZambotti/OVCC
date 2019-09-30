@@ -41,6 +41,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "throttle.h"
 #include "logger.h"
 #include "sdl2driver.h"
+#include "SDLInterface.h"
 
 SystemState2 EmuState2;
 static bool DialogOpen=false;
