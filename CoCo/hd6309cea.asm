@@ -22,8 +22,8 @@ DEST EQU 4
 	shr al, 5
 	and al, 3
 	inc al
-	cmp bl, 80h
-	je ceaelse1
+	bt bx, 7; If bit 7 is not set
+	jnc ceaelse1
 	; switch (posybtye & 0x1f)
 	and bl, 1FH
 	lea rdx, ceaswtch1
@@ -37,6 +37,7 @@ ceaswtch1:
 	QWORD ceacase104
 	QWORD ceacase105
 	QWORD ceacase106
+	QWORD ceacase107
 	QWORD ceacase108
 	QWORD ceacase109
 	QWORD ceacase10A
@@ -258,14 +259,13 @@ ceacase300: ; Indirect no offset from W.reg
 	add dword ptr [CycleCounter], 3
 	jmp cearet
 ceacase301: ; Indirect 16 bit offset from W.reg
-	mov cx, word ptr [q_s+WREG]
-	call MemRead16_s
-	movzx rdx, ax
-	; Get offset Byte at PC++
+	; Get offset Word at PC++
 	movzx rcx, word ptr [pc_s]
 	add word ptr [pc_s], 2
 	call MemRead16_s
-	add ax, dx
+	add ax, word ptr [q_s+WREG]
+	mov cx, ax
+	call MemRead16_s
 	add dword ptr [CycleCounter], 5
 	jmp cearet
 ceacase302: ; Indirect post-inc by 2 from W.reg

@@ -59,7 +59,6 @@ EXTERN	x_s: WORD
 EXTERN	y_s: WORD
 EXTERN	q_s: DWORD
 EXTERN	z_s: DWORD
-EXTERN	x86Flags: WORD
 EXTERN	SyncWaiting_s: BYTE
 EXTERN	InInterupt_s: BYTE
 EXTERN	ccbits_s: BYTE

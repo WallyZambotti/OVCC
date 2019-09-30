@@ -17,7 +17,7 @@ DEST EQU 4
 	mov cx, word ptr [pc_s]
 	inc word ptr [pc_s]
 	call MemRead8_s
-	mov bx, ax
+	movzx rbx, ax
 	; Source Reg = postbyte >> 4;
 	shr al, 4
 	; Dest = poastbyte & 0x0f
@@ -152,7 +152,7 @@ DEST EQU 4
 	mov cx, word ptr [pc_s]
 	inc word ptr [pc_s]
 	call MemRead8_s
-	mov bx, ax
+	movzx rbx, ax
 	; Source Reg = postbyte >> 4;
 	shr al, 4
 	; Dest = poastbyte & 0x0f

@@ -233,7 +233,7 @@ unsigned char MemRead8(unsigned short address)
 	return(PackMem8Read(MemPageOffsets[MmuRegisters[MmuState][address >> 13]] + (address & 0x1FFF)));
 }
 
-extern unsigned char MSABI MemRead8_s(unsigned short address)
+unsigned char MSABI MemRead8_s(unsigned short address)
 {
 	if (address<0xFE00)
 	{
@@ -277,7 +277,7 @@ void MemWrite8(unsigned char data, unsigned short address)
 	return;
 }
 
-extern void MSABI MemWrite8_s(unsigned char data, unsigned short address)
+void MSABI MemWrite8_s(unsigned char data, unsigned short address)
 {
 	//	char Message[256]="";
 	//	if ((address>=0xC000) & (address<=0xE000))
@@ -285,32 +285,22 @@ extern void MSABI MemWrite8_s(unsigned char data, unsigned short address)
 	//		sprintf(Message,"Writing %i to ROM Address %x\n",data,address);
 	//		WriteLog(Message,TOCONS);
 	//	}
-
 	if (address < 0xFE00)
 	{
 		if (MapType || (MmuRegisters[MmuState][address >> 13] < VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address >> 13] > VectorMask[CurrentRamConfig]))
-			if (MemPages[MmuRegisters[MmuState][address >> 13]][address & 0x1FFF] != data)
-			{
-				//WriteLog("Memory write 1 incorrect!\n", TOCONS);
-			}
+			MemPages[MmuRegisters[MmuState][address >> 13]][address & 0x1FFF] = data;
 		return;
 	}
 	if (address > 0xFEFF)
 	{
-		//port_write(data, address);
+		port_write(data, address);
 		return;
 	}
 	if (RamVectors)	//Address must be $FE00 - $FEFF
-		if (memory[(0x2000 * VectorMask[CurrentRamConfig]) | (address & 0x1FFF)] != data)
-		{
-			//WriteLog("Memory write 2 incorrect!\n", TOCONS);
-		}
+		memory[(0x2000 * VectorMask[CurrentRamConfig]) | (address & 0x1FFF)] = data;
 	else
 		if (MapType || (MmuRegisters[MmuState][address >> 13] < VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address >> 13] > VectorMask[CurrentRamConfig]))
-			if (MemPages[MmuRegisters[MmuState][address >> 13]][address & 0x1FFF] != data)
-			{
-				//WriteLog("Memory write 3 incorrect!\n", TOCONS);
-			}
+			MemPages[MmuRegisters[MmuState][address >> 13]][address & 0x1FFF] = data;
 	return;
 }
 

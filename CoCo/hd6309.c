@@ -7380,9 +7380,9 @@ void HD6309ForcePC(unsigned short NewPC)
 	return;
 }
 
-unsigned short GetPC(void)
-{
-	return(PC_REG);
-}
+// unsigned short GetPC(void)
+// {
+// 	return(PC_REG);
+// }
 
 

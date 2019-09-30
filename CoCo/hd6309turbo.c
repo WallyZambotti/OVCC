@@ -557,8 +557,6 @@ extern void Addf_E_A(void);
 #define NFx86 0x80
 #define VFx86 0x800
 
-UINT16 x86Flags;
-UINT8 SyncWaiting_s = 0;
 unsigned short *xfreg16_s[8];
 unsigned char *ureg8_s[8];
 
@@ -578,12 +576,9 @@ cpuregister pc_s, x_s, y_s, u_s, s_s, dp_s, v_s, z_s;
 static unsigned char InsCycles[2][25];
 unsigned char cc_s[8];
 //static unsigned int md_s[8];
-//static unsigned char *ureg8[8]; 
-//static unsigned char ccbits,mdbits;
 unsigned char ccbits_s, mdbits_s;
-//static unsigned short *xfreg16[8];
 int CycleCounter=0;
-//static unsigned int SyncWaiting=0;
+UINT8 SyncWaiting_s = 0;
 unsigned short temp16;
 static signed short stemp16;
 static signed char stemp8;
@@ -637,10 +632,9 @@ void HD6309Reset_s(void)
 		*xfreg16_s[index] = 0;
 	for(index=0;index<=7;index++)
 		*ureg8_s[index]=0;
-	x86Flags = 0;
 	//for(index=0;index<=7;index++)
 	//	md_s[index]=0;
-	mdbits_s = getmd_s();
+	//mdbits_s = getmd_s();
 	mdbits_s = 0;
 	setmd_s(mdbits_s);
 	dp_s.Reg=0;
@@ -3056,7 +3050,7 @@ int HD6309Exec_s(int CycleFor)
 
 		unsigned char memByte = MemRead8_s(PC_REG++);
 		JmpVec1_s[memByte](); // Execute instruction pointed to by PC_REG
-		CycleCounter += instcyclnat1[memByte]; // Add instruction cycles
+		CycleCounter += instcycl1[memByte]; // Add instruction cycles
 	}//End While
 
 	return(CycleFor - CycleCounter);
@@ -3066,14 +3060,14 @@ void Page_2_s(void) //10
 {
 	unsigned char memByte = MemRead8_s(PC_REG++);
 	JmpVec2_s[memByte](); // Execute instruction pointed to by PC_REG
-	CycleCounter += instcyclnat2[memByte]; // Add instruction cycles
+	CycleCounter += instcycl2[memByte]; // Add instruction cycles
 }
 
 void Page_3_s(void) //11
 {
 	unsigned char memByte = MemRead8_s(PC_REG++);
 	JmpVec3_s[memByte](); // Execute instruction pointed to by PC_REG
-	CycleCounter += instcyclnat3[memByte]; // Add instruction cycles
+	CycleCounter += instcycl3[memByte]; // Add instruction cycles
 }
 
 void cpu_firq_s(void)
@@ -3094,7 +3088,7 @@ void cpu_firq_s(void)
 			PC_REG=MemRead16_s(VFIRQ);
 		break;
 
-		case 1:		//6309
+		case MD_FIRQMODE_BIT:		//6309
 			cc_s[E]=1;
 			MemWrite8_s( pc_s.B.lsb,--S_REG);
 			MemWrite8_s( pc_s.B.msb,--S_REG);
@@ -3581,13 +3575,13 @@ void MSABI ErrorVector_s(void)
 	MemWrite8_s(A_REG,--S_REG);
 	MemWrite8_s(getcc_s(),--S_REG);
 	PC_REG=MemRead16_s(VTRAP);
-	CycleCounter+=(12 + InsCycles[MD_NATIVE6309][M54]);	//One for each byte +overhead? Guessing from PSHS
+	CycleCounter+=(12 + 5 - MD_NATIVE6309);	//One for each byte +overhead? Guessing from PSHS
 	return;
 }
 
 unsigned int MSABI MemRead32_s(unsigned short Address)
 {
-	return ( (MemRead16_s(Address)<<16) | MemRead16(Address+2) );
+	return ( (MemRead16_s(Address)<<16) | MemRead16_s(Address+2) );
 
 }
 void MSABI MemWrite32_s(unsigned int data,unsigned short Address)
@@ -3615,9 +3609,9 @@ void HD6309ForcePC_s(unsigned short NewPC)
 	return;
 }
 
-unsigned short GetPC_s(void)
-{
-	return(PC_REG);
-}
+// unsigned short GetPC_s(void)
+// {
+// 	return(PC_REG);
+// }
 
 
