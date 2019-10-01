@@ -111,7 +111,7 @@ static unsigned char *ureg8[8];
 static unsigned char ccbits,mdbits;
 static unsigned short *xfreg16[8];
 static int CycleCounter=0;
-unsigned int SyncWaiting=0;
+static unsigned int SyncWaiting=0;
 unsigned short temp16;
 static signed short stemp16;
 static signed char stemp8;

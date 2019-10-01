@@ -3,10 +3,10 @@ TARGET = ovcc
 _OBJS = vcc.o coco3.o config.o fileops.o hd6309.o iobus.o logger.o mc6809.o \
 	mc6821.o pakinterface.o quickload.o tcc1014mmu.o tcc1014registers.o \
 	throttle.o _xdebug.o cassette.o SDLInterface.o tcc1014graphicsSDL.o keyboardSDL.o \
-	keyboardLayoutSDL.o joystickinputSDL.o audioSDL.o vccgui.o iniman.o \
+	keyboardLayoutSDL.o joystickinputSDL.o audioSDL.o vccgui.o iniman.o hd6309turbo.o \
 	hd6309asmP0-00-7F.o hd6309asmP0-80-FF.o hd6309asmP1-00-FF.o hd6309asmP2-00-FF.o \
 	hd6309asmReg2Reg.o hd6309cea.o hd6309pshpul.o hd6309saveflags.o hd6309tfrexg.o \
-	hd6309turbo.o
+	
 _UNUSED_OBJS = hd6309-a.o fixedtexture.o
 
 include ../Makefile.common

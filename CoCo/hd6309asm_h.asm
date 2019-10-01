@@ -66,8 +66,8 @@ EXTERN	cc_s: BYTE
 EXTERN	mdbits_s: BYTE
 EXTERN	ureg8_s: QWORD
 EXTERN	xfreg16_s: QWORD
-extern gCycleFor: DWORD
-extern CycleCounter: DWORD
+EXTERN  gCycleFor: DWORD
+EXTERN  CycleCounter: DWORD
 
 EXTERN	MemRead8_s: PROC
 EXTERN	MemRead16_s: PROC

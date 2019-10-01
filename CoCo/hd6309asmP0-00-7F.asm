@@ -301,10 +301,9 @@ VAL EQU 4
 	call MemRead8_s
 	; Save the top bit for the V flag calc
 	mov dl, al
-	and dl, 080h
 	; Restore CF Flag
 	bt word ptr [cc_s+CF_C_B], 0 ; bit 0 (1st) is CF
-	; Rotate Right the byte and save the FLAGS
+	; Rotate left the byte and save the FLAGS
 	rcl al, 1
 	; rcl only affects Carry.  Save the Carry first
 	setc byte ptr [cc_s+CF_C_B]
