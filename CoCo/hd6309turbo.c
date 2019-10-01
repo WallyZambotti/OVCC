@@ -118,7 +118,7 @@ static char RegName[16][10]={"D","X","Y","U","S","PC","W","V","A","B","CC","DP",
 wideregister q_s;
 cpuregister pc_s, x_s, y_s, u_s, s_s, dp_s, v_s, z_s;
 static unsigned char InsCycles[2][25];
-unsigned int cc_s[8];
+unsigned char cc_s[8];
 static unsigned int md[8];
 unsigned char *ureg8_s[8]; 
 unsigned char ccbits_s,mdbits_s;
@@ -141,6 +141,7 @@ static signed short *spostword=(signed short *)&postword;
 char InInterupt_s=0;
 int gCycleFor;
 static short *instcycl1, *instcycl2, *instcycl3;
+static unsigned long instcnt1[256], instcnt2[256], instcnt3[0];
 //END Global variables for CPU Emulation-------------------
 
 //Fuction Prototypes---------------------------------------
@@ -188,6 +189,13 @@ void HD6309Reset_s(void)
 	SyncWaiting_s=0;
 	PC_REG=MemRead16(VRESET);	//PC gets its reset vector
 	SetMapType(0);	//shouldn't be here
+	for (int i = 0 ; i < 256 ; i++)
+	{
+		// printf("%02x 0:%ld 1:%ld 2:%ld\n", i, instcnt1[i], instcnt2[i], instcnt3[i]);
+		instcnt1[i] = 0;
+		instcnt2[i] = 0;
+		instcnt3[i] = 0;
+	}
 	return;
 }
 
@@ -7648,6 +7656,7 @@ short instcyclnat3[256] =
 	20, // Invalid FF
 };
 
+/*
 static void(*JmpVec1[256])(void) = {
 	Neg_D_A,		// 00
 	Oim_D_A,		// 01
@@ -7658,7 +7667,7 @@ static void(*JmpVec1[256])(void) = {
 	Ror_D_A,		// 06
 	Asr_D_A,		// 07
 	Asl_D_A,		// 08
-	Rol_D,		// 09
+	Rol_D_A,		// 09
 	Dec_D,		// 0A
 	Tim_D,		// 0B
 	Inc_D,		// 0C
@@ -7906,9 +7915,10 @@ static void(*JmpVec1[256])(void) = {
 	Ldu_E,		// FE
 	Stu_E,		// FF
 };
+*/
 
-/*
-static void(*JmpVec1_new[256])(void) = {
+
+static void(*JmpVec1[256])(void) = {
 	Neg_D_A,		// 00
 	Oim_D_A,		// 01
 	Aim_D_A,		// 02
@@ -8166,7 +8176,7 @@ static void(*JmpVec1_new[256])(void) = {
 	Ldu_E_A,		// FE
 	Stu_E_A,		// FF
 };
-*/
+
 
 /*
 static void(*JmpVec1_old[256])(void) = {
@@ -8947,8 +8957,19 @@ static void(*JmpVec3[256])(void) = {
 	InvalidInsHandler_s,		// FF
 };
 
+void getflags(char *flags)
+{
+	flags[0] = cc_s[H] == 1 ? 'H' : '_';
+	flags[1] = cc_s[N] == 1 ? 'N' : '_';
+	flags[2] = cc_s[Z] == 1 ? 'Z' : '_';
+	flags[3] = cc_s[V] == 1 ? 'V' : '_';
+	flags[4] = cc_s[C] == 1 ? 'C' : '_';
+	flags[5] = 0;
+}
+
 int HD6309Exec_s(int CycleFor)
 {
+char flags[6] ;
 
 	//static unsigned char opcode = 0;
 	CycleCounter = 0;
@@ -8976,8 +8997,25 @@ int HD6309Exec_s(int CycleFor)
 			break; //return(0); // WDZ - Experimental SyncWaiting_s should still return used cycles (and not zero) by breaking from loop
 
 		unsigned char memByte = MemRead8(PC_REG++);
+		// unsigned char postbyte, membyte;
+		// unsigned short memaddr;
+		// if (memByte == 0x09)
+		// {
+		// 	postbyte = MemRead8(PC_REG);
+		// 	memaddr = dp_s.Reg | postbyte;
+		// 	membyte = MemRead8(memaddr);
+		// 	getflags(flags);
+		// 	printf("Rol_D %02x (%04x) %02x %02x %s = ", postbyte, memaddr, membyte, cc_s[C], flags);
+		// }
 		JmpVec1[memByte](); // Execute instruction pointed to by PC_REG
-		CycleCounter += instcycl1[memByte]; // Add instruction cycles
+		// if (memByte == 0x09)
+		// {
+		// 	membyte = MemRead8(memaddr);
+		// 	getflags(flags);
+		// 	printf("%02x %s\n", membyte, flags);
+		// }
+		if (memByte < 10) CycleCounter += instcycl1[memByte]; // Add instruction cycles
+		//instcnt1[memByte]++;
 		//JmpVec1[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 	}//End While
 
@@ -8986,12 +9024,20 @@ int HD6309Exec_s(int CycleFor)
 
 static void Page_2(void) //10
 {
-	JmpVec2[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
+	unsigned char memByte = MemRead8(PC_REG++);
+	JmpVec2[memByte](); // Execute instruction pointed to by PC_REG
+	// CycleCounter += instcycl2[memByte]; // Add instruction cycles
+	//instcnt2[memByte]++;
+	//JmpVec2[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 }
 
 static void Page_3(void) //11
 {
-	JmpVec3[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
+	unsigned char memByte = MemRead8(PC_REG++);
+	JmpVec3[memByte](); // Execute instruction pointed to by PC_REG
+	// CycleCounter += instcycl2[memByte]; // Add instruction cycles
+	//instcnt3[memByte]++;
+	//JmpVec3[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 }
 
 static void cpu_firq(void)

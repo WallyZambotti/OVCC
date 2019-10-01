@@ -1,7 +1,7 @@
-export TARGETOS = Linux
+export TARGETOS = Mingw
 export TARGETARCH = AMD
 
-DIRS = CoCo becker FD502 HardDisk mpi orch90 Ramdisk SuperIDE mpu
+DIRS = CoCo becker FD502 HardDisk mpi orch90 Ramdisk SuperIDE
 
 .PHONY: all subdirs $(DIRS)
 
