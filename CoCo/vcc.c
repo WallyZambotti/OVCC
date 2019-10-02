@@ -437,7 +437,7 @@ unsigned char SetMmuType(unsigned char Tmp)
 		strcpy(MmuName,"Hardware Emulation");
 		break;
 	}
-	return(EmuState2.CpuType);
+	return(EmuState2.MmuType);
 }
 
 void DoReboot(void)

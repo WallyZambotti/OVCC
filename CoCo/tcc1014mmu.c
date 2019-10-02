@@ -369,6 +369,30 @@ void MSABI MemWrite16_s(unsigned short data,unsigned short addr)
 	return;
 }
 
+unsigned int MSABI MemRead32_s(unsigned short Address)
+{
+	return ( (MemRead16(Address)<<16) | MemRead16(Address+2) );
+}
+
+void MSABI MemWrite32_s(unsigned int data,unsigned short Address)
+{
+	MemWrite16( data>>16,Address);
+	MemWrite16( data & 0xFFFF,Address+2);
+	return;
+}
+
+unsigned int MemRead32(unsigned short Address)
+{
+	return ( (MemRead16(Address)<<16) | MemRead16(Address+2) );
+}
+
+void MemWrite32(unsigned int data,unsigned short Address)
+{
+	MemWrite16( data>>16,Address);
+	MemWrite16( data & 0xFFFF,Address+2);
+	return;
+}
+
 void SetDistoRamBank(unsigned char data)
 {
 

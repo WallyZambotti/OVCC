@@ -105,7 +105,7 @@ static char RegName[16][10]={"D","X","Y","U","S","PC","W","V","A","B","CC","DP",
 static wideregister q;
 static cpuregister pc, x, y, u, s, dp, v, z;
 static unsigned char InsCycles[2][25];
-static unsigned int cc[8];
+static unsigned char cc[8];
 static unsigned int md[8];
 static unsigned char *ureg8[8]; 
 static unsigned char ccbits,mdbits;
@@ -130,8 +130,6 @@ static int gCycleFor;
 //END Global variables for CPU Emulation-------------------
 
 //Fuction Prototypes---------------------------------------
-unsigned int MemRead32(unsigned short);
-void MemWrite32(unsigned int, unsigned short);
 static unsigned short CalculateEA(unsigned char);
 void InvalidInsHandler(void);
 void DivbyZero(void);
@@ -7346,19 +7344,6 @@ void ErrorVector(void)
 	MemWrite8(getcc(),--S_REG);
 	PC_REG=MemRead16(VTRAP);
 	CycleCounter+=(12 + InsCycles[md[NATIVE6309]][M54]);	//One for each byte +overhead? Guessing from PSHS
-	return;
-}
-
-unsigned int MemRead32(unsigned short Address)
-{
-	return ( (MemRead16(Address)<<16) | MemRead16(Address+2) );
-
-}
-
-void MemWrite32(unsigned int data,unsigned short Address)
-{
-	MemWrite16( data>>16,Address);
-	MemWrite16( data & 0xFFFF,Address+2);
 	return;
 }
 

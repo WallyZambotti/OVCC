@@ -1072,6 +1072,8 @@ Cwai_I_A PROC
 	; Set CC
 	movzx cx,al
 	call setcc_s
+	mov eax, dword ptr [gCycleFor]
+	mov dword ptr [CycleCounter], eax
 	mov byte ptr [SyncWaiting_s], 1
 	add rsp, 28h
 	ret
@@ -1201,8 +1203,8 @@ Coma_I_A PROC
 	add byte ptr [q_s+AREG], 0 ; trigger flags
 	; Save flags NF+ZF+VF
 	setz byte ptr [cc_s+ZF_C_B]
-	mov byte ptr [cc_s+VF_C_B], 0
 	sets byte ptr [cc_s+NF_C_B]
+	mov byte ptr [cc_s+VF_C_B], 0
 	mov byte ptr [cc_s+CF_C_B], 1
 	ret
 Coma_I_A ENDP
@@ -1330,9 +1332,9 @@ Negb_I_A PROC
 	; Negate B Reg and save the FLAGS
 	neg byte ptr [q_s+BREG]
 	; Save flags NF+ZF+VF+CF
-	mov byte ptr [cc_s+CF_C_B], 1
+	setc byte ptr [cc_s+CF_C_B]
 	setz byte ptr [cc_s+ZF_C_B]
-	mov byte ptr [cc_s+VF_C_B], 0
+	seto byte ptr [cc_s+VF_C_B]
 	sets byte ptr [cc_s+NF_C_B]
 	ret
 Negb_I_A ENDP
@@ -1344,8 +1346,8 @@ Comb_I_A PROC
 	add byte ptr [q_s+BREG], 0 ; trigger flags
 	; Save flags NF+ZF+VF
 	setz byte ptr [cc_s+ZF_C_B]
-	seto byte ptr [cc_s+VF_C_B]
 	sets byte ptr [cc_s+NF_C_B]
+	mov byte ptr [cc_s+VF_C_B], 0
 	mov byte ptr [cc_s+CF_C_B], 1 ; Always Set C flag
 	ret
 Comb_I_A ENDP
@@ -1357,7 +1359,7 @@ Lsrb_I_A PROC
 	; Save flags NF+ZF+CF
 	setz byte ptr [cc_s+ZF_C_B]
 	setc byte ptr [cc_s+CF_C_B]
-	sets byte ptr [cc_s+NF_C_B]
+	mov byte ptr [cc_s+NF_C_B], 0
 	ret
 Lsrb_I_A ENDP
 
@@ -1514,8 +1516,8 @@ VAL EQU 4
 	or al, byte ptr [rsp+VAL]
 	; Save flags NF+ZF+VF
 	setz byte ptr [cc_s+ZF_C_B]
-	mov byte ptr [cc_s+VF_C_B], 0
 	sets byte ptr [cc_s+NF_C_B]
+	mov byte ptr [cc_s+VF_C_B], 0
 	; Write Or'd byte (on stack) to saved address (on stack)
 	mov cx, ax
 	mov dx, word ptr [rsp+MEMADR]
@@ -1544,8 +1546,8 @@ VAL EQU 4
 	and al, byte ptr [rsp+VAL]
 	; Save flags NF+ZF+VF
 	setz byte ptr [cc_s+ZF_C_B]
-	mov byte ptr [cc_s+VF_C_B],0
 	sets byte ptr [cc_s+NF_C_B]
+	mov byte ptr [cc_s+VF_C_B],0
 	; Write Or'd byte (on stack) to saved address (on stack)
 	mov cx, ax
 	mov dx, word ptr [rsp+MEMADR]
@@ -1570,8 +1572,8 @@ VAL EQU 4
 	add al, 0 ; x86 not doesn't affect any flags so trigger
 	; Save flags NF+ZF+VF
 	setz byte ptr [cc_s+ZF_C_B]
-	mov byte ptr [cc_s+VF_C_B], 0
 	sets byte ptr [cc_s+NF_C_B]
+	mov byte ptr [cc_s+VF_C_B], 0
 	mov byte ptr [cc_s+CF_C_B], 1 ; always set carry
 	; Write complemented byte (on stack) to saved address (on stack)
 	mov cx, ax
@@ -1730,7 +1732,6 @@ VAL EQU 4
 	call MemRead8_s
 	; Save the top bit for the V flag calc
 	mov dl, al
-	and dl, 080h
 	; Restore CF Flag
 	bt word ptr [cc_s+CF_C_B], 0
 	; Rotate Right the byte and save the FLAGS
@@ -1926,9 +1927,9 @@ VAL EQU 4
 	; Or Mem Byte with saved Immediate Value
 	or al, byte ptr [rsp+VAL]
 	; Save flags NF+ZF+VF
-	mov byte ptr [cc_s+VF_C_B], 0
 	setz byte ptr [cc_s+ZF_C_B]
 	sets byte ptr [cc_s+NF_C_B]
+	mov byte ptr [cc_s+VF_C_B], 0
 	; Write Or'd byte (al) to address (saved on stack)
 	mov cx, ax
 	mov dx, word ptr [rsp+MEMADR]
@@ -1958,9 +1959,9 @@ VAL EQU 4
 	; And Mem Byte with saved Immediate Value
 	and al, byte ptr [rsp+VAL]
 	; Save flags NF+ZF+VF
-	mov byte ptr [cc_s+VF_C_B],0
 	setz byte ptr [cc_s+ZF_C_B]
 	sets byte ptr [cc_s+NF_C_B]
+	mov byte ptr [cc_s+VF_C_B],0
 	; Write Or'd byte (al) to address (saved on stack)
 	mov cx, ax
 	mov dx, word ptr [rsp+MEMADR]
@@ -1986,9 +1987,9 @@ VAL EQU 4
 	not al
 	add al, 0 ; x86 not doesn't affect any flags so trigger
 	; Save flags NF+ZF+VF
-	mov byte ptr [cc_s+VF_C_B], 0
 	setz byte ptr [cc_s+ZF_C_B]
 	sets byte ptr [cc_s+NF_C_B]
+	mov byte ptr [cc_s+VF_C_B], 0
 	mov byte ptr [cc_s+CF_C_B], 1 ; Always Set C flag
 	mov cx, ax
 	mov dx, word ptr [rsp+MEMADR]
@@ -2158,7 +2159,6 @@ VAL EQU 4
 	call MemRead8_s
 	; Save the top bit for the V flag calc
 	mov dl, al
-	and dl, 080h
 	; Restore CF Flag
 	bt word ptr [cc_s+CF_C_B], 0 ; bit 0 (1st) is CF
 	; Rotate Right the byte and save the FLAGS

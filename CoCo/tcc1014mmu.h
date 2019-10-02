@@ -32,8 +32,10 @@ extern void MmuWrite8(unsigned char,unsigned char,unsigned short );
 extern unsigned char MmuRead8(unsigned char,short unsigned int);
 #endif
 void MemWrite16(unsigned short,unsigned short );
-
 unsigned short MemRead16(short unsigned int);
+unsigned int MemRead32(unsigned short);
+void MemWrite32(unsigned int, unsigned short);
+
 unsigned char * MmuInit(unsigned char);
 unsigned char *	Getint_rom_pointer(void);
 unsigned char * Getext_rom_pointer(void);

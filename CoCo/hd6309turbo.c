@@ -41,7 +41,6 @@ This file is part of VCC (Virtual Color Computer).
 #define MD_ILLEGALINST (mdbits_s & MD_ILLEGALINST_BIT)
 #define MD_DIVBYZERO (mdbits_s & MD_DIVBYZERO_BIT)
 
-
 //Global variables for CPU Emulation-----------------------
 #define NTEST8(r) r>0x7F;
 #define NTEST16(r) r>0x7FFF;
@@ -141,19 +140,17 @@ static signed short *spostword=(signed short *)&postword;
 char InInterupt_s=0;
 int gCycleFor;
 static short *instcycl1, *instcycl2, *instcycl3;
-static unsigned long instcnt1[256], instcnt2[256], instcnt3[0];
+static unsigned long instcnt1[256], instcnt2[256], instcnt3[256];
 //END Global variables for CPU Emulation-------------------
 
 //Fuction Prototypes---------------------------------------
-unsigned int MemRead32_s(unsigned short);
-void MemWrite32_s(unsigned int, unsigned short);
 static unsigned short CalculateEA(unsigned char);
-void InvalidInsHandler_s(void);
-void DivbyZero_s(void);
+void MSABI InvalidInsHandler_s(void);
+void MSABI DivbyZero_s(void);
 static void ErrorVector(void);
 static void setcc (unsigned char);
 static unsigned char getcc(void);
-void setmd_s (unsigned char);
+void MSABI setmd_s (unsigned char);
 static unsigned char getmd(void);
 static void cpu_firq(void);
 static void cpu_irq(void);
@@ -161,10 +158,10 @@ static void cpu_nmi(void);
 static unsigned char GetSorceReg(unsigned char);
 static void Page_2(void);
 static void Page_3(void);
-extern void MemWrite8(unsigned char, unsigned short);
-extern void MemWrite16(unsigned short, unsigned short);
-extern unsigned char MemRead8(unsigned short);
-extern unsigned short MemRead16(unsigned short);
+void MemWrite8(unsigned char, unsigned short);
+void MemWrite16(unsigned short, unsigned short);
+unsigned char MemRead8(unsigned short);
+unsigned short MemRead16(unsigned short);
 
 //unsigned char GetDestReg(unsigned char);
 //END Fuction Prototypes-----------------------------------
@@ -269,6 +266,7 @@ void HD6309Init_s(void)
 	cc_s[F]=1;
 	return;
 }
+
 
 static void Neg_D(void)
 { //0
@@ -2022,7 +2020,7 @@ static void Lds_I(void)
 
 static void Ldq_D(void)
 { //10DC 6309
-	Q_REG=MemRead32_s(DPADDRESS(PC_REG++));
+	Q_REG=MemRead32(DPADDRESS(PC_REG++));
 	cc_s[Z] = ZTEST(Q_REG);
 	cc_s[N] = NTEST32(Q_REG);
 	cc_s[V] = 0;
@@ -2031,7 +2029,7 @@ static void Ldq_D(void)
 
 static void Stq_D(void)
 { //10DD 6309
-	MemWrite32_s(Q_REG,DPADDRESS(PC_REG++));
+	MemWrite32(Q_REG,DPADDRESS(PC_REG++));
 	cc_s[Z] = ZTEST(Q_REG);
 	cc_s[N] = NTEST32(Q_REG);
 	cc_s[V] = 0;
@@ -2058,7 +2056,7 @@ static void Sts_D(void)
 
 static void Ldq_X(void)
 { //10EC 6309
-	Q_REG=MemRead32_s(INDADDRESS(PC_REG++));
+	Q_REG=MemRead32(INDADDRESS(PC_REG++));
 	cc_s[Z] = ZTEST(Q_REG);
 	cc_s[N] = NTEST32(Q_REG);
 	cc_s[V] = 0;
@@ -2067,7 +2065,7 @@ static void Ldq_X(void)
 
 static void Stq_X(void)
 { //10ED 6309 DONE
-	MemWrite32_s(Q_REG,INDADDRESS(PC_REG++));
+	MemWrite32(Q_REG,INDADDRESS(PC_REG++));
 	cc_s[Z] = ZTEST(Q_REG);
 	cc_s[N] = NTEST32(Q_REG);
 	cc_s[V] = 0;
@@ -2095,7 +2093,7 @@ static void Sts_X(void)
 
 static void Ldq_E(void)
 { //10FC 6309
-	Q_REG=MemRead32_s(IMMADDRESS(PC_REG));
+	Q_REG=MemRead32(IMMADDRESS(PC_REG));
 	cc_s[Z] = ZTEST(Q_REG);
 	cc_s[N] = NTEST32(Q_REG);
 	cc_s[V] = 0;
@@ -2105,7 +2103,7 @@ static void Ldq_E(void)
 
 static void Stq_E(void)
 { //10FD 6309
-	MemWrite32_s(Q_REG,IMMADDRESS(PC_REG));
+	MemWrite32(Q_REG,IMMADDRESS(PC_REG));
 	cc_s[Z] = ZTEST(Q_REG);
 	cc_s[N] = NTEST32(Q_REG);
 	cc_s[V] = 0;
@@ -5574,7 +5572,7 @@ static void Ldd_M(void)
 
 static void Ldq_M(void)
 { //CD 6309 WORK
-	Q_REG = MemRead32_s(PC_REG);
+	Q_REG = MemRead32(PC_REG);
 	PC_REG+=4;
 	cc_s[Z] = ZTEST(Q_REG);
 	cc_s[N] = NTEST32(Q_REG);
@@ -7656,7 +7654,7 @@ short instcyclnat3[256] =
 	20, // Invalid FF
 };
 
-/*
+
 static void(*JmpVec1[256])(void) = {
 	Neg_D_A,		// 00
 	Oim_D_A,		// 01
@@ -7668,124 +7666,124 @@ static void(*JmpVec1[256])(void) = {
 	Asr_D_A,		// 07
 	Asl_D_A,		// 08
 	Rol_D_A,		// 09
-	Dec_D,		// 0A
-	Tim_D,		// 0B
-	Inc_D,		// 0C
-	Tst_D,		// 0D
-	Jmp_D,		// 0E
-	Clr_D,		// 0F
+	Dec_D_A,		// 0A
+	Tim_D_A,		// 0B
+	Inc_D_A,		// 0C
+	Tst_D_A,		// 0D
+	Jmp_D_A,		// 0E
+	Clr_D_A,		// 0F
 	Page_2,		// 10
 	Page_3,		// 11
-	Nop_I,		// 1
-	Sync_I,		// 13
-	Sexw_I,		// 14
+	Nop_I_A,		// 12
+	Sync_I_A,		// 13
+	Sexw_I_A,		// 14
 	InvalidInsHandler_s,	// 15
-	Lbra_R,		// 16
-	Lbsr_R,		// 17
+	Lbra_R_A,		// 16
+	Lbsr_R_A,		// 17
 	InvalidInsHandler_s,	// 18
-	Daa_I,		// 19
-	Orcc_M,		// 1A
+	Daa_I_A,		// 19
+	Orcc_M_A,		// 1A
 	InvalidInsHandler_s,	// 1B
-	Andcc_M,	// 1C
-	Sex_I,		// 1D
-	Exg_M,		// 1E
-	Tfr_M,		// 1F
-	Bra_R,		// 20
-	Brn_R,		// 21
-	Bhi_R,		// 22
-	Bls_R,		// 23
-	Bhs_R,		// 24
-	Blo_R,		// 25
-	Bne_R,		// 26
-	Beq_R,		// 27
-	Bvc_R,		// 28
-	Bvs_R,		// 29
-	Bpl_R,		// 2A
-	Bmi_R,		// 2B
-	Bge_R,		// 2C
-	Blt_R,		// 2D
-	Bgt_R,		// 2E
-	Ble_R,		// 2F
-	Leax_X,		// 30
-	Leay_X,		// 31
-	Leas_X,		// 32
-	Leau_X,		// 33
-	Pshs_M,		// 34
-	Puls_M,		// 35
-	Pshu_M,		// 36
-	Pulu_M,		// 37
+	Andcc_M_A,	// 1C
+	Sex_I_A,		// 1D
+	Exg_M_A,		// 1E
+	Tfr_M_A,		// 1F
+	Bra_R_A,		// 20
+	Brn_R_A,		// 21
+	Bhi_R_A,		// 22
+	Bls_R_A,		// 23
+	Bhs_R_A,		// 24
+	Blo_R_A,		// 25
+	Bne_R_A,		// 26
+	Beq_R_A,		// 27
+	Bvc_R_A,		// 28
+	Bvs_R_A,		// 29
+	Bpl_R_A,		// 2A
+	Bmi_R_A,		// 2B
+	Bge_R_A,		// 2C
+	Blt_R_A,		// 2D
+	Bgt_R_A,		// 2E
+	Ble_R_A,		// 2F
+	Leax_X_A,		// 30
+	Leay_X_A,		// 31
+	Leas_X_A,		// 32
+	Leau_X_A,		// 33
+	Pshs_M_A,		// 34
+	Puls_M_A,		// 35
+	Pshu_M_A,		// 36
+	Pulu_M_A,		// 37
 	InvalidInsHandler_s,	// 38
-	Rts_I,		// 39
-	Abx_I,		// 3A
-	Rti_I,		// 3B
-	Cwai_I,		// 3C
-	Mul_I,		// 3D
+	Rts_I_A,		// 39
+	Abx_I_A,		// 3A
+	Rti_I_A,		// 3B
+	Cwai_I_A,		// 3C
+	Mul_I_A,		// 3D
 	Reset,		// 3E
-	Swi1_I,		// 3F
-	Nega_I,		// 40
-	InvalidInsHandler_s,	// 41
+	Swi1_I_A,		// 3F
+	Nega_I_A,		// 40
+	InvalidInsHandler_s,  // 41
 	InvalidInsHandler_s,	// 42
-	Coma_I,		// 43
-	Lsra_I,		// 44
+	Coma_I_A,		// 43
+	Lsra_I_A,		// 44
 	InvalidInsHandler_s,	// 45
-	Rora_I,		// 46
-	Asra_I,		// 47
-	Asla_I,		// 48
-	Rola_I,		// 49
-	Deca_I,		// 4A
+	Rora_I_A,		// 46
+	Asra_I_A,		// 47
+	Asla_I_A,		// 48
+	Rola_I_A,		// 49
+	Deca_I_A,		// 4A
 	InvalidInsHandler_s,	// 4B
-	Inca_I,		// 4C
-	Tsta_I,		// 4D
+	Inca_I_A,		// 4C
+	Tsta_I_A,		// 4D
 	InvalidInsHandler_s,	// 4E
-	Clra_I,		// 4F
-	Negb_I,		// 50
+	Clra_I_A,		// 4F
+	Negb_I_A,		// 50
 	InvalidInsHandler_s,	// 51
 	InvalidInsHandler_s,	// 52
-	Comb_I,		// 53
-	Lsrb_I,		// 54
+	Comb_I_A,		// 53
+	Lsrb_I_A,		// 54
 	InvalidInsHandler_s,	// 55
-	Rorb_I,		// 56
-	Asrb_I,		// 57
-	Aslb_I,		// 58
-	Rolb_I,		// 59
-	Decb_I,		// 5A
+	Rorb_I_A,		// 56
+	Asrb_I_A,		// 57
+	Aslb_I_A,		// 58
+	Rolb_I_A,		// 59
+	Decb_I_A,		// 5A
 	InvalidInsHandler_s,	// 5B
-	Incb_I,		// 5C
-	Tstb_I,		// 5D
+	Incb_I_A,		// 5C
+	Tstb_I_A,		// 5D
 	InvalidInsHandler_s,	// 5E
-	Clrb_I,		// 5F
-	Neg_X,		// 60
-	Oim_X,		// 61
-	Aim_X,		// 62
-	Com_X,		// 63
-	Lsr_X,		// 64
-	Eim_X,		// 65
-	Ror_X,		// 66
-	Asr_X,		// 67
-	Asl_X,		// 68
-	Rol_X,		// 69
-	Dec_X,		// 6A
-	Tim_X,		// 6B
-	Inc_X,		// 6C
-	Tst_X,		// 6D
-	Jmp_X,		// 6E
-	Clr_X,		// 6F
-	Neg_E,		// 70
-	Oim_E,		// 71
-	Aim_E,		// 72
-	Com_E,		// 73
-	Lsr_E,		// 74
-	Eim_E,		// 75
-	Ror_E,		// 76
-	Asr_E,		// 77
-	Asl_E,		// 78
-	Rol_E,		// 79
-	Dec_E,		// 7A
-	Tim_E,		// 7B
-	Inc_E,		// 7C
-	Tst_E,		// 7D
-	Jmp_E,		// 7E
-	Clr_E,		// 7F
+	Clrb_I_A,		// 5F
+	Neg_X_A,		// 60
+	Oim_X_A,		// 61
+	Aim_X_A,		// 62
+	Com_X_A,		// 63
+	Lsr_X_A,		// 64
+	Eim_X_A,		// 65
+	Ror_X_A,		// 66
+	Asr_X_A,		// 67
+	Asl_X_A,		// 68
+	Rol_X_A,		// 69
+	Dec_X_A,		// 6A
+	Tim_X_A,		// 6B
+	Inc_X_A,		// 6C
+	Tst_X_A,		// 6D
+	Jmp_X_A,		// 6E
+	Clr_X_A,		// 6F
+	Neg_E_A,		// 70
+	Oim_E_A,		// 71
+	Aim_E_A,		// 72
+	Com_E_A,		// 73
+	Lsr_E_A,		// 74
+	Eim_E_A,		// 75
+	Ror_E_A,		// 76
+	Asr_E_A,		// 77
+	Asl_E_A,		// 78
+	Rol_E_A,		// 79
+	Dec_E_A,		// 7A
+	Tim_E_A,		// 7B
+	Inc_E_A,		// 7C
+	Tst_E_A,		// 7D
+	Jmp_E_A,		// 7E
+	Clr_E_A,		// 7F
 	Suba_M,		// 80
 	Cmpa_M,		// 81
 	Sbca_M,		// 82
@@ -7915,10 +7913,9 @@ static void(*JmpVec1[256])(void) = {
 	Ldu_E,		// FE
 	Stu_E,		// FF
 };
-*/
 
-
-static void(*JmpVec1[256])(void) = {
+/*
+static void(*JmpVec1_Turbo[256])(void) = {
 	Neg_D_A,		// 00
 	Oim_D_A,		// 01
 	Aim_D_A,		// 02
@@ -8176,10 +8173,9 @@ static void(*JmpVec1[256])(void) = {
 	Ldu_E_A,		// FE
 	Stu_E_A,		// FF
 };
+*/
 
-
-/*
-static void(*JmpVec1_old[256])(void) = {
+static void(*JmpVec1_orig[256])(void) = {
 	Neg_D,		// 00
 	Oim_D,		// 01
 	Aim_D,		// 02
@@ -8437,7 +8433,6 @@ static void(*JmpVec1_old[256])(void) = {
 	Ldu_E,		// FE
 	Stu_E,		// FF
 };
-*/
 
 static void(*JmpVec2[256])(void) = {
 	InvalidInsHandler_s,		// 00
@@ -8957,7 +8952,7 @@ static void(*JmpVec3[256])(void) = {
 	InvalidInsHandler_s,		// FF
 };
 
-void getflags(char *flags)
+static void getflags(char *flags)
 {
 	flags[0] = cc_s[H] == 1 ? 'H' : '_';
 	flags[1] = cc_s[N] == 1 ? 'N' : '_';
@@ -8969,7 +8964,6 @@ void getflags(char *flags)
 
 int HD6309Exec_s(int CycleFor)
 {
-char flags[6] ;
 
 	//static unsigned char opcode = 0;
 	CycleCounter = 0;
@@ -9014,9 +9008,8 @@ char flags[6] ;
 		// 	getflags(flags);
 		// 	printf("%02x %s\n", membyte, flags);
 		// }
-		if (memByte < 10) CycleCounter += instcycl1[memByte]; // Add instruction cycles
+		if (memByte < 0x80) CycleCounter += instcycl1[memByte]; // Add instruction cycles
 		//instcnt1[memByte]++;
-		//JmpVec1[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 	}//End While
 
 	return(CycleFor - CycleCounter);
@@ -9028,7 +9021,6 @@ static void Page_2(void) //10
 	JmpVec2[memByte](); // Execute instruction pointed to by PC_REG
 	// CycleCounter += instcycl2[memByte]; // Add instruction cycles
 	//instcnt2[memByte]++;
-	//JmpVec2[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 }
 
 static void Page_3(void) //11
@@ -9037,7 +9029,6 @@ static void Page_3(void) //11
 	JmpVec3[memByte](); // Execute instruction pointed to by PC_REG
 	// CycleCounter += instcycl2[memByte]; // Add instruction cycles
 	//instcnt3[memByte]++;
-	//JmpVec3[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 }
 
 static void cpu_firq(void)
@@ -9046,7 +9037,7 @@ static void cpu_firq(void)
 	if (!cc_s[F])
 	{
 		InInterupt_s=1; //Flag to indicate FIRQ has been asserted
-		switch (MD_FIRQMODE /* md[FIRQMODE] */)
+		switch (MD_FIRQMODE)
 		{
 		case 0:
 			cc_s[E]=0; // Turn E flag off
@@ -9144,6 +9135,7 @@ static void cpu_nmi(void)
 	PendingInterupts=PendingInterupts & 251;
 	return;
 }
+
 
 static unsigned short CalculateEA(unsigned char postbyte)
 {
@@ -9413,11 +9405,8 @@ static unsigned char getcc(void)
 		return(bincc);
 }
 
-void setmd_s (unsigned char binmd)
+void MSABI setmd_s (unsigned char binmd)
 {
-	// unsigned char bit;
-	// for (bit=0;bit<=1;bit++)
-	// 	md[bit]=!!(binmd & (1<<bit));
 	mdbits_s = binmd;
 
 	if (binmd & 1) // In nativemode
@@ -9438,11 +9427,6 @@ void setmd_s (unsigned char binmd)
 
 static unsigned char getmd(void)
 {
-	// unsigned char binmd=0,bit=0;
-	// for (bit=6;bit<=7;bit++)
-	// 	if (md[bit])
-	// 		binmd=binmd | (1<<bit);
-	// 	return(binmd);
 	return mdbits_s;
 }
 	
@@ -9461,23 +9445,23 @@ void HD6309DeAssertInterupt_s(unsigned char Interupt)// 4 nmi 2 firq 1 irq
 	return;
 }
 
-void InvalidInsHandler_s(void)
+void MSABI InvalidInsHandler_s(void)
 {	
-	mdbits_s |= MD_ILLEGALINST_BIT; // md[ILLEGAL]=1;
+	md[ILLEGAL]=1;
 	mdbits_s=getmd();
 	ErrorVector();
 	return;
 }
 
-void DivbyZero_s(void)
+void MSABI DivbyZero_s(void)
 {
-	mdbits_s |= MD_DIVBYZERO_BIT; // md[ZERODIV]=1;
+	md[ZERODIV]=1;
 	mdbits_s=getmd();
 	ErrorVector();
 	return;
 }
 
-static void  ErrorVector(void)
+static void ErrorVector(void)
 {
 	cc_s[E]=1;
 	MemWrite8( pc_s.B.lsb,--S_REG);
@@ -9500,19 +9484,6 @@ static void  ErrorVector(void)
 	MemWrite8(getcc(),--S_REG);
 	PC_REG=MemRead16(VTRAP);
 	CycleCounter+=(12 + InsCycles[MD_NATIVE6309][M54]);	//One for each byte +overhead? Guessing from PSHS
-	return;
-}
-
-unsigned int MemRead32_s(unsigned short Address)
-{
-	return ( (MemRead16(Address)<<16) | MemRead16(Address+2) );
-
-}
-
-void MemWrite32_s(unsigned int data,unsigned short Address)
-{
-	MemWrite16( data>>16,Address);
-	MemWrite16( data & 0xFFFF,Address+2);
 	return;
 }
 
