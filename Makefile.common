@@ -14,7 +14,7 @@ ASM=jwasm
 ODIR = obj
 
 DEBUG=-g
-OPT=-O0 # -Og
+OPT=-O2 # -Og
 WARN = -w # -Wall
 PTHREAD = -pthread
 
