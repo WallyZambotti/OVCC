@@ -183,7 +183,7 @@ void HD6309Reset_s(void)
 	SetMapType(0);	//shouldn't be here
 	for (int i = 0 ; i < 256 ; i++)
 	{
-		// printf("%02x 0:%ld 1:%ld 2:%ld\n", i, instcnt1[i], instcnt2[i], instcnt3[i]);
+		//printf("%02x 0:%ld 1:%ld 2:%ld\n", i, instcnt1[i], instcnt2[i], instcnt3[i]);
 		instcnt1[i] = 0;
 		instcnt2[i] = 0;
 		instcnt3[i] = 0;
@@ -2553,16 +2553,6 @@ static void(*JmpVec3[256])(void) = {
 	InvalidInsHandler_s,		// FF
 };
 
-static void getflags(char *flags)
-{
-	flags[0] = cc_s[H] == 1 ? 'H' : '_';
-	flags[1] = cc_s[N] == 1 ? 'N' : '_';
-	flags[2] = cc_s[Z] == 1 ? 'Z' : '_';
-	flags[3] = cc_s[V] == 1 ? 'V' : '_';
-	flags[4] = cc_s[C] == 1 ? 'C' : '_';
-	flags[5] = 0;
-}
-
 int HD6309Exec_s(int CycleFor)
 {
 
@@ -2592,7 +2582,18 @@ int HD6309Exec_s(int CycleFor)
 			break; //return(0); // WDZ - Experimental SyncWaiting_s should still return used cycles (and not zero) by breaking from loop
 
 		unsigned char memByte = MemRead8(PC_REG++);
+#ifdef _WIN64		
+		if (memByte == 0x34)
+		{
+			JmpVec1[memByte](); // Execute instruction pointed to by PC_REG
+		}
+		else
+		{
+			JmpVec1[memByte](); // Execute instruction pointed to by PC_REG
+		}
+#else
 		JmpVec1[memByte](); // Execute instruction pointed to by PC_REG
+#endif
 		CycleCounter += instcycl1[memByte]; // Add instruction cycles
 		//instcnt1[memByte]++;
 	}//End While
