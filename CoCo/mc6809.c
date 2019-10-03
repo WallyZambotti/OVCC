@@ -93,7 +93,7 @@ void MC6809Reset(void)
 	SetMapType(0);
 	return;
 }
-
+extern void SetNatEmuStat(unsigned char);
 void MC6809Init(void)
 {	//Call this first or RESET will core!
 	// reg pointers for TFR and EXG and LEA ops
@@ -112,7 +112,7 @@ void MC6809Init(void)
 	ureg8[5]=(unsigned char*)&dp.B.msb;
 	ureg8[6]=(unsigned char*)&dp.B.msb;
 	ureg8[7]=(unsigned char*)&dp.B.msb;
-
+	SetNatEmuStat(0);
 	cc[I]=1;
 	cc[F]=1;
 	return;

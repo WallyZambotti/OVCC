@@ -471,7 +471,7 @@ Nop_I_A ENDP
 PUBLIC Sync_I_A ; Op 13 - Synchronisze with Interupt
 Sync_I_A PROC
 	mov eax, dword ptr [gCycleFor]
-	add dword ptr [CycleCounter], eax
+	mov dword ptr [CycleCounter], eax
 	mov byte ptr [SyncWaiting_s], 1
 	ret
 Sync_I_A ENDP

@@ -148,6 +148,7 @@ void MemWrite8(unsigned char, unsigned short);
 void MemWrite16(unsigned short, unsigned short);
 unsigned char MemRead8(unsigned short);
 unsigned short MemRead16(unsigned short);
+extern void SetNatEmuStat(unsigned char);
 
 //unsigned char GetDestReg(unsigned char);
 //END Fuction Prototypes-----------------------------------
@@ -239,6 +240,7 @@ void HD6309Init(void)
 	InsCycles[1][M3726]=26;		
 	InsCycles[0][M3130]=31;	//31-30
 	InsCycles[1][M3130]=30;		
+	SetNatEmuStat(1);
 	cc[I]=1;
 	cc[F]=1;
 	return;
@@ -7269,11 +7271,13 @@ unsigned char getcc(void)
 			bincc=bincc | (1<<bit);
 		return(bincc);
 }
+
 void setmd (unsigned char binmd)
 {
 	unsigned char bit;
 	for (bit=0;bit<=1;bit++)
 		md[bit]=!!(binmd & (1<<bit));
+	if (md[NATIVE6309]) SetNatEmuStat(2); else SetNatEmuStat(1);
 	return;
 }
 

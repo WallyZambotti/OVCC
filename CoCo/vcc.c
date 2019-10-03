@@ -455,6 +455,18 @@ unsigned char SetAutoStart(unsigned char Tmp)
 
 /* Here starts the main Emulation Loop*/
 
+static char NatEmuStat[2] = "";
+
+void SetNatEmuStat(unsigned char natemu)
+{
+	switch (natemu)
+	{
+		case 1: strcpy(NatEmuStat, "E"); break;
+		case 2:	strcpy(NatEmuStat, "N"); break;
+		default: strcpy(NatEmuStat, ""); break;
+	}
+}
+
 void EmuLoop(void)
 {
 	static float FPS;
@@ -536,7 +548,7 @@ void EmuLoop(void)
 		char ttbuff[256];
 		// if (++framecnt == 6)
 		// {
-			sprintf(ttbuff,"Skip:%2.2i|FPS:%3.0f|%s@%3.2fMhz|%s",EmuState2.FrameSkip,FPS,CpuName,EmuState2.CPUCurrentSpeed,EmuState2.StatusLine);
+			sprintf(ttbuff,"Skip:%2.2i|FPS:%3.0f|%s%s@%3.2fMhz|%s",EmuState2.FrameSkip,FPS,CpuName,NatEmuStat,EmuState2.CPUCurrentSpeed,EmuState2.StatusLine);
 			SetStatusBarText(ttbuff,&EmuState2);
 			//fprintf(stderr, "|");
 		// 	framecnt = 0;

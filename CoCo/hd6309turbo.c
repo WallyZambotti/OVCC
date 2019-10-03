@@ -42,40 +42,7 @@ This file is part of VCC (Virtual Color Computer).
 #define MD_DIVBYZERO (mdbits_s & MD_DIVBYZERO_BIT)
 
 //Global variables for CPU Emulation-----------------------
-#define NTEST8(r) r>0x7F;
-#define NTEST16(r) r>0x7FFF;
-#define NTEST32(r) r>0x7FFFFFFF;
-#define OVERFLOW8(c,a,b,r) c ^ (((a^b^r)>>7) &1);
-#define OVERFLOW16(c,a,b,r) c ^ (((a^b^r)>>15)&1);
-#define ZTEST(r) !r;
-
-#define DPADDRESS(r) (dp_s.Reg |MemRead8(r))
-#define IMMADDRESS(r) MemRead16(r)
-#define INDADDRESS(r) CalculateEA(MemRead8(r))
-
-#define M65		0
-#define M64		1
-#define M32		2
-#define M21		3
-#define M54		4
-#define M97		5
-#define M85		6
-#define M51		7
-#define M31		8
-#define M1110	9
-#define M76		10
-#define M75		11
-#define M43		12
-#define M87		13
-#define M86		14
-#define M98		15
-#define M2726	16
-#define M3635	17
-#define M3029	18
-#define M2827	19
-#define M3726	20
-#define M3130	21
-
+// 
 typedef union
 {
 	unsigned short Reg;
@@ -117,12 +84,11 @@ static char RegName[16][10]={"D","X","Y","U","S","PC","W","V","A","B","CC","DP",
 wideregister q_s;
 cpuregister pc_s, x_s, y_s, u_s, s_s, dp_s, v_s, z_s;
 unsigned char cc_s[8];
-static unsigned int md[8];
 unsigned char *ureg8_s[8]; 
 unsigned char ccbits_s,mdbits_s;
 unsigned short *xfreg16_s[8];
-int CycleCounter=0;
-unsigned int SyncWaiting_s=0;
+volatile int CycleCounter=0;
+volatile unsigned char SyncWaiting_s=0;
 unsigned short temp16;
 static signed short stemp16;
 static signed char stemp8;
@@ -136,8 +102,8 @@ static unsigned char postbyte=0;
 static short unsigned postword=0;
 static signed char *spostbyte=(signed char *)&postbyte;
 static signed short *spostword=(signed short *)&postword;
-char InInterupt_s=0;
-int gCycleFor;
+volatile char InInterupt_s=0;
+volatile int gCycleFor;
 static short *instcycl1, *instcycl2, *instcycl3;
 static unsigned long instcnt1[256], instcnt2[256], instcnt3[256];
 //END Global variables for CPU Emulation-------------------
@@ -2613,7 +2579,7 @@ static void Page_3(void) //11
 {
 	unsigned char memByte = MemRead8(PC_REG++);
 	JmpVec3[memByte](); // Execute instruction pointed to by PC_REG
-	CycleCounter += instcycl2[memByte]; // Add instruction cycles
+	CycleCounter += instcycl3[memByte]; // Add instruction cycles
 	//instcnt3[memByte]++;
 }
 
@@ -2722,6 +2688,8 @@ static void cpu_nmi(void)
 	return;
 }
 
+extern void SetNatEmuStat(unsigned char);
+
 void MSABI setmd_s (unsigned char binmd)
 {
 	mdbits_s = binmd;
@@ -2731,12 +2699,14 @@ void MSABI setmd_s (unsigned char binmd)
 		instcycl1 = instcyclnat1;
 		instcycl2 = instcyclnat2;
 		instcycl3 = instcyclnat3;
+		SetNatEmuStat(2);
 	}
 	else // emulation mode
 	{
 		instcycl1 = instcyclemu1;
 		instcycl2 = instcyclemu2;
 		instcycl3 = instcyclemu3;
+		SetNatEmuStat(1);
 	}
 
 	return;
