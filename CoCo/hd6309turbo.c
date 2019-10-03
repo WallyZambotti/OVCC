@@ -2548,18 +2548,7 @@ int HD6309Exec_s(int CycleFor)
 			break; //return(0); // WDZ - Experimental SyncWaiting_s should still return used cycles (and not zero) by breaking from loop
 
 		unsigned char memByte = MemRead8(PC_REG++);
-#ifdef _WIN64		
-		if (memByte == 0x34)
-		{
-			JmpVec1[memByte](); // Execute instruction pointed to by PC_REG
-		}
-		else
-		{
-			JmpVec1[memByte](); // Execute instruction pointed to by PC_REG
-		}
-#else
 		JmpVec1[memByte](); // Execute instruction pointed to by PC_REG
-#endif
 		CycleCounter += instcycl1[memByte]; // Add instruction cycles
 		//instcnt1[memByte]++;
 	}//End While
