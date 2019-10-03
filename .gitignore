@@ -6,4 +6,10 @@ CoCo/ovcc
 .vscode/*
 CoCo/ovcc_clang
 CoCo/ovcc_gcc
+CoCo/libs/*
+CoCo/roms/*
+CoCo/vhds/*
+CoCo/dsks/*
+CoCo/*.rom
+CoCo/*.ini
 mpi/.vscode/*

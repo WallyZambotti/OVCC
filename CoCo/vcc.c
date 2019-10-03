@@ -323,6 +323,7 @@ void DoHardReset(SystemState2* const HRState)
 	}
 	switch (HRState->CpuType)
 	{
+	#ifdef __amd64__
 		case 2: // 6309 Turbo
 		CPUInit=HD6309Init_s;
 		CPUExec=HD6309Exec_s;
@@ -331,6 +332,7 @@ void DoHardReset(SystemState2* const HRState)
 		CPUDeAssertInterupt=HD6309DeAssertInterupt_s;
 		CPUForcePC=HD6309ForcePC_s;
 		break;
+	#endif
 		case 1: // 6309
 		CPUInit=HD6309Init;
 		CPUExec=HD6309Exec;
