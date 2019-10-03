@@ -1,7 +1,11 @@
 export TARGETOS = Linux
 export TARGETARCH = AMD
 
+ifeq ($(TARGETOS),Linux)
 DIRS = CoCo becker FD502 HardDisk mpi orch90 Ramdisk SuperIDE mpu
+else
+DIRS = CoCo becker FD502 HardDisk mpi orch90 Ramdisk SuperIDE
+endif
 
 .PHONY: all subdirs $(DIRS)
 
