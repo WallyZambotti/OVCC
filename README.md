@@ -45,9 +45,8 @@ There are some required roms to get OVCC working and these are compatible with V
 OVCC configures itself from an ini file (Vcc.ini) in the same directory as the executable. If one is not supplied it will be generated (and this is fine).
 
 Floppy disk images and hard disk images can also be placed in sub folders for convenience.
-
+```
 Linux/OSX
-
 .../OVCC/
         ovcc
         coco3.rom
@@ -67,9 +66,9 @@ Linux/OSX
               floppy_image_etc.dsk
         vhds/
               VCCEmuDisk.vhd
- 
+```
+```
 Mingw(Windows)
-
 ...\OVCC\
         ovcc.exe
         coco3.rom
@@ -89,7 +88,7 @@ Mingw(Windows)
               floppy_image_etc.dsk
         vhds\
               VCCEmuDisk.vhd
- 
+```
 When loading roms and devices into ovcc you will be asked to navigate and select the necessary rom/device(library) so they could be anywhere. However having an organised folder structure will make manually editing the Vcc.ini (if required) easier.
 
 Ovcc can be started from a terminal or added to your desktop GUI menu. On windows it should be started from a bat file that defines the paths to necessary Mingw libraries
