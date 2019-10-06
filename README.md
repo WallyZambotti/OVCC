@@ -38,6 +38,7 @@ Build AGAR as per AGAR documentation with the exception/addition of the configur
   Edit the two first lines of the makefile to reflect you environment:
   
 export TARGETOS = Linux  # options are Linux or Mingw
+
 export TARGETARCH = AMD  # options are AMD (Intel) or ARM
 
 Then make.
