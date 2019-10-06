@@ -24,7 +24,8 @@ Look in the Docs directory for instructions on including the patches for your pl
 
 Build AGAR as per AGAR documentation with the exception/addition of the configuration options mentioned in the forementioned Docs.
 
-./configure --enable-debug --with-sdl2 --without-sdl --with-libtool=/usr/bin/libtool
+./configure --enable-debug --with-sdl2 --without-sdl --with-libtool=/usr/bin/libtool # if you intend to DEBUG AGAR
+./configure --with-sdl2 --without-sdl --with-libtool=/usr/bin/libtool # if you don't intend to debug AGAR
 
 ( sdl2 driver cannot coexist with the sdl driver -
   you may need to explicitly define the "libtool" for the configuration to use)
