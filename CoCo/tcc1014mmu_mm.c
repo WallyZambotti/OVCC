@@ -214,24 +214,24 @@ int SetMMUslot(UINT8 task, UINT8 slotnum, UINT16 mempage)
 
 void UpdateMMap(void)
 {
-	UINT8 bankNo;
+	UINT8 slotNo;
 	UINT16 page;
 
-	for (int bankNo = 0; bankNo < 8; bankNo++)
+	for (int slotNo = 0; slotNo < 8; slotNo++)
 	{
-		if (MapType || bankNo < 4) // memory pages are always memory below bank 4 or if MapType is RAM
+		if (MapType || slotNo < 4) // memory pages are always memory below bank 4 or if MapType is RAM
 		{
 			if (MmuEnabled)
 			{
-				page = MmuRegisters[MmuTask][bankNo];
-				SetMMUslot(MmuTask, bankNo, page);
+				page = MmuRegisters[MmuTask][slotNo];
+				SetMMUslot(MmuTask, slotNo, page);
 			}
-			// else  // map the default pages 
-			// {
-			// 	page = StateSwitch[CurrentRamConfig] + bankNo;
-			// 	SetMMUslot(CoCoFullMemOffset, 0, bankNo, page);
-			// 	SetMMUslot(CoCoFullMemOffset, 1, bankNo, page);
-			// }
+			else  // map the default pages 
+			{
+				page = StateSwitch[CurrentRamConfig] + slotNo;
+				SetMMUslot(0, slotNo, page);
+				SetMMUslot(1, slotNo, page);
+			}
 		}
 		else // The bank is 4 and above and we are dealing with ROM
 		{
@@ -239,10 +239,10 @@ void UpdateMMap(void)
 			{
 			case 0: //16K Internal 16K External
 			case 1:
-				if (bankNo < 6)
+				if (slotNo < 6)
 				{
-					page = bankNo - 4 + StateSwitch[CurrentRamConfig] + 8;
-					SetMMUslot(MmuTask, bankNo, page);
+					page = slotNo - 4 + StateSwitch[CurrentRamConfig] + 8;
+					SetMMUslot(MmuTask, slotNo, page);
 				}
 				else
 				{
@@ -250,31 +250,42 @@ void UpdateMMap(void)
 					// The seg faults could be trapped but would probably
 					// hamper perforance significantly.
 					// So instead could use:
-					// SetMMUslot(RomMemOffset, MmuTask, bankNo, page+4);
+					// SetMMUslot(RomMemOffset, MmuTask, slotNo, page+4);
 					// where page+4 would return a page + 32k into the ROM.
 					// The ROM would need to be setup as 64k instead of 32k 
 					// and the top 32k would be wasted (used) for this purpose.
 					// For now leave it unmapped with no trapping and see how
 					// often unmapped ROM pages are accessed.
-					munmap(MMUbank[MmuTask][bankNo], CoCoPageSize);
-					//MMUbank[MmuTask][bankNo] = NULL;
-					MMUpages[MmuTask][bankNo] = 0xFFFF;
+					munmap(MMUbank[MmuTask][slotNo], CoCoPageSize);
+					//MMUbank[MmuTask][slotNo] = NULL;
+					MMUpages[MmuTask][slotNo] = 0xFFFF;
 					// A better mechanism would be to have the pak device 
 					// share its ROM with the mmu at initialisation time.
 				}
 				break;
 			case 2: // 32K Internal
-				page = bankNo - 4 + StateSwitch[CurrentRamConfig] + 8;
-				SetMMUslot(MmuTask, bankNo, page);
+				page = slotNo - 4 + StateSwitch[CurrentRamConfig] + 8;
+				SetMMUslot(MmuTask, slotNo, page);
 				break;
 			case 3: // 32 External
-				munmap(MMUbank[MmuTask][bankNo], CoCoPageSize);
-				//MMUbank[MmuTask][bankNo] = NULL;
-				MMUpages[MmuTask][bankNo] = 0xFFFF;
+				munmap(MMUbank[MmuTask][slotNo], CoCoPageSize);
+				//MMUbank[MmuTask][slotNo] = NULL;
+				MMUpages[MmuTask][slotNo] = 0xFFFF;
 				break;
 			}
 		}
 	}
+
+	// static char prevprtbuf[80];
+	// char prtbuf[80];
+	// sprintf(prtbuf, "%02x - %02x %02x %02x %02x %02x %02x %02x %02x", MmuTask,
+	// 	MMUpages[0][0], MMUpages[0][1], MMUpages[0][2], MMUpages[0][3], 
+	// 	MMUpages[0][4], MMUpages[0][5], MMUpages[0][6], MMUpages[0][7]);
+	// if (strcmp(prtbuf, prevprtbuf))
+	// {
+	// 	fprintf(stderr, "%s\n", prtbuf);
+	// 	strcpy(prevprtbuf, prtbuf);
+	// }
 }
 
 unsigned char *Create32KROMMemory()
@@ -396,7 +407,11 @@ void Set_MmuTask(unsigned char task)
 {
 	MmuTask=task;
 	MmuState= (!MmuEnabled)<<1 | MmuTask;
-	taskmemory = task == 0 ? ptrCoCoTask0Mem : ptrCoCoTask1Mem;
+	if (MmuEnabled) 
+	{
+		UpdateMMap();
+		taskmemory = ptrTasks[MmuTask];
+	}
 	return;
 }
 
@@ -404,6 +419,7 @@ void Set_MmuEnabled (unsigned char usingmmu)
 {
 	MmuEnabled=usingmmu;
 	MmuState= (!MmuEnabled)<<1 | MmuTask;
+	UpdateMMap();
 	return;
 }
  
@@ -532,7 +548,7 @@ void MSABI MemWrite8_s(unsigned char data, unsigned short address)
 	if (address < 0xFE00)
 	{
 		if (MapType || (MmuRegisters[MmuState][address >> 13] < VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address >> 13] > VectorMask[CurrentRamConfig]))
-			MemPages[MmuRegisters[MmuState][address >> 13]][address & 0x1FFF] = data;
+			taskmemory[address] = data;
 		return;
 	}
 	if (address > 0xFEFF)
@@ -544,47 +560,47 @@ void MSABI MemWrite8_s(unsigned char data, unsigned short address)
 		memory[(0x2000 * VectorMask[CurrentRamConfig]) | (address & 0x1FFF)] = data;
 	else
 		if (MapType || (MmuRegisters[MmuState][address >> 13] < VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address >> 13] > VectorMask[CurrentRamConfig]))
-			MemPages[MmuRegisters[MmuState][address >> 13]][address & 0x1FFF] = data;
+			taskmemory[address] = data;
 	return;
 }
 
-unsigned char fMemRead8( unsigned short address)
-{
-	if (address<0xFE00)
-	{
-		if (MemPageOffsets[MmuRegisters[MmuState][address>>13]]==1)
-			return(MemPages[MmuRegisters[MmuState][address>>13]][address & 0x1FFF]);
-		return( PackMem8Read( MemPageOffsets[MmuRegisters[MmuState][address>>13]] + (address & 0x1FFF) ));
-	}
-	if (address>0xFEFF)
-		return (port_read(address));
-	if (RamVectors)	//Address must be $FE00 - $FEFF
-		return(memory[(0x2000*VectorMask[CurrentRamConfig])|(address & 0x1FFF)]); 
-	if (MemPageOffsets[MmuRegisters[MmuState][address>>13]]==1)
-		return(MemPages[MmuRegisters[MmuState][address>>13]][address & 0x1FFF]);
-	return( PackMem8Read( MemPageOffsets[MmuRegisters[MmuState][address>>13]] + (address & 0x1FFF) ));
-}
+// unsigned char fMemRead8( unsigned short address)
+// {
+// 	if (address<0xFE00)
+// 	{
+// 		if (MemPageOffsets[MmuRegisters[MmuState][address>>13]]==1)
+// 			return(MemPages[MmuRegisters[MmuState][address>>13]][address & 0x1FFF]);
+// 		return( PackMem8Read( MemPageOffsets[MmuRegisters[MmuState][address>>13]] + (address & 0x1FFF) ));
+// 	}
+// 	if (address>0xFEFF)
+// 		return (port_read(address));
+// 	if (RamVectors)	//Address must be $FE00 - $FEFF
+// 		return(memory[(0x2000*VectorMask[CurrentRamConfig])|(address & 0x1FFF)]); 
+// 	if (MemPageOffsets[MmuRegisters[MmuState][address>>13]]==1)
+// 		return(MemPages[MmuRegisters[MmuState][address>>13]][address & 0x1FFF]);
+// 	return( PackMem8Read( MemPageOffsets[MmuRegisters[MmuState][address>>13]] + (address & 0x1FFF) ));
+// }
 
-void fMemWrite8(unsigned char data,unsigned short address)
-{
-	if (address<0xFE00)
-	{
-		if (MapType || (MmuRegisters[MmuState][address>>13] <VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address>>13] > VectorMask[CurrentRamConfig]))
-			MemPages[MmuRegisters[MmuState][address>>13]][address & 0x1FFF]=data;
-		return;
-	}
-	if (address>0xFEFF)
-	{
-		port_write(data,address);
-		return;
-	}
-	if (RamVectors)	//Address must be $FE00 - $FEFF
-		memory[(0x2000*VectorMask[CurrentRamConfig])|(address & 0x1FFF)]=data;
-	else
-	if (MapType || (MmuRegisters[MmuState][address>>13] <VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address>>13] > VectorMask[CurrentRamConfig]))
-		MemPages[MmuRegisters[MmuState][address>>13]][address & 0x1FFF]=data;
-	return;
-}
+// void fMemWrite8(unsigned char data,unsigned short address)
+// {
+// 	if (address<0xFE00)
+// 	{
+// 		if (MapType || (MmuRegisters[MmuState][address>>13] <VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address>>13] > VectorMask[CurrentRamConfig]))
+// 			MemPages[MmuRegisters[MmuState][address>>13]][address & 0x1FFF]=data;
+// 		return;
+// 	}
+// 	if (address>0xFEFF)
+// 	{
+// 		port_write(data,address);
+// 		return;
+// 	}
+// 	if (RamVectors)	//Address must be $FE00 - $FEFF
+// 		memory[(0x2000*VectorMask[CurrentRamConfig])|(address & 0x1FFF)]=data;
+// 	else
+// 	if (MapType || (MmuRegisters[MmuState][address>>13] <VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address>>13] > VectorMask[CurrentRamConfig]))
+// 		MemPages[MmuRegisters[MmuState][address>>13]][address & 0x1FFF]=data;
+// 	return;
+// }
 /*****************************************************************
 * 16 bit memory handling routines                                *
 *****************************************************************/
