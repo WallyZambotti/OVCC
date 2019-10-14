@@ -14,7 +14,7 @@ ASM=jwasm
 ODIR = obj
 
 DEBUG=-g
-OPT=-O2 # -Og
+OPT=-O0 # -Og
 WARN = -w # -Wall
 PTHREAD = -pthread
 
@@ -24,7 +24,7 @@ IDIR = $(INCDIR) $(SDLINC) $(AGARINC)
 
 SDLLIB := $(shell sdl2-config --libs)
 AGARLIB := $(shell agar-config --libs)
-LIBS = $(SDLLIB) $(AGARLIB)
+LIBS = $(SDLLIB) $(AGARLIB) -lrt
 
 CFLAGS += $(DEBUG) $(OPT) $(WARN) $(IDIR)
 
