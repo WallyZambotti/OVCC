@@ -480,7 +480,7 @@ unsigned char MemRead8(unsigned short address)
 {
 	if (address<0xFE00)
 	{
-		if (MemPageOffsets[MmuRegisters[MmuState][address >> 13]] == 1)
+		if (MapType || MemPageOffsets[MmuRegisters[MmuState][address >> 13]] == 1)
 			return(taskmemory[address]);
 		return(PackMem8Read(MemPageOffsets[MmuRegisters[MmuState][address >> 13]] + (address & 0x1FFF)));
 	}
@@ -488,7 +488,7 @@ unsigned char MemRead8(unsigned short address)
 		return (port_read(address));
 	if (RamVectors)	//Address must be $FE00 - $FEFF
 		return(memory[(0x2000 * VectorMask[CurrentRamConfig]) | (address & 0x1FFF)]);
-	if (MemPageOffsets[MmuRegisters[MmuState][address >> 13]] == 1)
+	if (MapType || MemPageOffsets[MmuRegisters[MmuState][address >> 13]] == 1)
 		return(taskmemory[address]);
 	return(PackMem8Read(MemPageOffsets[MmuRegisters[MmuState][address >> 13]] + (address & 0x1FFF)));
 }
@@ -497,7 +497,7 @@ unsigned char MSABI MemRead8_s(unsigned short address)
 {
 	if (address<0xFE00)
 	{
-		if (MemPageOffsets[MmuRegisters[MmuState][address >> 13]] == 1)
+		if (MapType || MemPageOffsets[MmuRegisters[MmuState][address >> 13]] == 1)
 			return(taskmemory[address]);
 		return(PackMem8Read(MemPageOffsets[MmuRegisters[MmuState][address >> 13]] + (address & 0x1FFF)));
 	}
@@ -505,19 +505,13 @@ unsigned char MSABI MemRead8_s(unsigned short address)
 		return (port_read(address));
 	if (RamVectors)	//Address must be $FE00 - $FEFF
 		return(memory[(0x2000 * VectorMask[CurrentRamConfig]) | (address & 0x1FFF)]);
-	if (MemPageOffsets[MmuRegisters[MmuState][address >> 13]] == 1)
+	if (MapType || MemPageOffsets[MmuRegisters[MmuState][address >> 13]] == 1)
 		return(taskmemory[address]);
 	return(PackMem8Read(MemPageOffsets[MmuRegisters[MmuState][address >> 13]] + (address & 0x1FFF)));
 }
 
 void MemWrite8(unsigned char data, unsigned short address)
 {
-	//	char Message[256]="";
-	//	if ((address>=0xC000) & (address<=0xE000))
-	//	{
-	//		sprintf(Message,"Writing %i to ROM Address %x\n",data,address);
-	//		WriteLog(Message,TOCONS);
-	//	}
 	if (address < 0xFE00)
 	{
 		if (MapType || (MmuRegisters[MmuState][address >> 13] < VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address >> 13] > VectorMask[CurrentRamConfig]))
@@ -539,12 +533,6 @@ void MemWrite8(unsigned char data, unsigned short address)
 
 void MSABI MemWrite8_s(unsigned char data, unsigned short address)
 {
-	//	char Message[256]="";
-	//	if ((address>=0xC000) & (address<=0xE000))
-	//	{
-	//		sprintf(Message,"Writing %i to ROM Address %x\n",data,address);
-	//		WriteLog(Message,TOCONS);
-	//	}
 	if (address < 0xFE00)
 	{
 		if (MapType || (MmuRegisters[MmuState][address >> 13] < VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address >> 13] > VectorMask[CurrentRamConfig]))
@@ -564,43 +552,6 @@ void MSABI MemWrite8_s(unsigned char data, unsigned short address)
 	return;
 }
 
-// unsigned char fMemRead8( unsigned short address)
-// {
-// 	if (address<0xFE00)
-// 	{
-// 		if (MemPageOffsets[MmuRegisters[MmuState][address>>13]]==1)
-// 			return(MemPages[MmuRegisters[MmuState][address>>13]][address & 0x1FFF]);
-// 		return( PackMem8Read( MemPageOffsets[MmuRegisters[MmuState][address>>13]] + (address & 0x1FFF) ));
-// 	}
-// 	if (address>0xFEFF)
-// 		return (port_read(address));
-// 	if (RamVectors)	//Address must be $FE00 - $FEFF
-// 		return(memory[(0x2000*VectorMask[CurrentRamConfig])|(address & 0x1FFF)]); 
-// 	if (MemPageOffsets[MmuRegisters[MmuState][address>>13]]==1)
-// 		return(MemPages[MmuRegisters[MmuState][address>>13]][address & 0x1FFF]);
-// 	return( PackMem8Read( MemPageOffsets[MmuRegisters[MmuState][address>>13]] + (address & 0x1FFF) ));
-// }
-
-// void fMemWrite8(unsigned char data,unsigned short address)
-// {
-// 	if (address<0xFE00)
-// 	{
-// 		if (MapType || (MmuRegisters[MmuState][address>>13] <VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address>>13] > VectorMask[CurrentRamConfig]))
-// 			MemPages[MmuRegisters[MmuState][address>>13]][address & 0x1FFF]=data;
-// 		return;
-// 	}
-// 	if (address>0xFEFF)
-// 	{
-// 		port_write(data,address);
-// 		return;
-// 	}
-// 	if (RamVectors)	//Address must be $FE00 - $FEFF
-// 		memory[(0x2000*VectorMask[CurrentRamConfig])|(address & 0x1FFF)]=data;
-// 	else
-// 	if (MapType || (MmuRegisters[MmuState][address>>13] <VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address>>13] > VectorMask[CurrentRamConfig]))
-// 		MemPages[MmuRegisters[MmuState][address>>13]][address & 0x1FFF]=data;
-// 	return;
-// }
 /*****************************************************************
 * 16 bit memory handling routines                                *
 *****************************************************************/
