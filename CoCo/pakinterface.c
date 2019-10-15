@@ -162,7 +162,7 @@ void PackPortWrite(unsigned char Port,unsigned char Data)
 unsigned char PackMem8Read (unsigned short Address)
 {
 	if (PakMemRead8!=NULL)
-		return(PakMemRead8(Address&32767));
+		return(PakMemRead8(Address/*&32767*/));
 	if (ExternalRomBuffer!=NULL)
 		return(ExternalRomBuffer[(Address & 32767)+BankedCartOffset]);
 	return(0);
