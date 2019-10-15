@@ -222,7 +222,8 @@ void CPUIncDecF3F4(AG_Event *event)
 {
     extern void ConfigOKApply(int);
     extern void CPUConfigSpeed(int);
-
+    extern void JoyStickConfigRecordState();
+    
     int incdec = AG_INT(1);
 
     cpuMax = (double)CurrentConfig.MaxOverclock * cpuMin;
@@ -236,6 +237,7 @@ void CPUIncDecF3F4(AG_Event *event)
     cpuOCval += cpuMin * (double)incdec;
 
     CPUConfigSpeed((int)(cpuOCval/cpuMin));
+    JoyStickConfigRecordState();
     ConfigOKApply(0);
 }
 
