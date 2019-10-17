@@ -43,8 +43,10 @@ void ADDCALL PackPortWrite(unsigned char, unsigned char);
 unsigned char ADDCALL PackPortRead(unsigned char);
 typedef unsigned char (*MEMREAD8)(unsigned short);
 typedef void (*MEMWRITE8)(unsigned char,unsigned short);
+typedef void (*MMUROMSHARE)(unsigned short, unsigned char *);
 void ADDCALL MemPointers(MEMREAD8, MEMWRITE8);
 unsigned char ADDCALL PakMemRead8 (unsigned short);
+void ADDCALL PakRomShare(MMUROMSHARE);
 void ADDCALL ModuleStatus (char *);
 //void ADDCALL SetIniPath (char *);
 

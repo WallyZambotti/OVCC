@@ -37,6 +37,8 @@ static unsigned char (*MemRead8)(unsigned short)=NULL;
 static void (*MemWrite8)(unsigned char,unsigned short)=NULL;
 static unsigned char (*MmuRead8)(unsigned char,unsigned short)=NULL;
 static void (*MmuWrite8)(unsigned char,unsigned char,unsigned short)=NULL;
+//static void (*PakRomShareCall)(MMUROMSHARE)=NULL;
+static void (*PakRomShareCall)(short, unsigned char *)=NULL;
 
 static void (*PakSetCart)(unsigned char)=NULL;
 static char ModuleNames[MAXPAX][MAX_LOADSTRING]={"Empty","Empty","Empty","Empty"};	
@@ -66,7 +68,7 @@ static void (*ModuleResetCalls[MAXPAX]) (void)={NULL,NULL,NULL,NULL};
 static void (*SetInteruptCallPointerCalls[MAXPAX]) ( ASSERTINTERUPT)={NULL,NULL,NULL,NULL};
 static void (*DmaMemPointerCalls[MAXPAX]) (MEMREAD8,MEMWRITE8)={NULL,NULL,NULL,NULL};
 static void (*MmuMemPointerCalls[MAXPAX]) (MMUREAD8,MMUWRITE8)={NULL,NULL,NULL,NULL};
-
+static void (*PakRomShareCalls[MAXPAX]) (MMUROMSHARE)={NULL,NULL,NULL,NULL};
 
 void SetCartSlot0(unsigned char);
 void SetCartSlot1(unsigned char);
@@ -260,6 +262,11 @@ void ADDCALL HeartBeat(void)
 	return;
 }
 
+void ADDCALL PakRomShare(MMUROMSHARE temp)
+{
+	PakRomShareCall = temp;
+}
+
 //This captures the pointers to the MmuRead8 and MmuWrite8 functions. This allows the DLL to do DMA xfers with MMU ram.
 void ADDCALL MmuPointers(MMUREAD8 Temp1,MMUWRITE8 Temp2)
 {
@@ -268,7 +275,7 @@ void ADDCALL MmuPointers(MMUREAD8 Temp1,MMUWRITE8 Temp2)
 	return;
 }
 
-//This captures the pointers to the MemRead8 and MemWrite8 functions. This allows the DLL to do DMA xfers with CPU ram.
+//This captures the pointers to the MemRead8 and MemWrite8 functions.
 void ADDCALL MemPointers(MEMREAD8 Temp1,MEMWRITE8 Temp2)
 {
 	MemRead8=Temp1;
@@ -279,7 +286,7 @@ void ADDCALL MemPointers(MEMREAD8 Temp1,MEMWRITE8 Temp2)
 unsigned char ADDCALL PakMemRead8(unsigned short Address)
 {
 	if (ExtRomPointers[ChipSelectSlot] != NULL)
-		return(ExtRomPointers[ChipSelectSlot][(Address & 32767)+BankedCartOffset[ChipSelectSlot]]); //Bank Select ???
+		return(ExtRomPointers[ChipSelectSlot][(Address & 32767)/*+BankedCartOffset[ChipSelectSlot]*/]); //Bank Select ???
 	if (PakMemRead8Calls[ChipSelectSlot] != NULL)
 		return(PakMemRead8Calls[ChipSelectSlot](Address));
 	return(NULL);
@@ -463,7 +470,7 @@ unsigned char MountModule(unsigned char Slot,char *ModName)
 
 	case 2: //ROM image
 		UnloadModule(Slot);
-		ExtRomPointers[Slot]=(unsigned char *)malloc(0x40000);
+		ExtRomPointers[Slot]=(unsigned char *)malloc(0x4000);
 		if (ExtRomPointers[Slot]==NULL)
 		{
 			AG_TextMsg(AG_MSG_INFO, "Rom pointer is NULL");
@@ -475,9 +482,15 @@ unsigned char MountModule(unsigned char Slot,char *ModName)
 			AG_TextMsg(AG_MSG_INFO, "File handle is NULL");
 			return(0);
 		}
-		while ((feof(rom_handle)==0) & (index<0x40000))
+		while ((index<0x4000) && (feof(rom_handle)==0))
 			ExtRomPointers[Slot][index++]=fgetc(rom_handle);
 		fclose(rom_handle);
+		if (PakRomShareCall) 
+		{
+			index--;
+			fprintf(stderr, "MPI calling PakRomShare call back %d\n", index);
+			PakRomShareCall((unsigned short) index, ExtRomPointers[Slot]);
+		}
 		strcpy(ModulePaths[Slot],ModuleName);
 		PathStripPath(ModuleName);
 //		PathRemovePath(ModuleName);
@@ -505,6 +518,7 @@ unsigned char MountModule(unsigned char Slot,char *ModName)
 
 		DmaMemPointerCalls[Slot]=(DMAMEMPOINTERS) SDL_LoadFunction(hinstLib[Slot], "MemPointers");
 		MmuMemPointerCalls[Slot]=(MMUMEMPOINTERS) SDL_LoadFunction(hinstLib[Slot], "MmuPointers");
+		PakRomShareCalls[Slot]=(MMUROMSHARE) SDL_LoadFunction(hinstLib[Slot], "PakRomShare");
 		SetCartCalls[Slot]=(SETCARTPOINTER) SDL_LoadFunction(hinstLib[Slot], "SetCart"); //HERE
 		
 		HeartBeatCalls[Slot]=(HEARTBEAT) SDL_LoadFunction(hinstLib[Slot], "HeartBeat");
@@ -534,6 +548,8 @@ unsigned char MountModule(unsigned char Slot,char *ModName)
 			DmaMemPointerCalls[Slot](MemRead8,MemWrite8);
 		if (MmuMemPointerCalls[Slot] !=NULL)
 			MmuMemPointerCalls[Slot](MmuRead8,MmuWrite8);
+		if (PakRomShareCalls[Slot] != NULL)
+			PakRomShareCalls[Slot](PakRomShareCall);
 		if (SetIniPathCalls[Slot] != NULL)
 		{
 			//SetIniPathCalls[Slot](IniFile);

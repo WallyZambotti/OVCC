@@ -55,6 +55,7 @@ typedef void (*MODULESTATUS)(char *);
 
 typedef void (*DMAMEMPOINTERS) ( MEMREAD8,MEMWRITE8);
 typedef void (*MMUMEMPOINTERS) ( MMUREAD8,MMUWRITE8);
+typedef void (*MMUROMSHARE)(unsigned short, unsigned char *);
 typedef void (*SETINTERUPTCALLPOINTER) (ASSERTINTERUPT);
 typedef unsigned short (*MODULEAUDIOSAMPLE)(void);
 typedef void (*MODULERESET)(void);

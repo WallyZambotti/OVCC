@@ -41,8 +41,9 @@ static char IniFile[MAX_PATH] = { 0 };
 typedef void (*ASSERTINTERUPT) (unsigned char,unsigned char);
 typedef void (*DMAMEMPOINTERS) ( MEMREAD8,MEMWRITE8);
 static void (*AssertInt)(unsigned char,unsigned char)=NULL;
-static unsigned char (*MemRead8)(unsigned short);
-static void (*MemWrite8)(unsigned char,unsigned short);
+static unsigned char (*MemRead8)(unsigned short)=NULL;
+static void (*MemWrite8)(unsigned char,unsigned short)=NULL;
+static void (*PakRomShareCall)(short, unsigned char *)=NULL;
 // static unsigned char *Memory=NULL;
 static unsigned char DiskRom[8192];
 static unsigned char ClockEnabled=1,ClockReadOnly=1;
@@ -78,7 +79,6 @@ void __attribute__ ((destructor)) cleanUpLibrary(void) {
 void MemWrite(unsigned char Data, unsigned short Address)
 {
 	MemWrite8(Data,Address);
-	return;
 }
 
 unsigned char MemRead(unsigned short Address)
@@ -97,8 +97,6 @@ void ADDCALL ModuleName(char *ModName, AG_MenuItem *Temp)
 	{
 		BuildMenu();
 	}
-
-	return ;
 }
 
 void ADDCALL ModuleConfig(unsigned char func)
@@ -120,8 +118,6 @@ void ADDCALL ModuleConfig(unsigned char func)
 	default:
 		break;
 	}
-
-	return;
 }
 
 /*
@@ -136,7 +132,6 @@ void AssertInterupt(ASSERTINTERUPT Dummy)
 void ADDCALL PackPortWrite(unsigned char Port, unsigned char Data)
 {
 	IdeWrite(Data,Port);
-	return;
 }
 
 unsigned char ADDCALL PackPortRead(unsigned char Port)
@@ -163,7 +158,11 @@ void ADDCALL MemPointers(MEMREAD8 Temp1, MEMWRITE8 Temp2)
 {
 	MemRead8=Temp1;
 	MemWrite8=Temp2;
-	return;
+}
+
+void ADDCALL PakRomShare(MMUROMSHARE temp)
+{
+	PakRomShareCall = temp;
 }
 
 unsigned char ADDCALL PakMemRead8(unsigned short Address)
@@ -181,7 +180,6 @@ void PakMemWrite8(unsigned char Data,unsigned short Address)
 void ADDCALL ModuleStatus(char *MyStatus)
 {
 	DiskStatus(MyStatus);
-	return ;
 }
 
 //void ADDCALL SetIniPath (char *IniFilePath)
@@ -192,7 +190,6 @@ void ADDCALL SetIniPath(INIman *InimanP)
 	InitPrivateProfile(InimanP);
 	iniman = InimanP;
 	LoadConfig();
-	return;
 }
 
 /*
@@ -220,7 +217,7 @@ static int LoadHDD(AG_Event *event)
 	SaveConfig();
 	UpdateMenu();
 
-    return 0;
+  return 0;
 }
 
 static void LoadHardDisk(AG_Event *event)
@@ -264,14 +261,12 @@ static void LoadConfig(void)
 	getcwd(DiskRomPath, sizeof(DiskRomPath));
 	strcat(DiskRomPath, "/rgbdos.rom");
 	LoadExtRom(DiskRomPath);
-	return;
 }
 
 static void SaveConfig(void)
 {
 	ValidatePath(HDDfilename);
 	WritePrivateProfileString(moduleName, "VHDImage", HDDfilename, IniFile);
-	return;
 }
 
 void UnloadHardDisk(AG_Event *event)
@@ -331,6 +326,11 @@ static unsigned char LoadExtRom( char *FilePath)	//Returns 1 on if loaded
 		
 		RetVal = 1;
 		fclose(rom_handle);
+
+		if (PakRomShareCall != NULL) 
+		{
+			PakRomShareCall(index, DiskRom);
+		}
 	}
 
 	return(RetVal);

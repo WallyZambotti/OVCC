@@ -25,11 +25,13 @@ extern "C" void MemWrite8(unsigned char,unsigned short );
 extern "C" unsigned char MemRead8(short unsigned int);
 extern "C" void MmuWrite8(unsigned char,unsigned char,unsigned short );
 extern "C" unsigned char MmuRead8(unsigned char,short unsigned int);
+extern "C" void MmuRomShare(unsigned short, unsigned char *);
 #else
 extern void MemWrite8(unsigned char,unsigned short );
 extern unsigned char MemRead8(short unsigned int);
 extern void MmuWrite8(unsigned char,unsigned char,unsigned short );
 extern unsigned char MmuRead8(unsigned char,short unsigned int);
+extern void MmuRomShare(unsigned short, unsigned char *);
 #endif
 void MemWrite16(unsigned short,unsigned short );
 unsigned short MemRead16(short unsigned int);
@@ -55,6 +57,7 @@ void MmuReset(void);
 void SetDistoRamBank(unsigned char);
 void SetMmuPrefix(unsigned char);
 void SetCartMMU (unsigned char);
+//void MmuRomShare(unsigned short, unsigned char *);
 
 #define _128K	0	
 #define _512K	1

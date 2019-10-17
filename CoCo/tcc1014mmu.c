@@ -484,3 +484,7 @@ void UpdateMmuArray(void)
 	return;
 }
 
+void MmuRomShare(unsigned short romsize, unsigned char *rom)
+{
+	return;
+}

@@ -44,9 +44,11 @@ typedef unsigned int  UINT32, *PUINT32;
 typedef unsigned long  UINT64, *PUINT64;
 
 static unsigned char *MemPages[1024];
-static unsigned short MemPageOffsets[1024];
+//static unsigned short MemPageOffsets[1024];
 static unsigned char *memory=NULL;	//Emulated RAM FULL 128-8096K
 static unsigned char *taskmemory=NULL;	//Emulated RAM 64k
+static unsigned char *vectormemory=NULL;	//Emulated RAM 64k
+static unsigned char *pendingrommemory=NULL;	//Emulated RAM 64k
 static unsigned char *InternalRomBuffer=NULL;
 static unsigned char MmuTask=0;		// $FF91 bit 0
 static unsigned char MmuEnabled=0;	// $FF90 bit 6
@@ -66,7 +68,7 @@ static unsigned short MmuPrefix=0;
 
 #define CoCoPageSize (8*1024)
 #define Mem64kSize (64*1024)
-#define CoCoROMSize (4*CoCoPageSize) // either 4 or 8 * 8k pages are reserved even though we only use 4 of them
+#define CoCoROMSize (8*CoCoPageSize) // 32k for internal ROM + 32k for external/PAK ROM
 #define MMUBankMax 2
 #define MMUSlotMax 8
 #define handle_error(msg) do { perror(msg) ; exit(EXIT_FAILURE);} while (0)
@@ -75,11 +77,14 @@ static unsigned short MmuPrefix=0;
 #define Task1MemOffset (StateSwitch[CurrentRamConfig]*CoCoPageSize)
 #define VideoMemOffset (StateSwitch[CurrentRamConfig]*CoCoPageSize)
 #define RomMemOffset (MemConfig[CurrentRamConfig])
+#define PAKExtMemOffset (RomMemOffset + (4 * CoCoPageSize))
 #define TotalMMmemSize (MemConfig[CurrentRamConfig]+CoCoROMSize)
 
 int CoCoMemFD;
+unsigned short pendingromsize;
 
-PUINT8 ptrCoCoFullMem = NULL, ptrCoCoTask0Mem = NULL, ptrCoCoTask1Mem = NULL, ptrCoCoRomMem = NULL, ptrTasks[MMUBankMax],
+PUINT8 ptrCoCoFullMem = NULL, ptrCoCoTask0Mem = NULL, ptrCoCoTask1Mem = NULL, ptrCoCoRomMem = NULL, ptrCoCoPakExtMem = NULL,
+	ptrTasks[MMUBankMax],
 	MMUbank[MMUBankMax][MMUSlotMax] = 
 	{ 
 		{ NULL, NULL, NULL, NULL,  NULL, NULL, NULL, NULL }, 
@@ -92,10 +97,10 @@ UINT16 MMUpages[MMUBankMax][MMUSlotMax] =
 	{ 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF }
 };
 
-void UpdateMmuArray(void);
+//void UpdateMmuArray(void);
 unsigned char *Create32KROMMemory();
 unsigned char *Create64KVirtualMemory(unsigned int);
-int SetMMUslot(UINT8, UINT8, UINT16);
+void SetMMUslot(UINT8, UINT8, UINT16);
 
 /*****************************************************************************************
 * MmuInit Initilize and allocate memory for RAM Internal and External ROM Images.        *
@@ -122,6 +127,8 @@ unsigned char *MmuInit(unsigned char RamConfig)
 	InternalRomBuffer = Create32KROMMemory();
 	if (InternalRomBuffer == NULL)
 		return(NULL);
+
+	vectormemory = ptrCoCoFullMem + (VectorMask[CurrentRamConfig] - 7) * CoCoPageSize;
 
 	CopyRom();
 	MmuReset();
@@ -153,11 +160,10 @@ void MmuReset(void)
 	for (Index1=0;Index1<1024;Index1++)
 	{
 		MemPages[Index1]=memory+( (Index1 & RamMask[CurrentRamConfig]) *0x2000);
-		MemPageOffsets[Index1]=1;
+		//MemPageOffsets[Index1]=1;
 	}
 	SetRomMap(0);
 	SetMapType(0);
-	return;
 }
 
 void freePhysicalMemPages()
@@ -170,7 +176,7 @@ void freePhysicalMemPages()
 		MMUbank[1][pageCnt] = NULL;
 	}
 
-	if(ptrCoCoRomMem != NULL) munmap(ptrCoCoRomMem, Mem64kSize);
+	if(ptrCoCoRomMem != NULL) munmap(ptrCoCoRomMem, CoCoROMSize);
 	if(ptrCoCoTask0Mem != NULL) munmap(ptrCoCoTask0Mem, Mem64kSize);
 	if(ptrCoCoTask1Mem != NULL) munmap(ptrCoCoTask1Mem, Mem64kSize);
 	if(ptrCoCoFullMem != NULL) munmap(ptrCoCoFullMem, TotalMMmemSize);
@@ -181,12 +187,7 @@ void freePhysicalMemPages()
 	ptrCoCoFullMem = NULL;
 }
 
-UINT8 *MemPagePointer(PUINT8 ptrmem, UINT16 page)
-{
-	return(ptrmem + page * CoCoPageSize);
-}
-
-int SetMMUslot(UINT8 task, UINT8 slotnum, UINT16 mempage)
+void SetMMUslot(UINT8 task, UINT8 slotnum, UINT16 mempage)
 {
   int memOffset;
   PUINT8 memPtr;
@@ -208,8 +209,6 @@ int SetMMUslot(UINT8 task, UINT8 slotnum, UINT16 mempage)
 
 		MMUpages[task][slotnum] = mempage;
 	}
-
-  return 1;
 }
 
 void UpdateMMap(void)
@@ -240,39 +239,18 @@ void UpdateMMap(void)
 			case 0: //16K Internal 16K External
 			case 1:
 				if (slotNo < 6)
-				{
-					page = slotNo - 4 + StateSwitch[CurrentRamConfig] + 8;
-					SetMMUslot(MmuTask, slotNo, page);
-				}
+					page = RamMask[CurrentRamConfig] + slotNo - 3;
 				else
-				{
-					// Unmapping the memory page may cause seg faults.
-					// The seg faults could be trapped but would probably
-					// hamper perforance significantly.
-					// So instead could use:
-					// SetMMUslot(RomMemOffset, MmuTask, slotNo, page+4);
-					// where page+4 would return a page + 32k into the ROM.
-					// The ROM would need to be setup as 64k instead of 32k 
-					// and the top 32k would be wasted (used) for this purpose.
-					// For now leave it unmapped with no trapping and see how
-					// often unmapped ROM pages are accessed.
-					munmap(MMUbank[MmuTask][slotNo], CoCoPageSize);
-					//MMUbank[MmuTask][slotNo] = NULL;
-					MMUpages[MmuTask][slotNo] = 0xFFFF;
-					// A better mechanism would be to have the pak device 
-					// share its ROM with the mmu at initialisation time.
-				}
+					page = RamMask[CurrentRamConfig] + slotNo - 1;
 				break;
 			case 2: // 32K Internal
-				page = slotNo - 4 + StateSwitch[CurrentRamConfig] + 8;
-				SetMMUslot(MmuTask, slotNo, page);
+				page = RamMask[CurrentRamConfig] + slotNo - 3;
 				break;
 			case 3: // 32 External
-				munmap(MMUbank[MmuTask][slotNo], CoCoPageSize);
-				//MMUbank[MmuTask][slotNo] = NULL;
-				MMUpages[MmuTask][slotNo] = 0xFFFF;
+					page = RamMask[CurrentRamConfig] + slotNo + 1;
 				break;
 			}
+			SetMMUslot(MmuTask, slotNo, page);
 		}
 	}
 
@@ -302,6 +280,19 @@ unsigned char *Create32KROMMemory()
         printf("Cannot mmap ROM mem\n");
         return NULL;
     }
+
+	  ptrCoCoPakExtMem = (PUINT8)mmap(NULL, romsize, PROT_READ | PROT_WRITE, MAP_SHARED, CoCoMemFD, PAKExtMemOffset);
+    
+    if (ptrCoCoRomMem == MAP_FAILED)
+    {
+        printf("Cannot mmap PAK/external ROM mem\n");
+        return NULL;
+    }
+
+		if (pendingrommemory != NULL)
+		{
+			MmuRomShare(pendingromsize, pendingrommemory);
+		}
 
 	return ptrCoCoRomMem;
 }
@@ -333,9 +324,7 @@ unsigned char *Create64KVirtualMemory(unsigned int ramsize)
 	// 128k CoCo = Page 8
 	// All other memsizes = Page 56
 
-	__off_t memoffset = Task0MemOffset;
-	size_t memsize = Mem64kSize;
-	ptrCoCoTask0Mem = (PUINT8)mmap(NULL, memsize, PROT_READ | PROT_WRITE, MAP_SHARED, CoCoMemFD, memoffset);
+	ptrCoCoTask0Mem = (PUINT8)mmap(NULL, Mem64kSize, PROT_READ | PROT_WRITE, MAP_SHARED, CoCoMemFD, Task0MemOffset);
 	
 	if (ptrCoCoTask0Mem == MAP_FAILED)
 	{
@@ -345,9 +334,7 @@ unsigned char *Create64KVirtualMemory(unsigned int ramsize)
 
 	ptrTasks[0] = ptrCoCoTask0Mem;
 
-	memoffset = Task1MemOffset;
-	memsize = Mem64kSize;
-	ptrCoCoTask1Mem = (PUINT8)mmap(NULL, memsize, PROT_READ | PROT_WRITE, MAP_SHARED, CoCoMemFD, memoffset);
+	ptrCoCoTask1Mem = (PUINT8)mmap(NULL, Mem64kSize, PROT_READ | PROT_WRITE, MAP_SHARED, CoCoMemFD, Task1MemOffset);
 	
 	if (ptrCoCoTask1Mem == MAP_FAILED)
 	{
@@ -370,7 +357,6 @@ unsigned char *Create64KVirtualMemory(unsigned int ramsize)
 void SetVectors(unsigned char data)
 {
 	RamVectors=!!data; //Bit 3 of $FF90 MC3
-	return;
 }
 
 void SetMmuRegister(unsigned char Register,unsigned char data)
@@ -383,24 +369,20 @@ void SetMmuRegister(unsigned char Register,unsigned char data)
 	MmuRegisters[Task][BankRegister]=bank ; //gime.c returns what was written so I can get away with this
 
 	UpdateMMap();
-
-	return;
 }
 
 void SetRomMap(unsigned char data)
 {	
 	RomMap=(data & 3);
-	UpdateMmuArray();
+	//UpdateMmuArray();
 	UpdateMMap();
-	return;
 }
 
 void SetMapType(unsigned char type)
 {
 	MapType=type;
-	UpdateMmuArray();
+	//UpdateMmuArray();
 	UpdateMMap();
-	return;
 }
 
 void Set_MmuTask(unsigned char task)
@@ -412,20 +394,39 @@ void Set_MmuTask(unsigned char task)
 		UpdateMMap();
 		taskmemory = ptrTasks[MmuTask];
 	}
-	return;
 }
 
-void Set_MmuEnabled (unsigned char usingmmu)
+void Set_MmuEnabled(unsigned char usingmmu)
 {
 	MmuEnabled=usingmmu;
 	MmuState= (!MmuEnabled)<<1 | MmuTask;
 	UpdateMMap();
-	return;
 }
  
 unsigned char * Getint_rom_pointer(void)
 {
 	return(InternalRomBuffer);
+}
+
+void MmuRomShare(unsigned short romsize, PUINT8 rom)
+{
+	if (romsize != 0 && romsize <= CoCoPageSize && rom != NULL) 
+	{
+		// The config routines load all the pak modules before the MMU is reset.
+		// Any PAK module that uses MmuRomShare will end up calling this function before
+		// the MMU has had a chance to setup memory.
+		// Therefore if memory is not ready record the share as pending and allow the reset 
+		// function to final copy the memory by recalling this function.
+
+		if (ptrCoCoPakExtMem != NULL)
+		{
+			memcpy(ptrCoCoPakExtMem, rom, (size_t)romsize);
+		}
+		else {
+			pendingromsize = romsize;
+			pendingrommemory = rom;
+		}
+	}
 }
 
 void CopyRom(void)
@@ -445,9 +446,6 @@ void CopyRom(void)
 		fprintf(stderr, "Missing file coco3.rom\n");
 		exit(0);
 	}
-//		for (temp=0;temp<=32767;temp++)
-//			InternalRomBuffer[temp]=CC3Rom[temp];
-	return;
 }
 
 int load_int_rom(char filename[MAX_PATH])
@@ -465,6 +463,7 @@ int load_int_rom(char filename[MAX_PATH])
 }
 
 // Coco3 MMU Code
+
 unsigned char MmuRead8(unsigned char bank, unsigned short address)
 {
 	return MemPages[bank][address & 0x1FFF];
@@ -476,46 +475,38 @@ void MmuWrite8(unsigned char data, unsigned char bank, unsigned short address)
 }
 
 // Coco3 MMU Code
+
 unsigned char MemRead8(unsigned short address)
 {
 	if (address<0xFE00)
 	{
-		if (MapType || MemPageOffsets[MmuRegisters[MmuState][address >> 13]] == 1)
-			return(taskmemory[address]);
-		return(PackMem8Read(MemPageOffsets[MmuRegisters[MmuState][address >> 13]] + (address & 0x1FFF)));
+		return(taskmemory[address]);
 	}
 	if (address>0xFEFF)
 		return (port_read(address));
 	if (RamVectors)	//Address must be $FE00 - $FEFF
-		return(memory[(0x2000 * VectorMask[CurrentRamConfig]) | (address & 0x1FFF)]);
-	if (MapType || MemPageOffsets[MmuRegisters[MmuState][address >> 13]] == 1)
-		return(taskmemory[address]);
-	return(PackMem8Read(MemPageOffsets[MmuRegisters[MmuState][address >> 13]] + (address & 0x1FFF)));
-}
+		return(vectormemory[address]);
+	return(taskmemory[address]);
+}	
 
 unsigned char MSABI MemRead8_s(unsigned short address)
 {
 	if (address<0xFE00)
 	{
-		if (MapType || MemPageOffsets[MmuRegisters[MmuState][address >> 13]] == 1)
-			return(taskmemory[address]);
-		return(PackMem8Read(MemPageOffsets[MmuRegisters[MmuState][address >> 13]] + (address & 0x1FFF)));
+		return(taskmemory[address]);
 	}
 	if (address>0xFEFF)
 		return (port_read(address));
 	if (RamVectors)	//Address must be $FE00 - $FEFF
-		return(memory[(0x2000 * VectorMask[CurrentRamConfig]) | (address & 0x1FFF)]);
-	if (MapType || MemPageOffsets[MmuRegisters[MmuState][address >> 13]] == 1)
-		return(taskmemory[address]);
-	return(PackMem8Read(MemPageOffsets[MmuRegisters[MmuState][address >> 13]] + (address & 0x1FFF)));
+		return(vectormemory[address]);
+	return(taskmemory[address]);
 }
 
 void MemWrite8(unsigned char data, unsigned short address)
 {
 	if (address < 0xFE00)
 	{
-		if (MapType || (MmuRegisters[MmuState][address >> 13] < VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address >> 13] > VectorMask[CurrentRamConfig]))
-			taskmemory[address] = data;
+		taskmemory[address] = data;
 		return;
 	}
 	if (address > 0xFEFF)
@@ -524,19 +515,16 @@ void MemWrite8(unsigned char data, unsigned short address)
 		return;
 	}
 	if (RamVectors)	//Address must be $FE00 - $FEFF
-		memory[(0x2000 * VectorMask[CurrentRamConfig]) | (address & 0x1FFF)] = data;
+		vectormemory[address] = data;
 	else
-		if (MapType || (MmuRegisters[MmuState][address >> 13] < VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address >> 13] > VectorMask[CurrentRamConfig]))
-			taskmemory[address] = data;
-	return;
+		taskmemory[address] = data;
 }
 
 void MSABI MemWrite8_s(unsigned char data, unsigned short address)
 {
 	if (address < 0xFE00)
 	{
-		if (MapType || (MmuRegisters[MmuState][address >> 13] < VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address >> 13] > VectorMask[CurrentRamConfig]))
-			taskmemory[address] = data;
+		taskmemory[address] = data;
 		return;
 	}
 	if (address > 0xFEFF)
@@ -545,15 +533,13 @@ void MSABI MemWrite8_s(unsigned char data, unsigned short address)
 		return;
 	}
 	if (RamVectors)	//Address must be $FE00 - $FEFF
-		memory[(0x2000 * VectorMask[CurrentRamConfig]) | (address & 0x1FFF)] = data;
+		vectormemory[address] = data;
 	else
-		if (MapType || (MmuRegisters[MmuState][address >> 13] < VectorMaska[CurrentRamConfig]) || (MmuRegisters[MmuState][address >> 13] > VectorMask[CurrentRamConfig]))
-			taskmemory[address] = data;
-	return;
+		taskmemory[address] = data;
 }
 
 /*****************************************************************
-* 16 bit memory handling routines                                *
+* 16 & 32 bit memory handling routines                                *
 *****************************************************************/
 
 unsigned short MemRead16(unsigned short addr)
@@ -634,64 +620,3 @@ void SetMmuPrefix(unsigned char data)
 	MmuPrefix=(data & 3)<<8;
 	return;
 }
-
-void UpdateMmuArray(void)
-{
-	if (MapType)
-	{
-		MemPages[VectorMask[CurrentRamConfig]-3]=memory+(0x2000*(VectorMask[CurrentRamConfig]-3));
-		MemPages[VectorMask[CurrentRamConfig]-2]=memory+(0x2000*(VectorMask[CurrentRamConfig]-2));
-		MemPages[VectorMask[CurrentRamConfig]-1]=memory+(0x2000*(VectorMask[CurrentRamConfig]-1));
-		MemPages[VectorMask[CurrentRamConfig]]=memory+(0x2000*VectorMask[CurrentRamConfig]);
-
-		MemPageOffsets[VectorMask[CurrentRamConfig]-3]=1;
-		MemPageOffsets[VectorMask[CurrentRamConfig]-2]=1;
-		MemPageOffsets[VectorMask[CurrentRamConfig]-1]=1;
-		MemPageOffsets[VectorMask[CurrentRamConfig]]=1;
-		return;
-	}
-	switch (RomMap)
-	{
-	case 0:
-	case 1:	//16K Internal 16K External
-		MemPages[VectorMask[CurrentRamConfig]-3]=InternalRomBuffer;
-		MemPages[VectorMask[CurrentRamConfig]-2]=InternalRomBuffer+0x2000;
-		MemPages[VectorMask[CurrentRamConfig]-1]=NULL;
-		MemPages[VectorMask[CurrentRamConfig]]=NULL;
-
-		MemPageOffsets[VectorMask[CurrentRamConfig]-3]=1;
-		MemPageOffsets[VectorMask[CurrentRamConfig]-2]=1;
-		MemPageOffsets[VectorMask[CurrentRamConfig]-1]=0;
-		MemPageOffsets[VectorMask[CurrentRamConfig]]=0x2000;
-		return;
-	break;
-
-	case 2:	// 32K Internal
-		MemPages[VectorMask[CurrentRamConfig]-3]=InternalRomBuffer;
-		MemPages[VectorMask[CurrentRamConfig]-2]=InternalRomBuffer+0x2000;
-		MemPages[VectorMask[CurrentRamConfig]-1]=InternalRomBuffer+0x4000;
-		MemPages[VectorMask[CurrentRamConfig]]=InternalRomBuffer+0x6000;
-
-		MemPageOffsets[VectorMask[CurrentRamConfig]-3]=1;
-		MemPageOffsets[VectorMask[CurrentRamConfig]-2]=1;
-		MemPageOffsets[VectorMask[CurrentRamConfig]-1]=1;
-		MemPageOffsets[VectorMask[CurrentRamConfig]]=1;
-		return;
-	break;
-
-	case 3:	//32K External
-		MemPages[VectorMask[CurrentRamConfig]-1]=NULL;
-		MemPages[VectorMask[CurrentRamConfig]]=NULL;
-		MemPages[VectorMask[CurrentRamConfig]-3]=NULL;
-		MemPages[VectorMask[CurrentRamConfig]-2]=NULL;
-
-		MemPageOffsets[VectorMask[CurrentRamConfig]-1]=0;
-		MemPageOffsets[VectorMask[CurrentRamConfig]]=0x2000;
-		MemPageOffsets[VectorMask[CurrentRamConfig]-3]=0x4000;
-		MemPageOffsets[VectorMask[CurrentRamConfig]-2]=0x6000;
-		return;
-	break;
-	}
-	return;
-}
-
