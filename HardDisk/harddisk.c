@@ -112,7 +112,13 @@ void ADDCALL ModuleConfig(unsigned char func)
 
 	case 1: // Update ini file
 		strcpy(IniFile, iniman->files[iniman->lastfile].name);
+		break;
 
+	case 2: // Trigger Mmu Rom Share
+		if (PakRomShareCall != NULL) 
+		{
+			PakRomShareCall(EXTROMSIZE, DiskRom);
+		}
 	break;
 
 	default:
@@ -326,11 +332,6 @@ static unsigned char LoadExtRom( char *FilePath)	//Returns 1 on if loaded
 		
 		RetVal = 1;
 		fclose(rom_handle);
-
-		if (PakRomShareCall != NULL) 
-		{
-			PakRomShareCall(index, DiskRom);
-		}
 	}
 
 	return(RetVal);

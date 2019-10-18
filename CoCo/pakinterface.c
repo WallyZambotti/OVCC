@@ -46,6 +46,7 @@ extern AG_MenuItem *GetMenuAnchor();
 
 // Storage for Pak ROMs
 static uint8_t *ExternalRomBuffer = nullptr; 
+static unsigned short ExternROMsize = 0;
 static bool RomPackLoaded = false;
 
 extern SystemState2 EmuState2;
@@ -371,6 +372,20 @@ void TriggerModuleConfig(unsigned char func)
 	}
 }
 
+// void TriggerModuleShare(void)
+// {
+// 	fprintf(stderr, "pakinterface RetriggerModuleShare\n");
+// 	if (ConfigModule != NULL) 
+// 	{
+// 		ConfigModule(2); // 2 = Reshare PAK rom
+// 		return;
+// 	}
+// 	if (ExternalRomBuffer != NULL)
+// 	{
+// 		MmuRomShare(ExternROMsize, ExternalRomBuffer);
+// 	}
+// }
+
 /**
 Load a ROM pack
 return total bytes loaded, or 0 on failure
@@ -402,15 +417,15 @@ int load_ext_rom(char filename[MAX_PATH])
 	while ((feof(rom_handle) == 0) && (index < PAK_MAX_MEM)) {
 		ExternalRomBuffer[index++] = fgetc(rom_handle);
 	}
-	if (index != 0) index--;
+	ExternROMsize = --index;
 	fclose(rom_handle);
 	
 	UnloadDll(1);
 	BankedCartOffset=0;
 	RomPackLoaded=true;
 
-	fprintf(stderr, "pakinterface calling PakRomShare call back %d\n", index);
-	MmuRomShare((unsigned short)index, ExternalRomBuffer);
+	//fprintf(stderr, "pakinterface calling PakRomShare call back %d\n", index);
+	//MmuRomShare(ExternROMsize, ExternalRomBuffer);
 	
 	return index;
 }

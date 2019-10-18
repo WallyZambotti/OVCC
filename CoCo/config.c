@@ -334,7 +334,7 @@ unsigned char ReadIniFile(void)
 
 void ConfigLoadIniFile(char * filename)
 {
-	void TriggerModuleConfig(unsigned char);
+	extern void TriggerModuleConfig(unsigned char);
 	char dummy[32];
 
 	// Update the config from the provided ini file name

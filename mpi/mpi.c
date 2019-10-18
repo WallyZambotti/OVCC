@@ -47,6 +47,7 @@ static char SlotLabel[MAXPAX][MAX_LOADSTRING*2]={"Empty","Empty","Empty","Empty"
 //static 
 static char ModulePaths[MAXPAX][MAX_PATH]={"","","",""};
 static unsigned char *ExtRomPointers[MAXPAX]={NULL,NULL,NULL,NULL};
+static unsigned short ExtRomSizes[MAXPAX]={0,0,0,0};
 static unsigned int BankedCartOffset[MAXPAX]={0,0,0,0};
 static unsigned char Temp,Temp2;
 static char IniFile[MAX_PATH]="";
@@ -98,6 +99,7 @@ int FileID(char *);
 void UpdateMenu(unsigned char);
 void BuildMenu(void);
 void UpdateConfig(unsigned char);
+static void RetriggerModuleShare(void);
 
 AG_MenuItem *menuAnchor = NULL;
 AG_MenuItem *itemMenu[MAXPAX] = { NULL,NULL,NULL,NULL };
@@ -179,7 +181,10 @@ void ADDCALL ModuleConfig(unsigned char func)
 			}
 		}
 
-	break;
+	// case 2: // Reshare PAK ROM or Ext ROM
+	// 	fprintf(stderr, "MPI ModuleConfig 2\n");
+	// 	RetriggerModuleShare();
+	// break;
 
 	default:
 		break;
@@ -326,6 +331,7 @@ unsigned short ADDCALL ModuleAudioSample(void)
 
 unsigned char ADDCALL ModuleReset(void)
 {
+	//fprintf(stderr, "MPI ModuleReset\n");
 	ChipSelectSlot=SwitchSlot;	
 	SpareSelectSlot=SwitchSlot;	
 	for (Temp=0;Temp<4;Temp++)
@@ -340,6 +346,7 @@ unsigned char ADDCALL ModuleReset(void)
 	PakSetCart(0);
 	if (CartForSlot[SpareSelectSlot]==1)
 		PakSetCart(1);
+	RetriggerModuleShare();
 	return(NULL);
 }
 
@@ -484,13 +491,8 @@ unsigned char MountModule(unsigned char Slot,char *ModName)
 		}
 		while ((index<0x4000) && (feof(rom_handle)==0))
 			ExtRomPointers[Slot][index++]=fgetc(rom_handle);
+		ExtRomSizes[Slot] = --index;
 		fclose(rom_handle);
-		if (PakRomShareCall) 
-		{
-			index--;
-			fprintf(stderr, "MPI calling PakRomShare call back %d\n", index);
-			PakRomShareCall((unsigned short) index, ExtRomPointers[Slot]);
-		}
 		strcpy(ModulePaths[Slot],ModuleName);
 		PathStripPath(ModuleName);
 //		PathRemovePath(ModuleName);
@@ -602,6 +604,21 @@ void UnloadModule(unsigned char Slot)
 	return;
 }
 
+static void RetriggerModuleShare(void)
+{
+	//fprintf(stderr, "MPI RetriggerModuleShare %d\n", (int)ChipSelectSlot);
+	if (ConfigModuleCalls[ChipSelectSlot] != NULL)
+	{
+		//fprintf(stderr, "MPI triggering PakRomShare call back with PAK\n");
+		ConfigModuleCalls[ChipSelectSlot](2); // Trigger Mmu ROM share
+	}
+	if (ExtRomPointers[ChipSelectSlot] != NULL) 
+	{
+		//fprintf(stderr, "MPI calling PakRomShare call back with ROM\n");
+		PakRomShareCall((unsigned short) ExtRomSizes[ChipSelectSlot], ExtRomPointers[ChipSelectSlot]);
+	}
+}
+
 void LoadConfig(void)
 {
 	char ModName[MAX_LOADSTRING]="";
@@ -622,6 +639,7 @@ void LoadConfig(void)
 	for (Temp=0;Temp<4;Temp++)
 		if (strlen(ModulePaths[Temp]) !=0)
 			MountModule(Temp, ModulePaths[Temp]);
+	//RetriggerModuleShare();
 	return;
 }
 

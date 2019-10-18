@@ -68,7 +68,8 @@ static unsigned short MmuPrefix=0;
 
 #define CoCoPageSize (8*1024)
 #define Mem64kSize (64*1024)
-#define CoCoROMSize (8*CoCoPageSize) // 32k for internal ROM + 32k for external/PAK ROM
+#define CoCoROMSize (4*CoCoPageSize) // 32k for internal ROM + ...
+#define CoCoPAKExtROMSize (4*CoCoPageSize) //... 32k for external/PAK ROM
 #define MMUBankMax 2
 #define MMUSlotMax 8
 #define handle_error(msg) do { perror(msg) ; exit(EXIT_FAILURE);} while (0)
@@ -77,7 +78,7 @@ static unsigned short MmuPrefix=0;
 #define Task1MemOffset (StateSwitch[CurrentRamConfig]*CoCoPageSize)
 #define VideoMemOffset (StateSwitch[CurrentRamConfig]*CoCoPageSize)
 #define RomMemOffset (MemConfig[CurrentRamConfig])
-#define PAKExtMemOffset (RomMemOffset + (4 * CoCoPageSize))
+#define PAKExtMemOffset (RomMemOffset + CoCoROMSize)
 #define TotalMMmemSize (MemConfig[CurrentRamConfig]+CoCoROMSize)
 
 int CoCoMemFD;
@@ -177,11 +178,13 @@ void freePhysicalMemPages()
 	}
 
 	if(ptrCoCoRomMem != NULL) munmap(ptrCoCoRomMem, CoCoROMSize);
+	if(ptrCoCoPakExtMem != NULL) munmap(ptrCoCoPakExtMem, CoCoPAKExtROMSize);
 	if(ptrCoCoTask0Mem != NULL) munmap(ptrCoCoTask0Mem, Mem64kSize);
 	if(ptrCoCoTask1Mem != NULL) munmap(ptrCoCoTask1Mem, Mem64kSize);
 	if(ptrCoCoFullMem != NULL) munmap(ptrCoCoFullMem, TotalMMmemSize);
 
 	ptrCoCoRomMem = NULL;
+	ptrCoCoPakExtMem = NULL;
 	ptrCoCoTask0Mem = NULL;
 	ptrCoCoTask1Mem = NULL;
 	ptrCoCoFullMem = NULL;
@@ -192,7 +195,7 @@ void SetMMUslot(UINT8 task, UINT8 slotnum, UINT16 mempage)
   int memOffset;
   PUINT8 memPtr;
 
-	if (MMUpages[task][slotnum] != mempage)
+	if (MMUpages[task][slotnum] != mempage) // only bother the MMU if the page is different
 	{
 		memOffset = mempage * CoCoPageSize;
 		memPtr = MMUbank[task][slotnum];
@@ -228,8 +231,7 @@ void UpdateMMap(void)
 			else  // map the default pages 
 			{
 				page = StateSwitch[CurrentRamConfig] + slotNo;
-				SetMMUslot(0, slotNo, page);
-				SetMMUslot(1, slotNo, page);
+				SetMMUslot(MmuTask, slotNo, page);
 			}
 		}
 		else // The bank is 4 and above and we are dealing with ROM
@@ -256,9 +258,9 @@ void UpdateMMap(void)
 
 	// static char prevprtbuf[80];
 	// char prtbuf[80];
-	// sprintf(prtbuf, "%02x - %02x %02x %02x %02x %02x %02x %02x %02x", MmuTask,
-	// 	MMUpages[0][0], MMUpages[0][1], MMUpages[0][2], MMUpages[0][3], 
-	// 	MMUpages[0][4], MMUpages[0][5], MMUpages[0][6], MMUpages[0][7]);
+	// sprintf(prtbuf, "T%01x E%01x M%01x- %02x %02x %02x %02x %02x %02x %02x %02x", MmuState, MmuEnabled, MapType,
+	// 	MMUpages[MmuTask][0], MMUpages[MmuTask][1], MMUpages[MmuTask][2], MMUpages[MmuTask][3], 
+	// 	MMUpages[MmuTask][4], MMUpages[MmuTask][5], MMUpages[MmuTask][6], MMUpages[MmuTask][7]);
 	// if (strcmp(prtbuf, prevprtbuf))
 	// {
 	// 	fprintf(stderr, "%s\n", prtbuf);
@@ -268,12 +270,10 @@ void UpdateMMap(void)
 
 unsigned char *Create32KROMMemory()
 {
-	size_t romsize = CoCoROMSize;
-
 	// The ROM mem offset points to beyond the CoCo RAM memory size.
 	// The ROM mem is appended to the physical mem in Create64KVirtualMemory()
 
-    ptrCoCoRomMem = (PUINT8)mmap(NULL, romsize, PROT_READ | PROT_WRITE, MAP_SHARED, CoCoMemFD, RomMemOffset);
+    ptrCoCoRomMem = (PUINT8)mmap(NULL, CoCoROMSize, PROT_READ | PROT_WRITE, MAP_SHARED, CoCoMemFD, RomMemOffset);
     
     if (ptrCoCoRomMem == MAP_FAILED)
     {
@@ -281,9 +281,9 @@ unsigned char *Create32KROMMemory()
         return NULL;
     }
 
-	  ptrCoCoPakExtMem = (PUINT8)mmap(NULL, romsize, PROT_READ | PROT_WRITE, MAP_SHARED, CoCoMemFD, PAKExtMemOffset);
+	  ptrCoCoPakExtMem = (PUINT8)mmap(NULL, CoCoPAKExtROMSize, PROT_READ | PROT_WRITE, MAP_SHARED, CoCoMemFD, PAKExtMemOffset);
     
-    if (ptrCoCoRomMem == MAP_FAILED)
+    if (ptrCoCoPakExtMem == MAP_FAILED)
     {
         printf("Cannot mmap PAK/external ROM mem\n");
         return NULL;
@@ -307,7 +307,7 @@ unsigned char *Create64KVirtualMemory(unsigned int ramsize)
 			return NULL;
 	}
 
-	off_t totalramromsize = ramsize + CoCoROMSize;
+	off_t totalramromsize = ramsize + CoCoROMSize + CoCoPAKExtROMSize;
 
 	shm_unlink("/CoCoMem");
 	ftruncate(CoCoMemFD, totalramromsize);
@@ -374,14 +374,12 @@ void SetMmuRegister(unsigned char Register,unsigned char data)
 void SetRomMap(unsigned char data)
 {	
 	RomMap=(data & 3);
-	//UpdateMmuArray();
 	UpdateMMap();
 }
 
 void SetMapType(unsigned char type)
 {
 	MapType=type;
-	//UpdateMmuArray();
 	UpdateMMap();
 }
 
@@ -392,8 +390,8 @@ void Set_MmuTask(unsigned char task)
 	if (MmuEnabled) 
 	{
 		UpdateMMap();
-		taskmemory = ptrTasks[MmuTask];
 	}
+	taskmemory = ptrTasks[MmuTask];
 }
 
 void Set_MmuEnabled(unsigned char usingmmu)
@@ -410,7 +408,7 @@ unsigned char * Getint_rom_pointer(void)
 
 void MmuRomShare(unsigned short romsize, PUINT8 rom)
 {
-	if (romsize != 0 && romsize <= CoCoPageSize && rom != NULL) 
+	if (romsize != 0 && romsize <= CoCoPAKExtROMSize && rom != NULL) 
 	{
 		// The config routines load all the pak modules before the MMU is reset.
 		// Any PAK module that uses MmuRomShare will end up calling this function before
@@ -421,11 +419,17 @@ void MmuRomShare(unsigned short romsize, PUINT8 rom)
 		if (ptrCoCoPakExtMem != NULL)
 		{
 			memcpy(ptrCoCoPakExtMem, rom, (size_t)romsize);
+			//fprintf(stderr, "MmuRomShare %d : ", romsize);
+			//for(int i = 0 ; i < 32 ; i++) fprintf(stderr, "%02x ", (int)(ptrCoCoPakExtMem[i]));
+			//fprintf(stderr, "\n");
 		}
-		else {
-			pendingromsize = romsize;
-			pendingrommemory = rom;
-		}
+		// else {
+		// 	pendingromsize = romsize;
+		// 	pendingrommemory = rom;
+		// 	//fprintf(stderr, "MmuRomShare pending %d : ", romsize);
+		// 	//for(int i = 0 ; i < 32 ; i++) fprintf(stderr, "%02x ", (int)(rom[i]));
+		// 	//fprintf(stderr, "\n");
+		// }
 	}
 }
 

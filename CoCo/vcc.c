@@ -312,7 +312,10 @@ unsigned char SetCPUMultiplyer(unsigned short Multiplyer)
 
 void DoHardReset(SystemState2* const HRState)
 {	
+	//fprintf(stderr, "DoHardReset\n");
+	//extern void TriggerModuleShare(unsigned char);
 	HRState->RamBuffer=MmuInit(HRState->RamSize);	//Alocate RAM/ROM & copy ROM Images from source
+	//TriggerModuleShare(2); // 2 = reshare PAK Ext ROM
 	HRState->WRamBuffer=(unsigned short *)HRState->RamBuffer;
 	EmuState2.RamBuffer=HRState->RamBuffer;
 	EmuState2.WRamBuffer=HRState->WRamBuffer;
