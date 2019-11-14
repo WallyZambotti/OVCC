@@ -13,3 +13,4 @@ CoCo/dsks/*
 CoCo/*.rom
 CoCo/*.ini
 mpi/.vscode/*
+CoCo/ovcc_nomm

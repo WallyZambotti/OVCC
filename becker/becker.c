@@ -18,6 +18,7 @@
 #include "../CoCo/iniman.h"
 
 #define MAX_PATH 260
+#define EXTROMSIZE 8192
 
 #ifndef __MINGW32__
 typedef int boolean;
@@ -34,8 +35,9 @@ typedef void (*SETCART)(unsigned char);
 typedef void (*SETCARTPOINTER)(SETCART);
 static void (*PakSetCart)(unsigned char)=NULL;
 static char IniFile[MAX_PATH]="";
-static unsigned char HDBRom[8192];
+static unsigned char HDBRom[EXTROMSIZE];
 static bool DWTCPEnabled = false;
+static char *PakRomAddr = NULL;
 
 // are we retrying tcp conn
 static bool retry = false;
@@ -624,6 +626,21 @@ void ADDCALL SetIniPath(INIman *InimanP)
 	return;
 }
 
+unsigned char ADDCALL ModuleReset(void)
+{
+	fprintf(stderr, "Becker ModuleReset\n");
+	if (PakRomAddr != NULL) 
+	{
+		memcpy(PakRomAddr, HDBRom, EXTROMSIZE);
+	}
+}
+
+void ADDCALL PakRomShare(char *pakromaddr)
+{
+	fprintf(stderr, "Becker PakRomShare\n");
+	PakRomAddr = pakromaddr;
+}
+
 void LoadConfig(void)
 {
 	char saddr[MAX_PATH]="";
@@ -665,10 +682,10 @@ unsigned char LoadExtRom(char *FilePath)	//Returns 1 on if loaded
 
 	rom_handle = fopen(FilePath, "rb");
 	if (rom_handle == NULL)
-		memset(HDBRom, 0xFF, 8192);
+		memset(HDBRom, 0xFF, EXTROMSIZE);
 	else
 	{
-		while ((feof(rom_handle) == 0) & (index<8192))
+		while ((feof(rom_handle) == 0) & (index<EXTROMSIZE))
 			HDBRom[index++] = fgetc(rom_handle);
 		RetVal = 1;
 		fclose(rom_handle);

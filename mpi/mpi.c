@@ -39,6 +39,7 @@ static unsigned char (*MmuRead8)(unsigned char,unsigned short)=NULL;
 static void (*MmuWrite8)(unsigned char,unsigned char,unsigned short)=NULL;
 //static void (*PakRomShareCall)(MMUROMSHARE)=NULL;
 static void (*PakRomShareCall)(short, unsigned char *)=NULL;
+static unsigned char *PakRomAddr=NULL;
 
 static void (*PakSetCart)(unsigned char)=NULL;
 static char ModuleNames[MAXPAX][MAX_LOADSTRING]={"Empty","Empty","Empty","Empty"};	
@@ -69,7 +70,7 @@ static void (*ModuleResetCalls[MAXPAX]) (void)={NULL,NULL,NULL,NULL};
 static void (*SetInteruptCallPointerCalls[MAXPAX]) ( ASSERTINTERUPT)={NULL,NULL,NULL,NULL};
 static void (*DmaMemPointerCalls[MAXPAX]) (MEMREAD8,MEMWRITE8)={NULL,NULL,NULL,NULL};
 static void (*MmuMemPointerCalls[MAXPAX]) (MMUREAD8,MMUWRITE8)={NULL,NULL,NULL,NULL};
-static void (*PakRomShareCalls[MAXPAX]) (MMUROMSHARE)={NULL,NULL,NULL,NULL};
+static void (*PakRomShareCalls[MAXPAX]) (unsigned char *)={NULL,NULL,NULL,NULL};
 
 void SetCartSlot0(unsigned char);
 void SetCartSlot1(unsigned char);
@@ -181,11 +182,6 @@ void ADDCALL ModuleConfig(unsigned char func)
 			}
 		}
 
-	// case 2: // Reshare PAK ROM or Ext ROM
-	// 	fprintf(stderr, "MPI ModuleConfig 2\n");
-	// 	RetriggerModuleShare();
-	// break;
-
 	default:
 		break;
 	}
@@ -217,16 +213,9 @@ void ADDCALL PackPortWrite(unsigned char Port,unsigned char Data)
 			PakSetCart(1);
 		return;
 	}
-//		if ( (Port>=0x40) & (Port<=0x5F))
-//		{
-//			BankedCartOffset[SpareSelectSlot]=(Data & 15)<<14;
-//			if ( PakPortWriteCalls[SpareSelectSlot] != NULL)
-//				PakPortWriteCalls[SpareSelectSlot](Port,Data);
-//		}
-//		else
-		for(unsigned char Temp=0;Temp<4;Temp++)
-			if (PakPortWriteCalls[Temp] != NULL)
-				PakPortWriteCalls[Temp](Port,Data);
+	for(unsigned char Temp=0;Temp<4;Temp++)
+		if (PakPortWriteCalls[Temp] != NULL)
+			PakPortWriteCalls[Temp](Port,Data);
 	return;
 }
 
@@ -239,13 +228,6 @@ unsigned char ADDCALL PackPortRead(unsigned char Port)
 		return(SlotRegister);
 	}
 
-//		if ( (Port>=0x40) & (Port<=0x5F))
-//		{
-//			if ( PakPortReadCalls[SpareSelectSlot] != NULL)
-//				return(PakPortReadCalls[SpareSelectSlot](Port));
-//			else
-//				return(NULL);
-//		}
 	Temp2=0;
 	for (Temp=0;Temp<4;Temp++)
 	{
@@ -265,11 +247,6 @@ void ADDCALL HeartBeat(void)
 		if (HeartBeatCalls[Temp] != NULL)
 			HeartBeatCalls[Temp]();
 	return;
-}
-
-void ADDCALL PakRomShare(MMUROMSHARE temp)
-{
-	PakRomShareCall = temp;
 }
 
 //This captures the pointers to the MmuRead8 and MmuWrite8 functions. This allows the DLL to do DMA xfers with MMU ram.
@@ -331,23 +308,35 @@ unsigned short ADDCALL ModuleAudioSample(void)
 
 unsigned char ADDCALL ModuleReset(void)
 {
-	//fprintf(stderr, "MPI ModuleReset\n");
 	ChipSelectSlot=SwitchSlot;	
 	SpareSelectSlot=SwitchSlot;	
 	for (Temp=0;Temp<4;Temp++)
 	{
 		BankedCartOffset[Temp]=0; //Do I need to keep independant selects?
 		
+		if (Temp == ChipSelectSlot)
+			if (PakRomShareCalls[Temp] != NULL)
+				PakRomShareCalls[Temp](PakRomAddr);
+		
+		//PakRomShareCalls[Temp] = NULL;
+
 		if (ModuleResetCalls[Temp] !=NULL)
 			ModuleResetCalls[Temp]();
 
-		ModuleResetCalls[Temp] = NULL;
+		//ModuleResetCalls[Temp] = NULL;
+
+		if (ExtRomPointers[Temp] != NULL && ExtRomSizes[Temp] != 0)
+			memcpy(PakRomAddr, ExtRomPointers[Temp], ExtRomSizes[Temp]);
 	}
 	PakSetCart(0);
 	if (CartForSlot[SpareSelectSlot]==1)
 		PakSetCart(1);
-	RetriggerModuleShare();
 	return(NULL);
+}
+
+void ADDCALL PakRomShare(unsigned char *pakromaddr)
+{
+	PakRomAddr = pakromaddr;
 }
 
 //void ADDCALL SetIniPath(char *IniFilePath)
@@ -550,8 +539,8 @@ unsigned char MountModule(unsigned char Slot,char *ModName)
 			DmaMemPointerCalls[Slot](MemRead8,MemWrite8);
 		if (MmuMemPointerCalls[Slot] !=NULL)
 			MmuMemPointerCalls[Slot](MmuRead8,MmuWrite8);
-		if (PakRomShareCalls[Slot] != NULL)
-			PakRomShareCalls[Slot](PakRomShareCall);
+		// if (PakRomShareCalls[Slot] != NULL)
+		// 	PakRomShareCalls[Slot](PakRomShareCall);
 		if (SetIniPathCalls[Slot] != NULL)
 		{
 			//SetIniPathCalls[Slot](IniFile);

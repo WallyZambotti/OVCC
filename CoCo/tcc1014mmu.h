@@ -32,6 +32,7 @@ extern unsigned char MemRead8(short unsigned int);
 extern void MmuWrite8(unsigned char,unsigned char,unsigned short );
 extern unsigned char MmuRead8(unsigned char,short unsigned int);
 extern void MmuRomShare(unsigned short, unsigned char *);
+extern unsigned char *GetPakExtMem();
 #endif
 void MemWrite16(unsigned short,unsigned short );
 unsigned short MemRead16(short unsigned int);

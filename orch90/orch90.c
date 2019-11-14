@@ -22,6 +22,8 @@ typedef int BOOL;
 #include "defines.h"
 #include "orch90.h"
 
+#define EXTROMSIZE 8192
+
 static char moduleName[13] = { "Orchestra-90" };
 
 typedef void (*SETCART)(unsigned char);
@@ -30,7 +32,8 @@ typedef void (*DYNAMICMENUCALLBACK)( char *,int, int);
 static unsigned char LeftChannel=0,RightChannel=0;
 static void (*PakSetCart)(unsigned char)=NULL;
 static unsigned char LoadExtRom(char *);
-static unsigned char Rom[8192];
+static unsigned char Rom[EXTROMSIZE];
+static char *PakRomAddr = NULL;
 
 void __attribute__ ((constructor)) initLibrary(void) {
  //
@@ -77,8 +80,6 @@ unsigned char ADDCALL ModuleReset(void)
 {
 	char RomPath[MAX_PATH];
 
-	//printf("Orch90 : ModuleReset\n");
-
 	memset(Rom, 0xff, 8192);
 	strcpy(RomPath, "orch90.rom");
 	
@@ -88,6 +89,11 @@ unsigned char ADDCALL ModuleReset(void)
 		{	//If we can load the rom them assert cart 
 			//printf("Orch90 : Loaded orch90.rom\n");
 			PakSetCart(1);
+
+			if (PakRomAddr != NULL) 
+			{
+				memcpy(PakRomAddr, Rom, EXTROMSIZE);
+			}
 		}
 		else
 		{
@@ -100,6 +106,11 @@ unsigned char ADDCALL ModuleReset(void)
 	}
 
 	return(0);
+}
+
+void ADDCALL PakRomShare(char *pakromaddr)
+{
+	PakRomAddr = pakromaddr;
 }
 
 unsigned char ADDCALL SetCart(SETCART Pointer)
@@ -133,10 +144,10 @@ static unsigned char LoadExtRom(char *FilePath)	//Returns 1 on if loaded
 
 	rom_handle = fopen(FilePath, "rb");
 	if (rom_handle == NULL)
-		memset(Rom, 0xFF, 8192);
+		memset(Rom, 0xFF, EXTROMSIZE);
 	else
 	{
-		while ((feof(rom_handle) == 0) & (index<8192))
+		while ((feof(rom_handle) == 0) & (index<EXTROMSIZE))
 			Rom[index++] = fgetc(rom_handle);
 		RetVal = 1;
 		fclose(rom_handle);

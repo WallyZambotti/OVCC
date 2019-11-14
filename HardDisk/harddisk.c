@@ -43,7 +43,6 @@ typedef void (*DMAMEMPOINTERS) ( MEMREAD8,MEMWRITE8);
 static void (*AssertInt)(unsigned char,unsigned char)=NULL;
 static unsigned char (*MemRead8)(unsigned short)=NULL;
 static void (*MemWrite8)(unsigned char,unsigned short)=NULL;
-static void (*PakRomShareCall)(short, unsigned char *)=NULL;
 // static unsigned char *Memory=NULL;
 static unsigned char DiskRom[8192];
 static unsigned char ClockEnabled=1,ClockReadOnly=1;
@@ -53,6 +52,7 @@ static void SaveConfig(void);
 static void BuildMenu(void);
 static void UpdateMenu(void);
 static unsigned char LoadExtRom( char *);
+static char *PakRomAddr = NULL;
 
 AG_MenuItem *menuAnchor = NULL;
 AG_MenuItem *itemMenu = NULL;
@@ -114,16 +114,24 @@ void ADDCALL ModuleConfig(unsigned char func)
 		strcpy(IniFile, iniman->files[iniman->lastfile].name);
 		break;
 
-	case 2: // Trigger Mmu Rom Share
-		if (PakRomShareCall != NULL) 
-		{
-			PakRomShareCall(EXTROMSIZE, DiskRom);
-		}
 	break;
 
 	default:
 		break;
 	}
+}
+
+unsigned char ADDCALL ModuleReset(void)
+{
+	if (PakRomAddr != NULL) 
+	{
+		memcpy(PakRomAddr, DiskRom, EXTROMSIZE);
+	}
+}
+
+void ADDCALL PakRomShare(char *pakromaddr)
+{
+	PakRomAddr = pakromaddr;
 }
 
 /*
@@ -164,11 +172,6 @@ void ADDCALL MemPointers(MEMREAD8 Temp1, MEMWRITE8 Temp2)
 {
 	MemRead8=Temp1;
 	MemWrite8=Temp2;
-}
-
-void ADDCALL PakRomShare(MMUROMSHARE temp)
-{
-	PakRomShareCall = temp;
 }
 
 unsigned char ADDCALL PakMemRead8(unsigned short Address)

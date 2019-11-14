@@ -83,7 +83,7 @@ static void (*ConfigModule)(unsigned char)=NULL;
 static void (*SetInteruptCallPointer)(ASSERTINTERUPT)=NULL;
 static void (*DmaMemPointer)(MEMREAD8, MEMWRITE8)=NULL;
 static void (*MmuMemPointer)(MMUREAD8, MMUWRITE8)=NULL;
-static void (*PakRomShare)(MMUROMSHARE)=NULL;
+static void (*PakRomShare)(unsigned char *)=NULL;
 static void (*HeartBeat)(void)=NULL;
 static void (*PakPortWrite)(unsigned char, unsigned char)=NULL;
 static unsigned char (*PakPortRead)(unsigned char)=NULL;
@@ -124,8 +124,18 @@ void PakTimer(void)
 void ResetBus(void)
 {
 	BankedCartOffset=0;
-	if (ModuleReset !=NULL)
+	if (PakRomShare != NULL)
+	{
+		PakRomShare(GetPakExtMem());
+	}
+	if (ModuleReset != NULL)
+	{
 		ModuleReset();
+	}
+	if (ExternalRomBuffer != NULL && ExternROMsize != 0)
+	{
+		memcpy(GetPakExtMem(), ExternalRomBuffer, ExternROMsize);
+	}
 	return;
 }
 
@@ -156,6 +166,7 @@ void PackPortWrite(unsigned char Port,unsigned char Data)
 	
 	if ((Port == 0x40) && (RomPackLoaded == true)) {
 		BankedCartOffset = (Data & 15) << 14;
+		fprintf(stderr, "banked cart offset %x\n", BankedCartOffset);
 	}
 
 	return;
@@ -192,6 +203,7 @@ int InsertModule (char *ModulePath)
 	INIman *tempMan = NULL;
 	unsigned char FileType=0;
 	FileType=FileID(ModulePath);
+	ExternROMsize = 0;
 
 	switch (FileType)
 	{
@@ -262,10 +274,11 @@ int InsertModule (char *ModulePath)
 		{
 			MmuMemPointer(MmuRead8, MmuWrite8);
 		}
-		if (PakRomShare != NULL)
-		{
-			PakRomShare(MmuRomShare);
-		}
+		// if (PakRomShare != NULL)
+		// {
+		// 	//PakRomShare(MmuRomShare);
+		// 	PakRomShare(GetPakExtMem());
+		// }
 		if (SetInteruptCallPointer != NULL)
 		{
 			SetInteruptCallPointer(CPUAssertInterupt);

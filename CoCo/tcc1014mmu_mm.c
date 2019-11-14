@@ -199,7 +199,7 @@ void SetMMUslot(UINT8 task, UINT8 slotnum, UINT16 mempage)
 	{
 		memOffset = mempage * CoCoPageSize;
 		memPtr = MMUbank[task][slotnum];
-
+		//fprintf(stderr, "task %d slot %d page %d mem %x", task, slotnum, mempage, memPtr);
 		MMUbank[task][slotnum] = (PUINT8)mmap(memPtr, CoCoPageSize, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FIXED, CoCoMemFD, memOffset);
 
 		if ((void*)memPtr != (void*)MMUbank[task][slotnum])
@@ -266,6 +266,18 @@ void UpdateMMap(void)
 	// 	fprintf(stderr, "%s\n", prtbuf);
 	// 	strcpy(prevprtbuf, prtbuf);
 	// }
+}
+
+void dumpMem(UINT16 addr, UINT16 len)
+{
+	UINT16 i;
+	fprintf(stderr, "Dump mem %x task %d maptype %d rommap %d", taskmemory, MmuTask, MapType, RomMap);
+	for(i = 0 ; i < len ; i++)
+	{
+		if ((i % 16) == 0) fprintf(stderr, "\n%08x  ", (UINT32)addr+i);
+		fprintf(stderr, "%02x ", (int)taskmemory[i]);
+	}
+	fprintf(stderr, "\n");
 }
 
 unsigned char *Create32KROMMemory()
@@ -404,6 +416,11 @@ void Set_MmuEnabled(unsigned char usingmmu)
 unsigned char * Getint_rom_pointer(void)
 {
 	return(InternalRomBuffer);
+}
+
+PUINT8 GetPakExtMem()
+{
+	return ptrCoCoPakExtMem;
 }
 
 void MmuRomShare(unsigned short romsize, PUINT8 rom)

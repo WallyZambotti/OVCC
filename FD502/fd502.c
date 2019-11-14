@@ -69,6 +69,7 @@ static unsigned char ClockEnabled=1,ClockReadOnly=1;
 static unsigned char NewDiskType=0;
 static unsigned char NewDiskTracks=0;
 static unsigned char DblSided=1;
+static char *PakRomAddr = NULL;
 //LRESULT CALLBACK Config(HWND, UINT, WPARAM, LPARAM);
 //LRESULT CALLBACK NewDisk(HWND,UINT, WPARAM, LPARAM);
 void LoadConfig(void);
@@ -154,6 +155,19 @@ void ADDCALL ModuleConfig(unsigned char func)
 	}
 
 	return;
+}
+
+unsigned char ADDCALL ModuleReset(void)
+{
+	if (PakRomAddr != NULL) 
+	{
+		memcpy(PakRomAddr, RomPointer[SelectRom], EXTROMSIZE);
+	}
+}
+
+void ADDCALL PakRomShare(char *pakromaddr)
+{
+	PakRomAddr = pakromaddr;
 }
 
 //void ADDCALL SetIniPath (char *IniFilePath)
@@ -268,15 +282,15 @@ void OKCallback(AG_Event *event)
 	strcpy(RomFileName, TempRomFileName);
 	CheckPath(RomFileName);
 	LoadExtRom(External, RomFileName);
-    SaveConfig();
-    AG_CloseFocusedWindow();
+  SaveConfig();
+  AG_CloseFocusedWindow();
 }
 
 void PhysDriveASelected(AG_Event *event)
 {
-    AG_TlistItem *ti = AG_PTR(1);
+  AG_TlistItem *ti = AG_PTR(1);
 
-    PhysicalDriveA = ti->label;
+  PhysicalDriveA = ti->label;
 }
 
 void PhysDriveBSelected(AG_Event *event)
