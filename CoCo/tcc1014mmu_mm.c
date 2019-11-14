@@ -270,7 +270,6 @@ void UpdateMMap(void)
 	// }
 }
 
-<<<<<<< HEAD
 void dumpMem(UINT16 addr, UINT16 len)
 {
 	UINT16 i;
@@ -284,9 +283,6 @@ void dumpMem(UINT16 addr, UINT16 len)
 }
 
 unsigned char *Create32KROMMemory()
-=======
-PUINT8 Create32KROMMemory()
->>>>>>> d350e99436fe9b0da735b86840e2780ceae77ba3
 {
 	// The ROM mem offset points to beyond the CoCo RAM memory size.
 	// The ROM mem is appended to the physical mem in Create64KVirtualMemory()
@@ -419,16 +415,12 @@ PUINT8  Getint_rom_pointer(void)
 	return(InternalRomBuffer);
 }
 
-<<<<<<< HEAD
 PUINT8 GetPakExtMem()
 {
 	return ptrCoCoPakExtMem;
 }
 
 void MmuRomShare(unsigned short romsize, PUINT8 rom)
-=======
-void MmuRomShare(UINT16 romsize, PUINT8 rom)
->>>>>>> d350e99436fe9b0da735b86840e2780ceae77ba3
 {
 	if (romsize != 0 && romsize <= CoCoPAKExtROMSize && rom != NULL) 
 	{
