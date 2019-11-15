@@ -218,9 +218,10 @@ int InsertModule (char *ModulePath)
 		PathStripPath(Modname);
 		PathRemoveExtension(Modname);
 		UpdateCartridgeMenu(Modname); //Refresh Menus
-		UpdateOnBoot(Modname);
+		UpdateOnBoot(ModulePath);
 		EmuState2.ResetPending=2;
 		SetCart(1);
+		strcpy(DllPath,ModulePath);
 		return(0);
 	break;
 
@@ -274,11 +275,6 @@ int InsertModule (char *ModulePath)
 		{
 			MmuMemPointer(MmuRead8, MmuWrite8);
 		}
-		// if (PakRomShare != NULL)
-		// {
-		// 	//PakRomShare(MmuRomShare);
-		// 	PakRomShare(GetPakExtMem());
-		// }
 		if (SetInteruptCallPointer != NULL)
 		{
 			SetInteruptCallPointer(CPUAssertInterupt);
@@ -385,20 +381,6 @@ void TriggerModuleConfig(unsigned char func)
 	}
 }
 
-// void TriggerModuleShare(void)
-// {
-// 	fprintf(stderr, "pakinterface RetriggerModuleShare\n");
-// 	if (ConfigModule != NULL) 
-// 	{
-// 		ConfigModule(2); // 2 = Reshare PAK rom
-// 		return;
-// 	}
-// 	if (ExternalRomBuffer != NULL)
-// 	{
-// 		MmuRomShare(ExternROMsize, ExternalRomBuffer);
-// 	}
-// }
-
 /**
 Load a ROM pack
 return total bytes loaded, or 0 on failure
@@ -455,7 +437,6 @@ void UnloadDll(short int config)
 	{
 		ConfigModule(0); // 0 = Release Resources (Menus etc)
 	}
-	ConfigModule=NULL;
 	GetModuleName=NULL;
 	ConfigModule=NULL;
 	PakPortWrite=NULL;
@@ -466,9 +447,12 @@ void UnloadDll(short int config)
 	HeartBeat=NULL;
 	PakMemWrite8=NULL;
 	PakMemRead8=NULL;
+	PakRomShare=NULL;
 	ModuleStatus=NULL;
 	ModuleAudioSample=NULL;
 	ModuleReset=NULL;
+	SetIni=NULL;
+	PakSetCart=NULL;
 	if (hinstLib !=NULL)
 		SDL_UnloadObject(hinstLib); 
 	hinstLib=NULL;
