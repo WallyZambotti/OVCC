@@ -144,10 +144,10 @@ static void cpu_nmi(void);
 unsigned char GetSorceReg(unsigned char);
 void Page_2(void);
 void Page_3(void);
-void MemWrite8(unsigned char, unsigned short);
-void MemWrite16(unsigned short, unsigned short);
-unsigned char MemRead8(unsigned short);
-unsigned short MemRead16(unsigned short);
+// void MemWrite8(unsigned char, unsigned short);
+// void MemWrite16(unsigned short, unsigned short);
+// unsigned char MemRead8(unsigned short);
+// unsigned short MemRead16(unsigned short);
 extern void SetNatEmuStat(unsigned char);
 
 //unsigned char GetDestReg(unsigned char);
@@ -1386,7 +1386,7 @@ void Cmpw_M(void)
 }
 
 void Sbcd_M(void)
-{ //1082 P6309
+{ //1082 6309
 	postword=IMMADDRESS(PC_REG);
 	temp32=D_REG-postword-cc[C];
 	cc[C] = (temp32 & 0x10000)>>16;
@@ -2406,7 +2406,7 @@ void Tfm1(void)
 }
 
 void Tfm2(void)
-{ //1139 TFM R-,R- Phase 3
+{ //1139 TFM R-,R- Phase 3 6309
 	postbyte=MemRead8(PC_REG);
 	Source=postbyte>>4;
 	Dest=postbyte&15;
@@ -3632,6 +3632,8 @@ void Exg_M(void)
 		{
 			Source &= 0x07;
 			Dest &= 0x07;
+			if (Dest == 5 || Source == 5) 
+				{ fprintf(stderr, "exg to PC from %d %d\n", Source, Dest);}
 			temp16 = (*xfreg16[Source]);
 			(*xfreg16[Source]) = (*xfreg16[Dest]);
 			(*xfreg16[Dest]) = temp16;
@@ -3660,6 +3662,8 @@ void Exg_M(void)
 			temp16 = (temp8 << 8) | temp8;
 			(*ureg8[Source]) = (*xfreg16[Dest]) >> 8; // A, DP, E get high byte of 16 bit Dest
 			(*xfreg16[Dest]) = temp16; // Place 8 bit source in both halves of 16 bit Dest
+			if (Dest == 5 || Source == 5) 
+				{ fprintf(stderr, "exg to PC from %d %d\n", Source, Dest);}
 			break;
 		case 0x01: // B
 		case 0x02: // CC
@@ -3668,6 +3672,8 @@ void Exg_M(void)
 			temp16 = (temp8 << 8) | temp8;
 			(*ureg8[Source]) = (*xfreg16[Dest]) & 0xFF; // B, CC, F get low byte of 16 bit Dest
 			(*xfreg16[Dest]) = temp16; // Place 8 bit source in both halves of 16 bit Dest
+			if (Dest == 5 || Source == 5) 
+				{ fprintf(stderr, "exg to PC from %d %d\n", Source, Dest);}
 			break;
 		}
 	}
@@ -3680,31 +3686,37 @@ void Tfr_M(void)
 	postbyte=MemRead8(PC_REG++);
 	Source= postbyte>>4;
 	Dest=postbyte & 15;
-	ccbits = getcc();
 
 	if (Dest < 8)
+	{
+		if (Dest == 5) 
+			{ fprintf(stderr, "tfr to PC from %d\n", Source);}
 		if (Source < 8)
 			*xfreg16[Dest] = *xfreg16[Source];
 		else
 			*xfreg16[Dest] = (*ureg8[Source & 7] << 8) | *ureg8[Source & 7];
+	}
 	else
 	{
+		ccbits = getcc();
+		Dest &= 7;
+
 		if (Source < 8)
 			switch (Dest)
 			{
-			case 8:
-			case 11:
-			case 14:
-				*ureg8[Dest & 7] = *xfreg16[Source] >> 8;
+			case 0:  // A
+			case 3: // DP
+			case 6: // E
+				*ureg8[Dest] = *xfreg16[Source] >> 8;
 				break;
-			case 9:
-			case 10:
-			case 15:
-				*ureg8[Dest & 7] = *xfreg16[Source] & 0xFF;
+			case 1:  // B
+			case 2: // CC
+			case 7: // F
+				*ureg8[Dest] = *xfreg16[Source] & 0xFF;
 				break;
 			}
 		else
-			*ureg8[Dest & 7] = *ureg8[Source & 7];
+			*ureg8[Dest] = *ureg8[Source & 7];
 
 		setcc(ccbits);
 	}
@@ -6394,8 +6406,8 @@ void(*JmpVec2[256])(void) = {
 	Pulsw,		// 39
 	Pshuw,		// 3A
 	Puluw,		// 3B
-	InvalidInsHandler,		// 3C
-	InvalidInsHandler,		// 3D
+	Bitmd_M,		// 3C
+	Ldmd_M,		// 3D
 	InvalidInsHandler,		// 3E
 	Swi2_I,		// 3F
 	Negd_I,		// 40
@@ -6431,37 +6443,37 @@ void(*JmpVec2[256])(void) = {
 	InvalidInsHandler,		// 5E
 	Clrw_I,		// 5F
 	InvalidInsHandler,		// 60
-	InvalidInsHandler,		// 61
-	InvalidInsHandler,		// 62
-	InvalidInsHandler,		// 63
-	InvalidInsHandler,		// 64
-	InvalidInsHandler,		// 65
-	InvalidInsHandler,		// 66
-	InvalidInsHandler,		// 67
-	InvalidInsHandler,		// 68
-	InvalidInsHandler,		// 69
-	InvalidInsHandler,		// 6A
-	InvalidInsHandler,		// 6B
-	InvalidInsHandler,		// 6C
-	InvalidInsHandler,		// 6D
-	InvalidInsHandler,		// 6E
-	InvalidInsHandler,		// 6F
-	InvalidInsHandler,		// 70
-	InvalidInsHandler,		// 71
-	InvalidInsHandler,		// 72
-	InvalidInsHandler,		// 73
-	InvalidInsHandler,		// 74
-	InvalidInsHandler,		// 75
-	InvalidInsHandler,		// 76
-	InvalidInsHandler,		// 77
-	InvalidInsHandler,		// 78
-	InvalidInsHandler,		// 79
-	InvalidInsHandler,		// 7A
-	InvalidInsHandler,		// 7B
-	InvalidInsHandler,		// 7C
-	InvalidInsHandler,		// 7D
-	InvalidInsHandler,		// 7E
-	InvalidInsHandler,		// 7F
+	Oim_X,		// 61
+	Aim_X,		// 62
+	Com_X,		// 63
+	Lsr_X,		// 64
+	Eim_X,		// 65
+	Ror_X,		// 66
+	Asr_X,		// 67
+	Asl_X,		// 68
+	Rol_X,		// 69
+	Dec_X,		// 6A
+	Tim_X,		// 6B
+	Inc_X,		// 6C
+	Tst_X,		// 6D
+	Jmp_X,		// 6E
+	Clr_X,		// 6F
+	Neg_E,		// 70
+	Oim_E,		// 71
+	Aim_E,		// 72
+	Com_E,		// 73
+	Lsr_E,		// 74
+	Eim_E,		// 75
+	Ror_E,		// 76
+	Asr_E,		// 77
+	Asl_E,		// 78
+	Rol_E,		// 79
+	Dec_E,		// 7A
+	Tim_E,		// 7B
+	Inc_E,		// 7C
+	Tst_E,		// 7D
+	Jmp_E,		// 7E
+	Clr_E,		// 7F
 	Subw_M,		// 80
 	Cmpw_M,		// 81
 	Sbcd_M,		// 82
@@ -6851,6 +6863,8 @@ void(*JmpVec3[256])(void) = {
 	InvalidInsHandler,		// FF
 };
 
+static unsigned char op1, op2;
+
 int HD6309Exec(int CycleFor)
 {
 
@@ -6877,9 +6891,12 @@ int HD6309Exec(int CycleFor)
 		}
 
 		if (SyncWaiting == 1)	//Abort the run nothing happens asyncronously from the CPU
-			break; //return(0); // WDZ - Experimental SyncWaiting should still return used cycles (and not zero) by breaking from loop
+			return(0); // WDZ - Experimental SyncWaiting should still return used cycles (and not zero) by breaking from loop
 
-		JmpVec1[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
+		op1 = MemRead8(PC_REG);
+		PC_REG++;
+		JmpVec1[op1]();
+		//JmpVec1[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 	}//End While
 
 	return(CycleFor - CycleCounter);
@@ -6887,12 +6904,16 @@ int HD6309Exec(int CycleFor)
 
 void Page_2(void) //10
 {
-	JmpVec2[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
+	op2 = MemRead8(PC_REG++);
+	JmpVec2[op2]();
+	//JmpVec2[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 }
 
 void Page_3(void) //11
 {
-	JmpVec3[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
+	op2 = MemRead8(PC_REG++);
+	JmpVec3[op2]();
+	//JmpVec3[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 }
 
 void cpu_firq(void)
@@ -7311,6 +7332,9 @@ void HD6309DeAssertInterupt(unsigned char Interupt)// 4 nmi 2 firq 1 irq
 
 void InvalidInsHandler(void)
 {	
+	fprintf(stderr, "Illegal instruction %02x %02x \n", (int)op1, (int)op2);
+	extern void dumpMem(UINT16, UINT16);
+	dumpMem(PC_REG-8, (UINT16)16);
 	md[ILLEGAL]=1;
 	mdbits=getmd();
 	ErrorVector();
