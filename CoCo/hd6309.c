@@ -190,8 +190,8 @@ void HD6309Init(void)
 	ureg8[1]=(unsigned char*)&B_REG;		
 	ureg8[2]=(unsigned char*)&ccbits;
 	ureg8[3]=(unsigned char*)&dp.B.msb;
-	ureg8[4]=(unsigned char*)&O_REG;
-	ureg8[5]=(unsigned char*)&O_REG;
+	ureg8[4]=(unsigned char*)&z.B.msb;
+	ureg8[5]=(unsigned char*)&z.B.lsb;
 	ureg8[6]=(unsigned char*)&E_REG;
 	ureg8[7]=(unsigned char*)&F_REG;
 
@@ -634,9 +634,12 @@ void Addr(void)
 		}
 
 		temp16 = source8 + dest8;
-		if (Dest == 2) 
-			setcc((unsigned char)temp16);
-		*ureg8[Dest] = (unsigned char)temp16;
+		switch (Dest)
+		{
+			case 2: 				setcc((unsigned char)temp16); break;
+			case 4: case 5: break; // never assign to zero reg
+			default: 				*ureg8[Dest] = (unsigned char)temp16; break;
+		}
 		cc[C] = (temp16 & 0x100) >> 8;
 		cc[V] = OVERFLOW8(cc[C], source8, dest8, temp16);
 		cc[N] = NTEST8(*ureg8[Dest]);
@@ -669,7 +672,6 @@ void Addr(void)
 		cc[V] = OVERFLOW16(cc[C], source16, dest16, temp32);
 		cc[N] = NTEST16(*xfreg16[Dest]);
 		cc[Z] = ZTEST(*xfreg16[Dest]);
-		O_REG = 0; // In case the Dest is the zero reg which can never be changed
 	}
 	CycleCounter += 4;
 }
@@ -701,8 +703,12 @@ void Adcr(void)
 		}
 
 		temp16 = source8 + dest8 + cc[C];
-		if (Dest == 2) setcc((unsigned char)temp16);
-		*ureg8[Dest] = (unsigned char)temp16;
+		switch (Dest)
+		{
+			case 2: 				setcc((unsigned char)temp16); break;
+			case 4: case 5: break; // never assign to zero reg
+			default: 				*ureg8[Dest] = (unsigned char)temp16; break;
+		}
 		cc[C] = (temp16 & 0x100) >> 8;
 		cc[V] = OVERFLOW8(cc[C], source8, dest8, temp16);
 		cc[N] = NTEST8(*ureg8[Dest]);
@@ -733,9 +739,7 @@ void Adcr(void)
 		*xfreg16[Dest] = (unsigned short)temp32;
 		cc[C] = (temp32 & 0x10000) >> 16;
 		cc[V] = OVERFLOW16(cc[C], source16, dest16, temp32);
-		cc[N] = NTEST16(*xfreg16[Dest]);
-		cc[Z] = ZTEST(*xfreg16[Dest]);
-		O_REG = 0; // In case the Dest is the zero reg which can never be changed
+		cc[N] = NTEST16(*xfreg16[Dest]);		cc[Z] = ZTEST(*xfreg16[Dest]);
 	}
 	CycleCounter += 4;
 }
@@ -767,8 +771,12 @@ void Subr(void)
 		}
 
 		temp16 = dest8 - source8;
-		if (Dest == 2) setcc((unsigned char)temp16);
-		*ureg8[Dest] = (unsigned char)temp16;
+		switch (Dest)
+		{
+			case 2: 				setcc((unsigned char)temp16); break;
+			case 4: case 5: break; // never assign to zero reg
+			default: 				*ureg8[Dest] = (unsigned char)temp16; break;
+		}
 		cc[C] = (temp16 & 0x100) >> 8;
 		cc[V] = cc[C] ^ ((dest8 ^ *ureg8[Dest] ^ source8) >> 7);
 		cc[N] = *ureg8[Dest] >> 7;
@@ -801,7 +809,6 @@ void Subr(void)
 		*xfreg16[Dest] = (unsigned short)temp32;
 		cc[N] = (temp32 & 0x8000) >> 15;
 		cc[Z] = ZTEST(temp32);
-		O_REG = 0; // In case the Dest is the zero reg which can never be changed
 	}
 	CycleCounter += 4;
 }
@@ -833,8 +840,12 @@ void Sbcr(void)
 		}
 
 		temp16 = dest8 - source8 - cc[C];
-		if (Dest == 2) setcc((unsigned char)temp16);
-		*ureg8[Dest] = (unsigned char)temp16;
+		switch (Dest)
+		{
+			case 2: 				setcc((unsigned char)temp16); break;
+			case 4: case 5: break; // never assign to zero reg
+			default: 				*ureg8[Dest] = (unsigned char)temp16; break;
+		}
 		cc[C] = (temp16 & 0x100) >> 8;
 		cc[V] = cc[C] ^ ((dest8 ^ *ureg8[Dest] ^ source8) >> 7);
 		cc[N] = *ureg8[Dest] >> 7;
@@ -867,7 +878,6 @@ void Sbcr(void)
 		*xfreg16[Dest] = (unsigned short)temp32;
 		cc[N] = (temp32 & 0x8000) >> 15;
 		cc[Z] = ZTEST(temp32);
-		O_REG = 0; // In case the Dest is the zero reg which can never be changed
 	}
 	CycleCounter += 4;
 }
@@ -899,8 +909,12 @@ void Andr(void)
 		}
 
 		temp8 = dest8 & source8;
-		if (Dest == 2) setcc((unsigned char)temp8);
-		else *ureg8[Dest] = temp8;
+		switch (Dest)
+		{
+			case 2: 				setcc((unsigned char)temp8); break;
+			case 4: case 5: break; // never assign to zero reg
+			default: 				*ureg8[Dest] = (unsigned char)temp8; break;
+		}
 		cc[N] = temp8 >> 7;
 		cc[Z] = ZTEST(temp8);
 	}
@@ -929,7 +943,6 @@ void Andr(void)
 		*xfreg16[Dest] = temp16;
 		cc[N] = temp16 >> 15;
 		cc[Z] = ZTEST(temp16);
-		O_REG = 0; // In case the Dest is the zero reg which can never be changed
 	}
 	cc[V] = 0;
 	CycleCounter += 4;
@@ -962,8 +975,12 @@ void Orr(void)
 		}
 
 		temp8 = dest8 | source8;
-		if (Dest == 2) setcc((unsigned char)temp8);
-		else *ureg8[Dest] = temp8;
+		switch (Dest)
+		{
+			case 2: 				setcc((unsigned char)temp8); break;
+			case 4: case 5: break; // never assign to zero reg
+			default: 				*ureg8[Dest] = (unsigned char)temp8; break;
+		}
 		cc[N] = temp8 >> 7;
 		cc[Z] = ZTEST(temp8);
 	}
@@ -992,7 +1009,6 @@ void Orr(void)
 		*xfreg16[Dest] = temp16;
 		cc[N] = temp16 >> 15;
 		cc[Z] = ZTEST(temp16);
-		O_REG = 0; // In case the Dest is the zero reg which can never be changed
 	}
 	cc[V] = 0;
 	CycleCounter += 4;
@@ -1025,8 +1041,12 @@ void Eorr(void)
 		}
 
 		temp8 = dest8 ^ source8;
-		if (Dest == 2) setcc((unsigned char)temp8);
-		else *ureg8[Dest] = temp8;
+		switch (Dest)
+		{
+			case 2: 				setcc((unsigned char)temp8); break;
+			case 4: case 5: break; // never assign to zero reg
+			default: 				*ureg8[Dest] = (unsigned char)temp8; break;
+		}
 		cc[N] = temp8 >> 7;
 		cc[Z] = ZTEST(temp8);
 	}
@@ -1055,7 +1075,6 @@ void Eorr(void)
 		*xfreg16[Dest] = temp16;
 		cc[N] = temp16 >> 15;
 		cc[Z] = ZTEST(temp16);
-		O_REG = 0; // In case the Dest is the zero reg which can never be changed
 	}
 	cc[V] = 0;
 	CycleCounter += 4;
@@ -1120,7 +1139,6 @@ void Cmpr(void)
 		cc[V] = !!((dest16 ^ source16 ^ temp32 ^ (temp32 >> 1)) & 0x8000);
 		cc[N] = (temp32 & 0x8000) >> 15;
 		cc[Z] = ZTEST(temp32);
-		O_REG = 0; // In case the Dest is the zero reg which can never be changed
 	}
 	CycleCounter += 4;
 }
@@ -1180,12 +1198,11 @@ void Swi2_I(void)
 
 void Negd_I(void)
 { //1040 Phase 5 6309
-	temp16= 0-D_REG;
+	D_REG = 0-D_REG;
 	cc[C] = temp16>0;
 	cc[V] = D_REG==0x8000;
-	cc[N] = NTEST16(temp16);
-	cc[Z] = ZTEST(temp16);
-	D_REG= temp16;
+	cc[N] = NTEST16(D_REG);
+	cc[Z] = ZTEST(D_REG);
 	CycleCounter+=InsCycles[md[NATIVE6309]][M32];
 }
 
@@ -2377,6 +2394,13 @@ void Stbt(void)
 
 void Tfm1(void)
 { //1138 TFM R+,R+ 6309
+	if (W_REG == 0)
+	{
+    CycleCounter += 6;
+    PC_REG++;
+		return;
+  }
+
 	postbyte=MemRead8(PC_REG);
 	Source=postbyte>>4;
 	Dest=postbyte&15;
@@ -2392,21 +2416,19 @@ void Tfm1(void)
   (*xfreg16[Dest])++;
   (*xfreg16[Source])++;
   W_REG--;
-
-	if ((W_REG)!=0)
-	{
-    CycleCounter += 3;
-    PC_REG -= 2;
-  }
-	else
-	{
-    CycleCounter += 6;
-    PC_REG++;
-  }
+	CycleCounter += 3;
+	PC_REG -= 2;
 }
 
 void Tfm2(void)
 { //1139 TFM R-,R- Phase 3 6309
+	if (W_REG == 0)
+	{
+		CycleCounter+=6;
+		PC_REG++;
+		return;
+	}			
+
 	postbyte=MemRead8(PC_REG);
 	Source=postbyte>>4;
 	Dest=postbyte&15;
@@ -2422,21 +2444,19 @@ void Tfm2(void)
   (*xfreg16[Dest])--;
   (*xfreg16[Source])--;
   W_REG--;
-
-	if (W_REG!=0)
-	{
-		CycleCounter+=3;
-		PC_REG-=2;
-	}
-	else
-	{
-		CycleCounter+=6;
-		PC_REG++;
-	}			
+	CycleCounter+=3;
+	PC_REG-=2;
 }
 
 void Tfm3(void)
 { //113A 6309 TFM R+,R 6309
+	if (W_REG == 0)
+	{
+		CycleCounter+=6;
+		PC_REG++;
+		return;
+	}			
+
 	postbyte = MemRead8(PC_REG);
 	Source = postbyte >> 4;
 	Dest = postbyte & 15;
@@ -2451,21 +2471,19 @@ void Tfm3(void)
   MemWrite8(temp8, *xfreg16[Dest]);
   (*xfreg16[Source])++;
   W_REG--;
-
-  if (W_REG!=0)
-  {
-    PC_REG -= 2; //Hit the same instruction on the next loop if not done copying
-		CycleCounter += 3;
-	}
-	else
-	{
-		CycleCounter += 6;
-		PC_REG++;
-	}
+	PC_REG -= 2; //Hit the same instruction on the next loop if not done copying
+	CycleCounter += 3;
 }
 
 void Tfm4(void)
 { //113B TFM R,R+ 6309 
+	if (W_REG == 0)
+	{
+		CycleCounter+=6;
+		PC_REG++;
+		return;
+	}			
+
 	postbyte=MemRead8(PC_REG);
 	Source=postbyte>>4;
 	Dest=postbyte&15;
@@ -2480,17 +2498,8 @@ void Tfm4(void)
   MemWrite8(temp8, *xfreg16[Dest]);
   (*xfreg16[Dest])++;
   W_REG--;
-
-	if (W_REG!=0)
-	{
-		PC_REG-=2; //Hit the same instruction on the next loop if not done copying
-		CycleCounter+=3;
-	}
-	else
-	{
-		CycleCounter+=6;
-		PC_REG++;
-	}
+	PC_REG-=2; //Hit the same instruction on the next loop if not done copying
+	CycleCounter+=3;
 }
 
 void Bitmd_M(void)
@@ -6406,8 +6415,8 @@ void(*JmpVec2[256])(void) = {
 	Pulsw,		// 39
 	Pshuw,		// 3A
 	Puluw,		// 3B
-	Bitmd_M,		// 3C
-	Ldmd_M,		// 3D
+	InvalidInsHandler,		// 3C
+	InvalidInsHandler,		// 3D
 	InvalidInsHandler,		// 3E
 	Swi2_I,		// 3F
 	Negd_I,		// 40
@@ -6443,37 +6452,37 @@ void(*JmpVec2[256])(void) = {
 	InvalidInsHandler,		// 5E
 	Clrw_I,		// 5F
 	InvalidInsHandler,		// 60
-	Oim_X,		// 61
-	Aim_X,		// 62
-	Com_X,		// 63
-	Lsr_X,		// 64
-	Eim_X,		// 65
-	Ror_X,		// 66
-	Asr_X,		// 67
-	Asl_X,		// 68
-	Rol_X,		// 69
-	Dec_X,		// 6A
-	Tim_X,		// 6B
-	Inc_X,		// 6C
-	Tst_X,		// 6D
-	Jmp_X,		// 6E
-	Clr_X,		// 6F
-	Neg_E,		// 70
-	Oim_E,		// 71
-	Aim_E,		// 72
-	Com_E,		// 73
-	Lsr_E,		// 74
-	Eim_E,		// 75
-	Ror_E,		// 76
-	Asr_E,		// 77
-	Asl_E,		// 78
-	Rol_E,		// 79
-	Dec_E,		// 7A
-	Tim_E,		// 7B
-	Inc_E,		// 7C
-	Tst_E,		// 7D
-	Jmp_E,		// 7E
-	Clr_E,		// 7F
+	InvalidInsHandler,		// 61
+	InvalidInsHandler,		// 62
+	InvalidInsHandler,		// 63
+	InvalidInsHandler,		// 64
+	InvalidInsHandler,		// 65
+	InvalidInsHandler,		// 66
+	InvalidInsHandler,		// 67
+	InvalidInsHandler,		// 68
+	InvalidInsHandler,		// 69
+	InvalidInsHandler,		// 6A
+	InvalidInsHandler,		// 6B
+	InvalidInsHandler,		// 6C
+	InvalidInsHandler,		// 6D
+	InvalidInsHandler,		// 6E
+	InvalidInsHandler,		// 6F
+	InvalidInsHandler,		// 70
+	InvalidInsHandler,		// 71
+	InvalidInsHandler,		// 72
+	InvalidInsHandler,		// 73
+	InvalidInsHandler,		// 74
+	InvalidInsHandler,		// 75
+	InvalidInsHandler,		// 76
+	InvalidInsHandler,		// 77
+	InvalidInsHandler,		// 78
+	InvalidInsHandler,		// 79
+	InvalidInsHandler,		// 7A
+	InvalidInsHandler,		// 7B
+	InvalidInsHandler,		// 7C
+	InvalidInsHandler,		// 7D
+	InvalidInsHandler,		// 7E
+	InvalidInsHandler,		// 7F
 	Subw_M,		// 80
 	Cmpw_M,		// 81
 	Sbcd_M,		// 82
@@ -6863,7 +6872,10 @@ void(*JmpVec3[256])(void) = {
 	InvalidInsHandler,		// FF
 };
 
-static unsigned char op1, op2;
+// static unsigned char op1, op2;
+// static unsigned short opstack[16];
+// static unsigned short addrstack[16];
+// static short int stckidx = 0;
 
 int HD6309Exec(int CycleFor)
 {
@@ -6893,10 +6905,7 @@ int HD6309Exec(int CycleFor)
 		if (SyncWaiting == 1)	//Abort the run nothing happens asyncronously from the CPU
 			return(0); // WDZ - Experimental SyncWaiting should still return used cycles (and not zero) by breaking from loop
 
-		op1 = MemRead8(PC_REG);
-		PC_REG++;
-		JmpVec1[op1]();
-		//JmpVec1[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
+		JmpVec1[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 	}//End While
 
 	return(CycleFor - CycleCounter);
@@ -6904,16 +6913,12 @@ int HD6309Exec(int CycleFor)
 
 void Page_2(void) //10
 {
-	op2 = MemRead8(PC_REG++);
-	JmpVec2[op2]();
-	//JmpVec2[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
+	JmpVec2[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 }
 
 void Page_3(void) //11
 {
-	op2 = MemRead8(PC_REG++);
-	JmpVec3[op2]();
-	//JmpVec3[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
+	JmpVec3[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 }
 
 void cpu_firq(void)
@@ -7020,7 +7025,6 @@ void cpu_nmi(void)
 	PendingInterupts=PendingInterupts & 251;
 	return;
 }
-
 
 static unsigned short CalculateEA(unsigned char postbyte)
 {
@@ -7273,12 +7277,10 @@ static unsigned short CalculateEA(unsigned char postbyte)
 	return(ea);
 }
 
-
-
-
 void setcc (unsigned char bincc)
 {
 	unsigned char bit;
+	ccbits = bincc;
 	for (bit=0;bit<=7;bit++)
 		cc[bit]=!!(bincc & (1<<bit));
 	return;
@@ -7311,10 +7313,6 @@ unsigned char getmd(void)
 		return(binmd);
 }
 	
-
-
-
-
 void HD6309AssertInterupt(unsigned char Interupt,unsigned char waiter)// 4 nmi 2 firq 1 irq
 {
 	SyncWaiting=0;
@@ -7332,9 +7330,14 @@ void HD6309DeAssertInterupt(unsigned char Interupt)// 4 nmi 2 firq 1 irq
 
 void InvalidInsHandler(void)
 {	
-	fprintf(stderr, "Illegal instruction %02x %02x \n", (int)op1, (int)op2);
-	extern void dumpMem(UINT16, UINT16);
-	dumpMem(PC_REG-8, (UINT16)16);
+	// fprintf(stderr, "Illegal instruction %02x %02x \n", (int)op1, (int)op2);
+	// extern void dumpMem(UINT16, UINT16);
+	// dumpMem(PC_REG-8, (UINT16)16);
+	// for(short i = 0 ; i > -16 ; i--)
+	// {
+	// 	fprintf(stderr, "(%04x %04x)", addrstack[stckidx+i], opstack[stckidx+i]);
+	// }
+	// fprintf(stderr, "\n");
 	md[ILLEGAL]=1;
 	mdbits=getmd();
 	ErrorVector();
