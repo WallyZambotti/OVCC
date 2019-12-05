@@ -314,6 +314,15 @@ unsigned char ADDCALL ModuleReset(void)
 	{
 		BankedCartOffset[Temp]=0; //Do I need to keep independant selects?
 		
+		if (SetInteruptCallPointerCalls[Temp] !=NULL)
+			SetInteruptCallPointerCalls[Temp](AssertInt);
+
+		if (DmaMemPointerCalls[Temp] !=NULL)
+			DmaMemPointerCalls[Temp](MemRead8,MemWrite8);
+
+		if (MmuMemPointerCalls[Temp] !=NULL)
+			MmuMemPointerCalls[Temp](MmuRead8,MmuWrite8);
+
 		if (Temp == ChipSelectSlot)
 			if (PakRomShareCalls[Temp] != NULL)
 				PakRomShareCalls[Temp](PakRomAddr);
@@ -325,7 +334,7 @@ unsigned char ADDCALL ModuleReset(void)
 
 		//ModuleResetCalls[Temp] = NULL;
 
-		if (ExtRomPointers[Temp] != NULL && ExtRomSizes[Temp] != 0)
+		if (PakRomAddr != NULL && ExtRomPointers[Temp] != NULL && ExtRomSizes[Temp] != 0)
 			memcpy(PakRomAddr, ExtRomPointers[Temp], ExtRomSizes[Temp]);
 	}
 	PakSetCart(0);
@@ -533,14 +542,6 @@ unsigned char MountModule(unsigned char Slot,char *ModName)
 		UpdateMenu(Slot);
 		UpdateConfig(Slot);
 
-		if (SetInteruptCallPointerCalls[Slot] !=NULL)
-			SetInteruptCallPointerCalls[Slot](AssertInt);
-		if (DmaMemPointerCalls[Slot] !=NULL)
-			DmaMemPointerCalls[Slot](MemRead8,MemWrite8);
-		if (MmuMemPointerCalls[Slot] !=NULL)
-			MmuMemPointerCalls[Slot](MmuRead8,MmuWrite8);
-		// if (PakRomShareCalls[Slot] != NULL)
-		// 	PakRomShareCalls[Slot](PakRomShareCall);
 		if (SetIniPathCalls[Slot] != NULL)
 		{
 			//SetIniPathCalls[Slot](IniFile);

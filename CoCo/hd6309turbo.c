@@ -122,10 +122,10 @@ static void cpu_nmi(void);
 static unsigned char GetSorceReg(unsigned char);
 static void Page_2(void);
 static void Page_3(void);
-void MemWrite8(unsigned char, unsigned short);
-void MemWrite16(unsigned short, unsigned short);
-unsigned char MemRead8(unsigned short);
-unsigned short MemRead16(unsigned short);
+// void MemWrite8(unsigned char, unsigned short);
+// void MemWrite16(unsigned short, unsigned short);
+// unsigned char MemRead8(unsigned short);
+// unsigned short MemRead16(unsigned short);
 
 //unsigned char GetDestReg(unsigned char);
 //END Fuction Prototypes-----------------------------------

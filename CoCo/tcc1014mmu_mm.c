@@ -3,7 +3,7 @@ Copyright 2015 by Joseph Forgione
 This file is part of VCC (Virtual Color Computer).
 
 Additional material copyright 2019 by Walter Zambotti
-This file is part of VCC (Virtual Color Computer).
+This file is part of OVCC (Open Virtual Color Computer).
 
     OVCC and VCC (Virtual Color Computer) is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,11 +41,6 @@ This file is part of VCC (Virtual Color Computer).
 #endif
 
 #define handle_error(msg) do { perror(msg) ; exit(EXIT_FAILURE);} while (0)
-
-typedef unsigned char  UINT8,  *PUINT8;
-typedef unsigned short UINT16, *PUINT16;
-typedef unsigned int   UINT32, *PUINT32;
-typedef unsigned long  UINT64, *PUINT64;
 
 static PUINT8 MemPages[1024];
 static PUINT8 memory=NULL;				//Emulated RAM FULL 128-8096K
@@ -98,9 +93,9 @@ static UINT16 MMUpages[MMUBankMax][MMUSlotMax] =
 	{ 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF }
 };
 
-PUINT8 Create32KROMMemory();
-PUINT8 Create64KVirtualMemory(UINT32);
-void SetMMUslot(UINT8, UINT8, UINT16);
+static PUINT8 Create32KROMMemory();
+static PUINT8 Create64KVirtualMemory(UINT32);
+static void SetMMUslot(UINT8, UINT8, UINT16);
 
 /*****************************************************************************************
 * MmuInit Initilize and allocate memory for RAM Internal and External ROM Images.        *
@@ -108,7 +103,7 @@ void SetMMUslot(UINT8, UINT8, UINT16);
 * Returns NULL if any of the above fail.                                                 *
 *****************************************************************************************/
 
-PUINT8 MmuInit(UINT8  RamConfig)
+static PUINT8 MmuInit_hw(UINT8  RamConfig)
 {
 	UINT32 RamSize=0;
 	UINT32 Index1=0;
@@ -136,7 +131,7 @@ PUINT8 MmuInit(UINT8  RamConfig)
 	return(memory);
 }
 
-void MmuReset(void)
+static void MmuReset_hw(void)
 {
 	UINT32 Index1=0,Index2=0;
 	MmuTask=0;
@@ -169,7 +164,7 @@ void MmuReset(void)
 	SetMapType(0);
 }
 
-void freePhysicalMemPages()
+static void freePhysicalMemPages()
 {
 	for(int pageCnt = 0 ; pageCnt < MMUSlotMax ; pageCnt++)
 	{
@@ -192,7 +187,7 @@ void freePhysicalMemPages()
 	ptrCoCoFullMem = NULL;
 }
 
-void SetMMUslot(UINT8 task, UINT8 slotnum, UINT16 mempage)
+static void SetMMUslot(UINT8 task, UINT8 slotnum, UINT16 mempage)
 {
 	int memOffset;
 	PUINT8 memPtr;
@@ -216,7 +211,7 @@ void SetMMUslot(UINT8 task, UINT8 slotnum, UINT16 mempage)
 	}
 }
 
-void UpdateMMap(void)
+static void UpdateMMap(void)
 {
 	UINT8 slotNo;
 	UINT16 page;
@@ -272,17 +267,21 @@ void UpdateMMap(void)
 
 void dumpMem(UINT16 addr, UINT16 len)
 {
-	UINT16 i;
-	fprintf(stderr, "Dump mem %x task %d maptype %d rommap %d", taskmemory, MmuTask, MapType, RomMap);
-	for(i = 0 ; i < len ; i++)
+	UINT16 i, t, ti;
+	fprintf(stderr, "Dump mem %x task %d maptype %d rommap %d\n", taskmemory, MmuTask, MapType, RomMap);
+	for(t = 0 ; t < 2 ; t++)
 	{
-		if ((i % 16) == 0) fprintf(stderr, "\n%08x  ", (UINT32)addr+i);
-		fprintf(stderr, "%02x ", (int)taskmemory[i]);
+		for(i = 0 ; i < len ; i++)
+		{
+			ti = (addr+i) % 0xffff;
+			if ((i % 16) == 0) fprintf(stderr, "%08x  ", (int)ti);
+			fprintf(stderr, "%02x ", (int)ptrTasks[t][ti]);
+		}
+		fprintf(stderr, "\n");
 	}
-	fprintf(stderr, "\n");
 }
 
-unsigned char *Create32KROMMemory()
+static unsigned char *Create32KROMMemory()
 {
 	// The ROM mem offset points to beyond the CoCo RAM memory size.
 	// The ROM mem is appended to the physical mem in Create64KVirtualMemory()
@@ -306,7 +305,7 @@ unsigned char *Create32KROMMemory()
 	return ptrCoCoRomMem;
 }
 
-PUINT8 Create64KVirtualMemory(UINT32 ramsize)
+static PUINT8 Create64KVirtualMemory(UINT32 ramsize)
 {
 	CoCoMemFD = shm_open("/CoCoMem", O_RDWR | O_CREAT | O_EXCL, 0600);
 
@@ -363,12 +362,12 @@ PUINT8 Create64KVirtualMemory(UINT32 ramsize)
 	return ptrCoCoFullMem;
 }
 
-void SetVectors(UINT8  data)
+void SetVectors_hw(UINT8  data)
 {
 	RamVectors=!!data; //Bit 3 of $FF90 MC3
 }
 
-void SetMmuRegister(UINT8  Register,UINT8  data)
+void SetMmuRegister_hw(UINT8  Register,UINT8  data)
 {	
 	UINT8  BankRegister,Task;
 	UINT16 bank;
@@ -380,19 +379,19 @@ void SetMmuRegister(UINT8  Register,UINT8  data)
 	UpdateMMap();
 }
 
-void SetRomMap(UINT8  data)
+void SetRomMap_hw(UINT8  data)
 {	
 	RomMap=(data & 3);
 	UpdateMMap();
 }
 
-void SetMapType(UINT8  type)
+void SetMapType_hw(UINT8  type)
 {
 	MapType=type;
 	UpdateMMap();
 }
 
-void Set_MmuTask(UINT8  task)
+void Set_MmuTask_hw(UINT8  task)
 {
 	MmuTask=task;
 	MmuState= (!MmuEnabled)<<1 | MmuTask;
@@ -403,14 +402,14 @@ void Set_MmuTask(UINT8  task)
 	taskmemory = ptrTasks[MmuTask];
 }
 
-void Set_MmuEnabled(UINT8  usingmmu)
+void Set_MmuEnabled_hw(UINT8  usingmmu)
 {
 	MmuEnabled=usingmmu;
 	MmuState= (!MmuEnabled)<<1 | MmuTask;
 	UpdateMMap();
 }
  
-PUINT8  Getint_rom_pointer(void)
+PUINT8  Getint_rom_pointer_hw(void)
 {
 	return(InternalRomBuffer);
 }
@@ -420,18 +419,7 @@ PUINT8 GetPakExtMem()
 	return ptrCoCoPakExtMem;
 }
 
-void MmuRomShare(unsigned short romsize, PUINT8 rom)
-{
-	if (romsize != 0 && romsize <= CoCoPAKExtROMSize && rom != NULL) 
-	{
-		if (ptrCoCoPakExtMem != NULL)
-		{
-			memcpy(ptrCoCoPakExtMem, rom, (size_t)romsize);
-		}
-	}
-}
-
-void CopyRom(void)
+void CopyRom_hw(void)
 {
 	char ExecPath[MAX_PATH];
 	UINT16 temp=0;
@@ -450,7 +438,7 @@ void CopyRom(void)
 	}
 }
 
-int load_int_rom(char filename[MAX_PATH])
+static int load_int_rom(char filename[MAX_PATH])
 {
 	UINT16 index=0;
 	FILE *rom_handle;
@@ -466,19 +454,19 @@ int load_int_rom(char filename[MAX_PATH])
 
 // Coco3 MMU Code
 
-UINT8  MmuRead8(UINT8  bank, UINT16 address)
+UINT8  MmuRead8_hw(UINT8  bank, UINT16 address)
 {
 	return MemPages[bank][address & 0x1FFF];
 }
 
-void MmuWrite8(UINT8  data, UINT8  bank, UINT16 address)
+void MmuWrite8_hw(UINT8  data, UINT8  bank, UINT16 address)
 {
 	MemPages[bank][address & 0x1FFF] = data;
 }
 
 // Coco3 MMU Code
 
-UINT8  MemRead8(UINT16 address)
+UINT8  MemRead8_hw(UINT16 address)
 {
 	if (address<0xFE00)
 	{
@@ -504,7 +492,7 @@ UINT8  MSABI MemRead8_s(UINT16 address)
 	return(taskmemory[address]);
 }
 
-void MemWrite8(UINT8  data, UINT16 address)
+void MemWrite8_hw(UINT8  data, UINT16 address)
 {
 	if (address < 0xFE00)
 	{
@@ -592,7 +580,7 @@ void MemWrite32(UINT32 data,UINT16 Address)
 	return;
 }
 
-void SetDistoRamBank(UINT8  data)
+void SetDistoRamBank_hw(UINT8  data)
 {
 
 	switch (CurrentRamConfig)
@@ -617,8 +605,27 @@ void SetDistoRamBank(UINT8  data)
 	return;
 }
 
-void SetMmuPrefix(UINT8  data)
+static void SetMmuPrefix(UINT8  data)
 {
 	MmuPrefix=(data & 3)<<8;
 	return;
+}
+
+void SetHWMmu()
+{
+	MmuInit=MmuInit_hw;
+	MmuReset=MmuReset_hw;
+	SetVectors=SetVectors_hw;
+	SetMmuRegister=SetMmuRegister_hw;
+	SetRomMap=SetRomMap_hw;
+	SetMapType=SetMapType_hw;
+	Set_MmuTask=Set_MmuTask_hw;
+	Set_MmuEnabled=Set_MmuEnabled_hw;
+	Getint_rom_pointer=Getint_rom_pointer_hw;
+	CopyRom=CopyRom_hw;
+	MmuRead8=MmuRead8_hw;
+	MmuWrite8=MmuWrite8_hw;
+	MemRead8=MemRead8_hw;
+	MemWrite8=MemWrite8_hw;
+	SetDistoRamBank=SetDistoRamBank_hw;
 }

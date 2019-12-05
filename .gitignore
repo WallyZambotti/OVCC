@@ -14,3 +14,6 @@ CoCo/*.rom
 CoCo/*.ini
 mpi/.vscode/*
 CoCo/ovcc_nomm
+CoCo/ovcc_mmu
+CoCo/ovcc_mmu_swt
+CoCo/ovcc_nommu

@@ -124,6 +124,18 @@ void PakTimer(void)
 void ResetBus(void)
 {
 	BankedCartOffset=0;
+	if (DmaMemPointer != NULL)
+	{
+		DmaMemPointer(*MemRead8, *MemWrite8);
+	}
+	if (MmuMemPointer != NULL)
+	{
+		MmuMemPointer(*MmuRead8, *MmuWrite8);
+	}
+	if (SetInteruptCallPointer != NULL)
+	{
+		SetInteruptCallPointer(CPUAssertInterupt);
+	}
 	if (PakRomShare != NULL)
 	{
 		PakRomShare(GetPakExtMem());
@@ -267,18 +279,6 @@ int InsertModule (char *ModulePath)
 			return(NOTVCC);
 		}
 		BankedCartOffset=0;
-		if (DmaMemPointer != NULL)
-		{
-			DmaMemPointer(MemRead8, MemWrite8);
-		}
-		if (MmuMemPointer != NULL)
-		{
-			MmuMemPointer(MmuRead8, MmuWrite8);
-		}
-		if (SetInteruptCallPointer != NULL)
-		{
-			SetInteruptCallPointer(CPUAssertInterupt);
-		}
 
 		//fprintf(stderr, "Insert Module : Calling GetModuleName %lx\n", (unsigned long)GetModuleName);
 		UpdateOnBoot(Modname);
@@ -419,9 +419,6 @@ int load_ext_rom(char filename[MAX_PATH])
 	BankedCartOffset=0;
 	RomPackLoaded=true;
 
-	//fprintf(stderr, "pakinterface calling PakRomShare call back %d\n", index);
-	//MmuRomShare(ExternROMsize, ExternalRomBuffer);
-	
 	return index;
 }
 

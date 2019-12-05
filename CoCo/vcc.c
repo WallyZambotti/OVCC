@@ -61,9 +61,24 @@ void CartLoad(void);
 void (*CPUInit)(void)=NULL;
 int  (*CPUExec)( int)=NULL;
 void (*CPUReset)(void)=NULL;
-void (*CPUAssertInterupt)(unsigned char,unsigned char)=NULL;
-void (*CPUDeAssertInterupt)(unsigned char)=NULL;
-void (*CPUForcePC)(unsigned short)=NULL;
+void (*CPUAssertInterupt)(UINT8, UINT8)=NULL;
+void (*CPUDeAssertInterupt)(UINT8)=NULL;
+void (*CPUForcePC)(UINT16)=NULL;
+PUINT8 (*MmuInit)(UINT8)=NULL;
+void (*MmuReset)(void)=NULL;
+void (*SetVectors)(UINT8)=NULL;
+void (*SetMmuRegister)(UINT8, UINT8)=NULL;
+void (*SetRomMap)(UINT8)=NULL;
+void (*SetMapType)(UINT8)=NULL;
+void (*Set_MmuTask)(UINT8)=NULL;
+void (*Set_MmuEnabled)(UINT8)=NULL;
+PUINT8 (*Getint_rom_pointer)(void)=NULL;
+void (*CopyRom)(void)=NULL;
+UINT8 (*MmuRead8)(UINT8, UINT16)=NULL;
+void (*MmuWrite8)(UINT8, UINT8, UINT16)=NULL;
+UINT8 (*MemRead8)(UINT16)=NULL;
+void (*MemWrite8)(UINT8, UINT16)=NULL;
+void (*SetDistoRamBank)(UINT8)=NULL;
 void FullScreenToggle(void);
 
 // Message handlers
@@ -313,7 +328,8 @@ unsigned char SetCPUMultiplyer(unsigned short Multiplyer)
 void DoHardReset(SystemState2* const HRState)
 {	
 	//fprintf(stderr, "DoHardReset\n");
-	//extern void TriggerModuleShare(unsigned char);
+	SetHWMmu();
+
 	HRState->RamBuffer=MmuInit(HRState->RamSize);	//Alocate RAM/ROM & copy ROM Images from source
 	//TriggerModuleShare(2); // 2 = reshare PAK Ext ROM
 	HRState->WRamBuffer=(unsigned short *)HRState->RamBuffer;
@@ -353,6 +369,7 @@ void DoHardReset(SystemState2* const HRState)
 		CPUForcePC=MC6809ForcePC;
 		break;
 	}
+
 	PiaReset();
 	mc6883_reset();	//Captures interal rom pointer for CPU Interupt Vectors
 	CPUInit();
