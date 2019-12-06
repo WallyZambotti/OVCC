@@ -1579,7 +1579,7 @@ void About(AG_Event *ev)
     AG_WindowSetCloseAction(AboutWin, AG_WINDOW_DETACH);
 
 	AG_Label *lbl = AG_LabelNewPolled(AboutWin, AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
-        "OVCC 1.1.0\n"
+        "OVCC 1.2.0\n"
         "SDL2 / AGAR 1.5.0 modifications by:"
         "Walter Zambotti\n"
         "Forked from VCC 2.01B (1.43)\n"
