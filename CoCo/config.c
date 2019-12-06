@@ -251,7 +251,6 @@ unsigned char ReadNamedIniFile(char *iniFilePath)
 	CurrentConfig.CpuType = GetPrivateProfileInt("CPU","CpuType",0,iniFilePath);
 	CurrentConfig.MaxOverclock = GetPrivateProfileInt("CPU", "MaxOverClock",100, iniFilePath);
 	CurrentConfig.MmuType = GetPrivateProfileInt("CPU","MmuType",0,iniFilePath);
-
 	CurrentConfig.AudioRate = GetPrivateProfileInt("Audio","Rate",3,iniFilePath);
 	GetPrivateProfileString("Audio","SndCard","",CurrentConfig.SoundCardName,CARDNAME_LEN-1,iniFilePath);
 
@@ -366,7 +365,7 @@ void ConfigOKApply(int close)
 {
 	EmuState2.ResetPending=4;
 
-	if ((CurrentConfig.RamSize != TempConfig.RamSize) || (CurrentConfig.CpuType != TempConfig.CpuType))
+	if ((CurrentConfig.RamSize != TempConfig.RamSize) || (CurrentConfig.CpuType != TempConfig.CpuType) || (CurrentConfig.MmuType != TempConfig.MmuType))
 	{
 		EmuState2.ResetPending=2;
 	}
@@ -401,8 +400,6 @@ INIman *GetIniMan(void)
 
 void UpdateConfig (void)
 {
-	extern unsigned char SetMmuType(unsigned char);
-
 	SetResizeSDL(CurrentConfig.Resize);
 	SetAspectSDL(CurrentConfig.Aspect);
 	SetScanLinesSDL(CurrentConfig.ScanLines);
@@ -451,6 +448,11 @@ void CPUConfigMemSize(int size)
 void CPUConfigCPU(int cpu)
 {
 	TempConfig.CpuType = (unsigned char)cpu;
+}
+
+void MMUConfigMMU(int mmu)
+{
+	TempConfig.MmuType = (unsigned char)mmu;
 }
 
 void MiscConfigAutoStart(int start)

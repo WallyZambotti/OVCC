@@ -108,12 +108,9 @@ static char RegName[16][10]={"D","X","Y","U","S","PC","W","V","A","B","CC","DP",
 
 static wideregister q;
 static cpuregister pc, x, y, u, s, dp, v, z;
-static unsigned char InsCycles[2][25];
 static unsigned char cc[8];
 static unsigned int md[8];
-static unsigned char *ureg8[8]; 
 static unsigned char ccbits,mdbits;
-static unsigned short *xfreg16[8];
 static int CycleCounter=0;
 static unsigned int SyncWaiting=0;
 unsigned short temp16;
@@ -131,6 +128,22 @@ static signed char *spostbyte=(signed char *)&postbyte;
 static signed short *spostword=(signed short *)&postword;
 static char InInterupt=0;
 static int gCycleFor;
+
+static unsigned char *ureg8[8] =
+{
+	&A_REG, &B_REG, &ccbits, &dp.B.msb, &z.B.msb, &z.B.lsb, &E_REG, &F_REG
+};
+
+static unsigned short *xfreg16[8] =
+{
+	&D_REG, &X_REG, &Y_REG, &U_REG, &S_REG, &PC_REG, &W_REG, &V_REG
+}; 
+
+static UINT8 InsCycles[2][25] =
+{
+	{ 6, 6, 3, 2, 5, 9, 8, 5, 3, 11, 7, 7, 4, 8, 8, 9, 27, 36, 30, 28, 37, 31, 4, 5 },
+	{ 5, 4, 2, 1, 4, 7, 5, 1, 1, 10, 6, 5, 3, 7, 6, 8, 26 ,25, 29, 27, 26, 30, 2, 3 }
+};
 
 static UINT8 NatEmuCycles65 = 6;
 static UINT8 NatEmuCycles64 = 6;
@@ -159,30 +172,10 @@ static UINT8 NatEmuCycles53 = 5;
 
 static UINT8 *NatEmuCycles[] =
 {
-	&NatEmuCycles65,
-	&NatEmuCycles64,
-	&NatEmuCycles32,
-	&NatEmuCycles21,
-	&NatEmuCycles54,
-	&NatEmuCycles97,
-	&NatEmuCycles85,
-	&NatEmuCycles51,
-	&NatEmuCycles31,
-	&NatEmuCycles1110,
-	&NatEmuCycles76,
-	&NatEmuCycles75,
-	&NatEmuCycles43,
-	&NatEmuCycles87,
-	&NatEmuCycles86,
-	&NatEmuCycles98,
-	&NatEmuCycles2726,
-	&NatEmuCycles3635,
-	&NatEmuCycles3029,
-	&NatEmuCycles2827,
-	&NatEmuCycles3726,
-	&NatEmuCycles3130,
-	&NatEmuCycles42,
-	&NatEmuCycles53
+	&NatEmuCycles65, &NatEmuCycles64, &NatEmuCycles32, &NatEmuCycles21, &NatEmuCycles54, &NatEmuCycles97,
+	&NatEmuCycles85, &NatEmuCycles51, &NatEmuCycles31, &NatEmuCycles1110, &NatEmuCycles76, &NatEmuCycles75,
+	&NatEmuCycles43, &NatEmuCycles87,	&NatEmuCycles86, &NatEmuCycles98,	&NatEmuCycles2726, &NatEmuCycles3635,
+	&NatEmuCycles3029, &NatEmuCycles2827,	&NatEmuCycles3726, &NatEmuCycles3130,	&NatEmuCycles42, &NatEmuCycles53
 };
 
 //END Global variables for CPU Emulation-------------------
@@ -206,7 +199,6 @@ void Page_3(void);
 // void MemWrite16(unsigned short, unsigned short);
 // unsigned char MemRead8(unsigned short);
 // unsigned short MemRead16(unsigned short);
-extern void SetNatEmuStat(unsigned char);
 
 //unsigned char GetDestReg(unsigned char);
 //END Fuction Prototypes-----------------------------------
@@ -234,74 +226,6 @@ void HD6309Reset(void)
 
 void HD6309Init(void)
 {	//Call this first or RESET will core!
-	// reg pointers for TFR and EXG and LEA ops
-	xfreg16[0] = &D_REG;
-	xfreg16[1] = &X_REG;
-	xfreg16[2] = &Y_REG;
-	xfreg16[3] = &U_REG;
-	xfreg16[4] = &S_REG;
-	xfreg16[5] = &PC_REG;
-	xfreg16[6] = &W_REG;
-	xfreg16[7] = &V_REG;
-
-	ureg8[0]=(unsigned char*)&A_REG;		
-	ureg8[1]=(unsigned char*)&B_REG;		
-	ureg8[2]=(unsigned char*)&ccbits;
-	ureg8[3]=(unsigned char*)&dp.B.msb;
-	ureg8[4]=(unsigned char*)&z.B.msb;
-	ureg8[5]=(unsigned char*)&z.B.lsb;
-	ureg8[6]=(unsigned char*)&E_REG;
-	ureg8[7]=(unsigned char*)&F_REG;
-
-	//This handles the disparity between 6309 and 6809 Instruction timing
-	InsCycles[0][M65]=6;	//6-5
-	InsCycles[1][M65]=5;
-	InsCycles[0][M64]=6;	//6-4
-	InsCycles[1][M64]=4;
-	InsCycles[0][M32]=3;	//3-2
-	InsCycles[1][M32]=2;
-	InsCycles[0][M21]=2;	//2-1
-	InsCycles[1][M21]=1;
-	InsCycles[0][M54]=5;	//5-4
-	InsCycles[1][M54]=4;
-	InsCycles[0][M97]=9;	//9-7
-	InsCycles[1][M97]=7;
-	InsCycles[0][M85]=8;	//8-5
-	InsCycles[1][M85]=5;
-	InsCycles[0][M51]=5;	//5-1
-	InsCycles[1][M51]=1;
-	InsCycles[0][M31]=3;	//3-1
-	InsCycles[1][M31]=1;
-	InsCycles[0][M1110]=11;	//11-10
-	InsCycles[1][M1110]=10;
-	InsCycles[0][M76]=7;	//7-6
-	InsCycles[1][M76]=6;
-	InsCycles[0][M75]=7;	//7-5
-	InsCycles[1][M75]=5;
-	InsCycles[0][M43]=4;	//4-3
-	InsCycles[1][M43]=3;
-	InsCycles[0][M87]=8;	//8-7
-	InsCycles[1][M87]=7;
-	InsCycles[0][M86]=8;	//8-6
-	InsCycles[1][M86]=6;
-	InsCycles[0][M98]=9;	//9-8
-	InsCycles[1][M98]=8;
-	InsCycles[0][M2726]=27;	//27-26
-	InsCycles[1][M2726]=26;
-	InsCycles[0][M3635]=36;	//36-25
-	InsCycles[1][M3635]=35;	
-	InsCycles[0][M3029]=30;	//30-29
-	InsCycles[1][M3029]=29;	
-	InsCycles[0][M2827]=28;	//28-27
-	InsCycles[1][M2827]=27;	
-	InsCycles[0][M3726]=37;	//37-26
-	InsCycles[1][M3726]=26;		
-	InsCycles[0][M3130]=31;	//31-30
-	InsCycles[1][M3130]=30;		
-	InsCycles[0][M42]=4;	//4-2
-	InsCycles[1][M42]=2;		
-	InsCycles[0][M53]=5;	//5-3
-	InsCycles[1][M53]=3;		
 	SetNatEmuStat(1);
 	cc[I]=1;
 	cc[F]=1;
@@ -3696,8 +3620,9 @@ void Exg_M(void)
 			Source &= 0x07;
 			Dest &= 0x07;
 			temp8 = (*ureg8[Source]);
-			if (Source != 4 && Source != 5) (*ureg8[Source]) = (*ureg8[Dest]);
-			if (Dest!=4 && Dest!=5) (*ureg8[Dest]) = temp8;
+			*ureg8[Source] = (*ureg8[Dest]);
+			*ureg8[Dest] = temp8;
+			O_REG = 0; // Just in case Zero reg was used
 		}
 		else // 16 bit EXG
 		{
@@ -3781,6 +3706,7 @@ void Tfr_M(void)
 		else
 			*ureg8[Dest] = *ureg8[Source & 7];
 
+		O_REG = 0; // Just in case Zero reg was used
 		setcc(ccbits);
 	}
 	

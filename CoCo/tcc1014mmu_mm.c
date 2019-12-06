@@ -34,12 +34,6 @@ This file is part of OVCC (Open Virtual Color Computer).
 #include <sys/mman.h>
 #include <fcntl.h>
 
-#if defined(_WIN64)
-#define MSABI 
-#else
-#define MSABI __attribute__((ms_abi))
-#endif
-
 #define handle_error(msg) do { perror(msg) ; exit(EXIT_FAILURE);} while (0)
 
 static PUINT8 MemPages[1024];
@@ -265,21 +259,21 @@ static void UpdateMMap(void)
 	// }
 }
 
-void dumpMem(UINT16 addr, UINT16 len)
-{
-	UINT16 i, t, ti;
-	fprintf(stderr, "Dump mem %x task %d maptype %d rommap %d\n", taskmemory, MmuTask, MapType, RomMap);
-	for(t = 0 ; t < 2 ; t++)
-	{
-		for(i = 0 ; i < len ; i++)
-		{
-			ti = (addr+i) % 0xffff;
-			if ((i % 16) == 0) fprintf(stderr, "%08x  ", (int)ti);
-			fprintf(stderr, "%02x ", (int)ptrTasks[t][ti]);
-		}
-		fprintf(stderr, "\n");
-	}
-}
+// void dumpMem(UINT16 addr, UINT16 len)
+// {
+// 	UINT16 i, t, ti;
+// 	fprintf(stderr, "Dump mem %x task %d maptype %d rommap %d\n", taskmemory, MmuTask, MapType, RomMap);
+// 	for(t = 0 ; t < 2 ; t++)
+// 	{
+// 		for(i = 0 ; i < len ; i++)
+// 		{
+// 			ti = (addr+i) % 0xffff;
+// 			if ((i % 16) == 0) fprintf(stderr, "%08x  ", (int)ti);
+// 			fprintf(stderr, "%02x ", (int)ptrTasks[t][ti]);
+// 		}
+// 		fprintf(stderr, "\n");
+// 	}
+// }
 
 static unsigned char *Create32KROMMemory()
 {
@@ -479,19 +473,6 @@ UINT8  MemRead8_hw(UINT16 address)
 	return(taskmemory[address]);
 }	
 
-UINT8  MSABI MemRead8_s(UINT16 address)
-{
-	if (address<0xFE00)
-	{
-		return(taskmemory[address]);
-	}
-	if (address>0xFEFF)
-		return (port_read(address));
-	if (RamVectors)	//Address must be $FE00 - $FEFF
-		return(vectormemory[address]);
-	return(taskmemory[address]);
-}
-
 void MemWrite8_hw(UINT8  data, UINT16 address)
 {
 	if (address < 0xFE00)
@@ -508,76 +489,6 @@ void MemWrite8_hw(UINT8  data, UINT16 address)
 		vectormemory[address] = data;
 	else
 		taskmemory[address] = data;
-}
-
-void MSABI MemWrite8_s(UINT8  data, UINT16 address)
-{
-	if (address < 0xFE00)
-	{
-		taskmemory[address] = data;
-		return;
-	}
-	if (address > 0xFEFF)
-	{
-		port_write(data, address);
-		return;
-	}
-	if (RamVectors)	//Address must be $FE00 - $FEFF
-		vectormemory[address] = data;
-	else
-		taskmemory[address] = data;
-}
-
-/*****************************************************************
-* 16 & 32 bit memory handling routines                                *
-*****************************************************************/
-
-UINT16 MemRead16(UINT16 addr)
-{
-	return (MemRead8(addr)<<8 | MemRead8(addr+1));
-}
-
-UINT16 MSABI MemRead16_s(UINT16 addr)
-{
-	return (MemRead8_s(addr)<<8 | MemRead8_s(addr+1));
-}
-
-void MemWrite16(UINT16 data,UINT16 addr)
-{
-	MemWrite8( data >>8,addr);
-	MemWrite8( data & 0xFF,addr+1);
-	return;
-}
-
-void MSABI MemWrite16_s(UINT16 data,UINT16 addr)
-{
-	MemWrite8_s( data >>8,addr);
-	MemWrite8_s( data & 0xFF,addr+1);
-	return;
-}
-
-UINT32 MSABI MemRead32_s(UINT16 Address)
-{
-	return ( (MemRead16(Address)<<16) | MemRead16(Address+2) );
-}
-
-void MSABI MemWrite32_s(UINT32 data,UINT16 Address)
-{
-	MemWrite16( data>>16,Address);
-	MemWrite16( data & 0xFFFF,Address+2);
-	return;
-}
-
-UINT32 MemRead32(UINT16 Address)
-{
-	return ( (MemRead16(Address)<<16) | MemRead16(Address+2) );
-}
-
-void MemWrite32(UINT32 data,UINT16 Address)
-{
-	MemWrite16( data>>16,Address);
-	MemWrite16( data & 0xFFFF,Address+2);
-	return;
 }
 
 void SetDistoRamBank_hw(UINT8  data)
@@ -628,4 +539,5 @@ void SetHWMmu()
 	MemRead8=MemRead8_hw;
 	MemWrite8=MemWrite8_hw;
 	SetDistoRamBank=SetDistoRamBank_hw;
+	SetMMUStat(1);
 }

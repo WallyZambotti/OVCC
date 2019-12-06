@@ -1,15 +1,11 @@
-
 ifeq ($(TARGETOS),Mingw)
-    EXEDIR = ..
-    LIBDIR = ../libs
+EXEDIR = ..
+LIBDIR = ../libs
 else
-    prefix = /usr/local
-    EXEDIR = $(DESTDIR)$(prefix)/bin
-    LIBDIR = $(DESTDIR)$(prefix)/lib/ovcc
+prefix = /usr/local
+EXEDIR = $(DESTDIR)$(prefix)/bin
+LIBDIR = $(DESTDIR)$(prefix)/lib/ovcc
 endif
-
-# assembler
-ASM=jwasm
 
 ODIR = obj
 

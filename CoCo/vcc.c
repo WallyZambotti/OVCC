@@ -327,8 +327,17 @@ unsigned char SetCPUMultiplyer(unsigned short Multiplyer)
 
 void DoHardReset(SystemState2* const HRState)
 {	
-	//fprintf(stderr, "DoHardReset\n");
-	SetHWMmu();
+	//fprintf(stderr, "DoHardReset %d\n", HRState->MmuType);
+	
+	switch (HRState->MmuType)
+	{	case 0: // Software MMU
+			SetSWMmu();
+			break;
+		
+		case 1: // Hardware MMU
+			SetHWMmu();
+			break;
+	}
 
 	HRState->RamBuffer=MmuInit(HRState->RamSize);	//Alocate RAM/ROM & copy ROM Images from source
 	//TriggerModuleShare(2); // 2 = reshare PAK Ext ROM
@@ -342,24 +351,6 @@ void DoHardReset(SystemState2* const HRState)
 	}
 	switch (HRState->CpuType)
 	{
-	#ifdef __amd64__
-		case 2: // 6309 Turbo
-		CPUInit=HD6309Init_s;
-		CPUExec=HD6309Exec_s;
-		CPUReset=HD6309Reset_s;
-		CPUAssertInterupt=HD6309AssertInterupt_s;
-		CPUDeAssertInterupt=HD6309DeAssertInterupt_s;
-		CPUForcePC=HD6309ForcePC_s;
-		break;
-	#endif
-		case 1: // 6309
-		CPUInit=HD6309Init;
-		CPUExec=HD6309Exec;
-		CPUReset=HD6309Reset;
-		CPUAssertInterupt=HD6309AssertInterupt;
-		CPUDeAssertInterupt=HD6309DeAssertInterupt;
-		CPUForcePC=HD6309ForcePC;
-		break;
 		case 0: // 6809
 		CPUInit=MC6809Init;
 		CPUExec=MC6809Exec;
@@ -367,6 +358,14 @@ void DoHardReset(SystemState2* const HRState)
 		CPUAssertInterupt=MC6809AssertInterupt;
 		CPUDeAssertInterupt=MC6809DeAssertInterupt;
 		CPUForcePC=MC6809ForcePC;
+		break;
+		case 1: // 6309
+		CPUInit=HD6309Init;
+		CPUExec=HD6309Exec;
+		CPUReset=HD6309Reset;
+		CPUAssertInterupt=HD6309AssertInterupt;
+		CPUDeAssertInterupt=HD6309DeAssertInterupt;
+		CPUForcePC=HD6309ForcePC;
 		break;
 	}
 
@@ -436,11 +435,6 @@ unsigned char SetCpuType( unsigned char Tmp)
 		EmuState2.CpuType=1;
 		strcpy(CpuName,"HD6309");
 		break;
-
-	case 2:
-		EmuState2.CpuType=2;
-		strcpy(CpuName,"HD6309X");
-		break;
 	}
 	return(EmuState2.CpuType);
 }
@@ -486,6 +480,18 @@ void SetNatEmuStat(unsigned char natemu)
 		case 1: strcpy(NatEmuStat, "E"); break;
 		case 2:	strcpy(NatEmuStat, "N"); break;
 		default: strcpy(NatEmuStat, ""); break;
+	}
+}
+
+static char MMUStat[2] = "";
+
+void SetMMUStat(unsigned char mmu)
+{
+	switch (mmu)
+	{
+		case 0: strcpy(MMUStat, "S"); break;
+		case 1:	strcpy(MMUStat, "H"); break;
+		default: strcpy(MMUStat, ""); break;
 	}
 }
 
@@ -570,7 +576,7 @@ void EmuLoop(void)
 		char ttbuff[256];
 		// if (++framecnt == 6)
 		// {
-			sprintf(ttbuff,"Skip:%2.2i|FPS:%3.0f|%s%s@%3.2fMhz|%s",EmuState2.FrameSkip,FPS,CpuName,NatEmuStat,EmuState2.CPUCurrentSpeed,EmuState2.StatusLine);
+			sprintf(ttbuff,"Skip:%2.2i|FPS:%3.0f|%s%s%s@%3.2fMhz|%s",EmuState2.FrameSkip,FPS,CpuName,NatEmuStat,MMUStat,EmuState2.CPUCurrentSpeed,EmuState2.StatusLine);
 			SetStatusBarText(ttbuff,&EmuState2);
 			//fprintf(stderr, "|");
 		// 	framecnt = 0;

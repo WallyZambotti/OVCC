@@ -337,21 +337,16 @@ void CPUChange(AG_Event *event)
     //int newSelection = AG_INT(1);
     extern void CPUConfigCPU(int);
 
-#ifndef __amd64__
-    if (CPU > 1)
-    {
-        AG_TextMsg(AG_MSG_INFO, "Feature only available on Intel");
-        CPU = 1;
-    }
-#endif
     CPUConfigCPU(CPU);
 }
 
 void MMUChange(AG_Event *event)
 {
-    int newSelection = AG_INT(1);
+    //int newSelection = AG_INT(1);
 
-    AG_TextMsg(AG_MSG_INFO, "(Coming Soon) Feature only available on Linux");
+    extern void MMUConfigMMU(int);
+
+    MMUConfigMMU(MMU);
 }
 
 void MonitorChange(AG_Event *event)
@@ -1039,7 +1034,6 @@ void Configure(AG_Event *ev)
         {
             "Motorola MC6809",
             "Hitachi HD6309",
-            "Hitachi HD6309 Turbo",
             NULL
         };
 
