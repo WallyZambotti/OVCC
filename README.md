@@ -18,6 +18,8 @@ OVCC requires additional AGAR SDL2 drivers and feature patches in order to compi
 
 The source for those additional patches and drivers are located here:
 
+https://github.com/WallyZambotti/AGAR-SDL2
+or
 https://drive.google.com/drive/folders/1AwqpwM3JeLzOXsBsxrChQUqCO-TRxheG?usp=sharing
 
 Look in the Docs directory for instructions on including the patches for your platform. (Mingw or Linux/OSX)
