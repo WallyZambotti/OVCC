@@ -495,6 +495,13 @@ Stbt_A ENDP
 PUBLIC Tfm1_A ; Op 1138 - Transfer Block Mem+ to Mem+
 Tfm1_A PROC
   sub rsp, 28h
+	; Test W Reg and exit if zero
+	cmp word ptr [q_s+WREG],0
+  jne doagain
+  ; finish up
+  inc word ptr [pc_s]
+  jmp exit
+doagain:
 	; Get Immediate value at PC++
 	mov cx, word ptr [pc_s]
 	call MemRead8_s ; ax holds immediate byte
@@ -526,11 +533,6 @@ cont:
   inc word ptr [r9] ; (*xfreg16[Dest])++;
   ; W_REG--;
   dec word ptr [q_s+WREG]
-  jne doagain
-  ; finish up
-  inc word ptr [pc_s]
-  jmp exit
-doagain:
   sub word ptr [pc_s], 2
 exit:
   add rsp, 28h
@@ -540,6 +542,13 @@ Tfm1_A ENDP
 PUBLIC Tfm2_A ; Op 1139 - Transfer Block Mem- to Mem-
 Tfm2_A PROC
   sub rsp, 28h
+	; Test W Reg and exit if zero
+	cmp word ptr [q_s+WREG],0
+  jne doagain
+  ; finish up
+  inc word ptr [pc_s]
+  jmp exit
+doagain:
 	; Get Immediate value at PC++
 	mov cx, word ptr [pc_s]
 	call MemRead8_s ; ax holds immediate byte
@@ -571,11 +580,6 @@ cont:
   dec word ptr [r9] ; (*xfreg16[Dest])++;
   ; W_REG--;
   dec word ptr [q_s+WREG]
-  jne doagain
-  ; finish up
-  inc word ptr [pc_s]
-  jmp exit
-doagain:
   sub word ptr [pc_s], 2
 exit:
   add rsp, 28h
@@ -585,6 +589,13 @@ Tfm2_A ENDP
 PUBLIC Tfm3_A ; Op 113A - Transfer Block Mem+ to Mem
 Tfm3_A PROC
   sub rsp, 28h
+	; Test W Reg and exit if zero
+	cmp word ptr [q_s+WREG],0
+  jne doagain
+  ; finish up
+  inc word ptr [pc_s]
+  jmp exit
+doagain:
 	; Get Immediate value at PC++
 	mov cx, word ptr [pc_s]
 	call MemRead8_s ; ax holds immediate byte
@@ -615,11 +626,6 @@ cont:
   inc word ptr [r8] ; (*xfreg16[Source])++;
   ; W_REG--;
   dec word ptr [q_s+WREG]
-  jne doagain
-  ; finish up
-  inc word ptr [pc_s]
-  jmp exit
-doagain:
   sub word ptr [pc_s], 2
 exit:
   add rsp, 28h
@@ -629,6 +635,13 @@ Tfm3_A ENDP
 PUBLIC Tfm4_A ; Op 113B - Transfer Block Mem to Mem+
 Tfm4_A PROC
   sub rsp, 28h
+	; Test W Reg and exit if zero
+	cmp word ptr [q_s+WREG],0
+  jne doagain
+  ; finish up
+  inc word ptr [pc_s]
+  jmp exit
+doagain:
 	; Get Immediate value at PC++
 	mov cx, word ptr [pc_s]
 	call MemRead8_s ; ax holds immediate byte
@@ -659,11 +672,6 @@ cont:
   inc word ptr [r9] ; (*xfreg16[Dest])++;
   ; W_REG--;
   dec word ptr [q_s+WREG]
-  jne doagain
-  ; finish up
-  inc word ptr [pc_s]
-  jmp exit
-doagain:
   sub word ptr [pc_s], 2
 exit:
   add rsp, 28h
