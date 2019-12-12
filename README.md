@@ -10,7 +10,7 @@ Compiling guide.
 
 OVCC Dependancies:
 
-AGAR 1.5.0 source available from https://libagar.org/download.html
+the original AGAR 1.5.0 source is available from https://libagar.org/download.html
 
 AGAR also has its dependancies so read the compilation documentation for the relevant platforms here https://libagar.org/docs/
 
@@ -20,7 +20,11 @@ The source for those additional patches and drivers are located here:
 
 https://drive.google.com/drive/folders/1AwqpwM3JeLzOXsBsxrChQUqCO-TRxheG?usp=sharing
 
-Look in the Docs directory for instructions on including the patches for your platform. (Mingw or Linux/OSX)
+Alternatively you can download a copy of the source (for Linux/OSX) with the patches already installed from: 
+
+https://github.com/WallyZambotti/AGAR-SDL2  (does not contain the Docs directory)
+
+Look in the Docs directory for instructions on including the patches for your platform. (Mingw or Linux/OSX)  The github version does not contain the Docs directory but there is an included readme that the github repo brings to your attention.
 
 Build AGAR as per AGAR documentation with the exception/addition of the configuration options mentioned in the forementioned Docs.
 
