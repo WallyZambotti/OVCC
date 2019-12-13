@@ -20,7 +20,7 @@ IDIR = $(INCDIR) $(SDLINC) $(AGARINC)
 
 SDLLIB := $(shell sdl2-config --libs)
 AGARLIB := $(shell agar-config --libs)
-LIBS = $(SDLLIB) $(AGARLIB) -lrt
+LIBS = $(SDLLIB) $(AGARLIB) #-lrt # Comment out rt lib for Mac
 
 CFLAGS += $(DEBUG) $(OPT) $(WARN) $(IDIR)
 

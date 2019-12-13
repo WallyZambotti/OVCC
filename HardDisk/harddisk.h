@@ -45,7 +45,7 @@ typedef unsigned char (*MEMREAD8)(unsigned short);
 typedef void (*MEMWRITE8)(unsigned char,unsigned short);
 void ADDCALL MemPointers(MEMREAD8, MEMWRITE8);
 unsigned char ADDCALL PakMemRead8 (unsigned short);
-void ADDCALL PakRomShare(MMUROMSHARE);
+void ADDCALL PakRomShare(char*);
 void ADDCALL ModuleStatus (char *);
 //void ADDCALL SetIniPath (char *);
 

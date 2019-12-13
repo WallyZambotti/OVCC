@@ -198,7 +198,7 @@ static void SetMMUslot(UINT8 task, UINT8 slotnum, UINT16 mempage)
 			char errmsg[128]; 
 			sprintf(errmsg, "Failed to map page %d to mmu[%d][%d]\n",	mempage, task, slotnum);
 			handle_error(errmsg);
-			return 0;
+			return;
 		}
 
 		MMUpages[task][slotnum] = mempage;

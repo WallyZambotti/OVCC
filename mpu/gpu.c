@@ -32,6 +32,8 @@ static short int queueProcessing = 1;
 
 #ifdef GPU_MODE_QUEUE
 
+void RemoveGPUrequest(QueueRequest *);
+
 static void GPUsigHandler(int signo)
 {
     // write(0, "!", 1);
