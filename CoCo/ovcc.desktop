@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=OVCC
+Comment=Open Virtual Color Computer
+Exec=/home/odroid/Projects/OVCC/CoCo/ovcc
+Path=/home/odroid/Projects/OVCC/CoCo
+Icon=/home/odroid/Projects/OVCC/CoCo/ovcc.ico
+Terminal=false
+
