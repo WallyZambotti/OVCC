@@ -333,10 +333,11 @@ void DoHardReset(SystemState2* const HRState)
 	{	case 0: // Software MMU
 			SetSWMmu();
 			break;
-		
+#ifndef __MINGW32__
 		case 1: // Hardware MMU
 			SetHWMmu();
 			break;
+#endif
 	}
 
 	HRState->RamBuffer=MmuInit(HRState->RamSize);	//Alocate RAM/ROM & copy ROM Images from source

@@ -344,6 +344,13 @@ void MMUChange(AG_Event *event)
 {
     //int newSelection = AG_INT(1);
 
+    if (MMU > 0)
+    {
+        AG_TextMsg(AG_MSG_INFO, "Feature only available on Linux");
+        MMU = 0;
+        return;
+    }
+    
     extern void MMUConfigMMU(int);
 
     MMUConfigMMU(MMU);

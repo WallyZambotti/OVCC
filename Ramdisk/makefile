@@ -1,5 +1,5 @@
 # change application name here (executable output name)
-TARGET=testlib
+TARGET=ramdisk.dll
  
 # compiler
 CC=gcc
@@ -34,12 +34,6 @@ UNUSEDOBJS=
 
 _OBJS=	ramdisk.o memboard.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
-
-testlib: obj/testlib.o ramdisk.dll
-	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
-
-$(ODIR)/testlib.o: testlib.c
-	$(CC) -O0 -g -c $(SDLINC) $< -o $@
 
 ramdisk.dll: $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 

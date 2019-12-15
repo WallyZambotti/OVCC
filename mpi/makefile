@@ -1,5 +1,5 @@
 # change application name here (executable output name)
-TARGET=testlib
+TARGET=mpi.dll
  
 # compiler
 CC=gcc
@@ -36,12 +36,6 @@ UNUSEDOBJS=
 
 _OBJS=mpi.o fileops.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
-
-testlib: obj/testlib.o mpi.dll
-	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
-
-$(ODIR)/testlib.o: testlib.c
-	$(CC) -O0 -g -c $(SDLINC) $< -o $@
 
 mpi.dll: $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 

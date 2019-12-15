@@ -1,5 +1,5 @@
 # change application name here (executable output name)
-TARGET=testlib
+TARGET=orch90.dll
  
 # compiler
 CC=gcc
@@ -34,12 +34,6 @@ UNUSEDOBJS=
 
 _OBJS=orch90.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
-
-testlib: obj/testlib.o orch90.dll
-	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
-
-$(ODIR)/testlib.o: testlib.c
-	$(CC) -O0 -g -c $(SDLINC) $< -o $@
 
 orch90.dll: $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) -o $@ 

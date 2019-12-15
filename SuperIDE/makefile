@@ -35,12 +35,6 @@ UNUSEDOBJS=
 _OBJS=superide.o cloud9.o fileops.o idebus.o logger.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-testlib: obj/testlib.o superide.dll
-	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
-
-$(ODIR)/testlib.o: testlib.c
-	$(CC) -O0 -g -c $(SDLINC) $< -o $@
-
 superide.dll: $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
     
