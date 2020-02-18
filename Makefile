@@ -1,4 +1,4 @@
-export TARGETOS = Mingw
+export TARGETOS = Linux
 export TARGETARCH = AMD
 
 ifeq ($(TARGETOS),Linux)
