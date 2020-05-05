@@ -60,6 +60,8 @@ void GimeWrite(unsigned char port,unsigned char data)
 {
 	GimeRegisters[port]=data;
 
+	// if ((port == 0x92 || port == 0x93) && data & 32) write(0, "*", 1);
+
 	switch (port)
 	{
 	case 0x90:
@@ -270,9 +272,9 @@ void SetTimerMSB(unsigned char data) //94
 
 void SetTimerLSB(unsigned char data) //95
 {
-	unsigned short Temp;
-	Temp=((GimeRegisters[0x94] <<8)+ GimeRegisters[0x95]) & 4095;
-	SetInteruptTimer(Temp);
+	// unsigned short Temp;
+	// Temp=((GimeRegisters[0x94] <<8)+ GimeRegisters[0x95]) & 4095;
+	// SetInteruptTimer(Temp);
 	return;
 }
 
@@ -281,13 +283,13 @@ void GimeAssertKeyboardInterupt(void)
 	if ( ((GimeRegisters[0x93] & 2)!=0) & (EnhancedFIRQFlag==1))
 	{
 		CPUAssertInterupt(FIRQ,0);
-		LastFirq=LastFirq | 2;
+		LastFirq |= 2;
 	}
 	else
 	if ( ((GimeRegisters[0x92] & 2)!=0) & (EnhancedIRQFlag==1))
 	{
 		CPUAssertInterupt(IRQ,0);
-		LastIrq=LastIrq | 2;
+		LastIrq |= 2;
 	}
 	return;
 }
@@ -297,14 +299,16 @@ void GimeAssertVertInterupt(void)
 
 	if (((GimeRegisters[0x93] & 8)!=0) & (EnhancedFIRQFlag==1))
 	{
+		//write(0, "F", 1);
 		CPUAssertInterupt(FIRQ,0); //FIRQ
-		LastFirq=LastFirq | 8;
+		LastFirq |= 8;
 	}
 	else
 	if (((GimeRegisters[0x92] & 8)!=0) & (EnhancedIRQFlag==1))
 	{
+		//write(0, "I", 1);
 		CPUAssertInterupt(IRQ,0); //IRQ moon patrol demo using this
-		LastIrq=LastIrq | 8;
+		LastIrq |= 8;
 	}
 	return;
 }
@@ -315,13 +319,13 @@ void GimeAssertHorzInterupt(void)
 	if (((GimeRegisters[0x93] & 16)!=0) & (EnhancedFIRQFlag==1))
 	{
 		CPUAssertInterupt(FIRQ,0);
-		LastFirq=LastFirq | 16;
+		LastFirq |= 16;
 	}
 	else
 	if (((GimeRegisters[0x92] & 16)!=0) & (EnhancedIRQFlag==1))
 	{
 		CPUAssertInterupt(IRQ,0);
-		LastIrq=LastIrq | 16;
+		LastIrq |= 16;
 	}
 	return;
 }
@@ -331,13 +335,13 @@ void GimeAssertTimerInterupt(void)
 	if (((GimeRegisters[0x93] & 32)!=0) & (EnhancedFIRQFlag==1))
 	{
 		CPUAssertInterupt(FIRQ,0);
-		LastFirq=LastFirq | 32;
+		LastFirq |= 32;
 	}
 	else
 		if (((GimeRegisters[0x92] & 32)!=0) & (EnhancedIRQFlag==1))
 		{
 			CPUAssertInterupt(IRQ,0);
-			LastIrq=LastIrq | 32;
+			LastIrq |= 32;
 		}
 	return;
 }

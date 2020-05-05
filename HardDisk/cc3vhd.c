@@ -27,6 +27,7 @@ This file is part of VCC (Virtual Color Computer).
 *	FF83          Command/status register
 *	FF84          Buffer address (high byte)
 *	FF85          Buffer address (low byte)
+*	FF86		  Drive select (0 or 1)
 *
 *	Set the other registers, and then issue a command to FF83 as follows:
 *

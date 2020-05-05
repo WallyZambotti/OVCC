@@ -27,7 +27,7 @@ void DiskStatus(char *);
 #define STANDALONE 2
 
 
-#define DRIVESIZE 130	//in Mb
+#define DRIVESIZE 2048	//in Mb
 #define MAX_SECTOR DRIVESIZE*1024*1024
 #define SECTORSIZE 256
 
