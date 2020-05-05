@@ -202,6 +202,7 @@ void StartGPUQueue()
     struct sigaction action;
 
     /* set up signal handlers for SIGINT & SIGUSR1 */
+    sigemptyset(&action.sa_mask);
     action.sa_flags = 0;
     action.sa_handler = GPUsigHandler;
     sigaction(SIGUSR1, &action, NULL);
