@@ -318,6 +318,7 @@ int CPUCycle(void)
 
 void SetTimerInteruptState(unsigned char State)
 {
+	// printf("%d", (int)State); fflush(stdout);
 	TimerInteruptEnabled=State;
 	return;
 }

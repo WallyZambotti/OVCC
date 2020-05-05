@@ -849,7 +849,7 @@ void PrintMonitorChange(AG_Event *event)
 
 void SetStatusBarText(const char *text, SystemState2 *STState)
 {
-    if (sdl->r == NULL) return;
+    if (sdl == NULL || sdl->r == NULL) return;
     
     if (STState->EmulationRunning) AG_LabelText(status, "%s", text);
 }

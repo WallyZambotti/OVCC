@@ -503,6 +503,7 @@ void EmuLoop(void)
 	AG_Delay(30);
 	unsigned long LC = 0;
 	int framecnt = 0;
+	static char ttbuff[256];
 
 	//TestDelay();
 
@@ -573,7 +574,6 @@ void EmuLoop(void)
 		FPS= FPS != 0 ? FPS/EmuState2.FrameSkip : GetCurrentFPS()/EmuState2.FrameSkip;
 		GetModuleStatus(&EmuState2);
 
-		char ttbuff[256];
 		// if (++framecnt == 6)
 		// {
 			sprintf(ttbuff,"Skip:%2.2i|FPS:%3.0f|%s%s%s@%3.2fMhz|%s",EmuState2.FrameSkip,FPS,CpuName,NatEmuStat,MMUStat,EmuState2.CPUCurrentSpeed,EmuState2.StatusLine);

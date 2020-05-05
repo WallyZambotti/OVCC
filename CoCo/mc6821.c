@@ -260,28 +260,36 @@ void irq_hs(int phase)	//63.5 uS
 void irq_fs(int phase)	//60HZ Vertical sync pulse 16.667 mS
 {
 	if ((CartInserted==1) & (CartAutoStart==1))
+	{
 		AssertCart();
+	}
 	switch (phase)
 	{
-	case 0:	//FS went High to low
-		if ( (rega[3] & 2)==0 ) //IRQ on High to low transition
-			rega[3]=(rega[3] | 128);
-		if (rega[3] & 1)
-			CPUAssertInterupt(IRQ,1);
+		case 0:	//FS went High to low
+			if ( (rega[3] & 2)==0 ) //IRQ on High to low transition
+			{
+				rega[3]=(rega[3] | 128);
+				if (rega[3] & 1)
+				{
+					//write(0, "v", 1);
+					CPUAssertInterupt(IRQ,1);
+				}	
+			}
+			return;
+		break;
 
-		return;
-	break;
-
-	case 1:	//FS went Low to High
-
-		if ( (rega[3] & 2) ) //IRQ  Low to High transition
-		{
-		rega[3]=(rega[3] | 128);
-		if (rega[3] & 1)
-			CPUAssertInterupt(IRQ,1);
-		}
-		return;
-	break;
+		case 1:	//FS went Low to High
+			if ( (rega[3] & 2) ) //IRQ  Low to High transition
+			{
+				rega[3]=(rega[3] | 128);
+				if (rega[3] & 1)
+				{
+					//write(0, "^", 1);
+					CPUAssertInterupt(IRQ,1);
+				}
+			}
+			return;
+		break;
 	} //END switch
 
 	return;

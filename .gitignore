@@ -1,3 +1,4 @@
+Exec/
 CoCo/ovcc
 */obj
 */lib*.so
@@ -17,3 +18,4 @@ CoCo/ovcc_nomm
 CoCo/ovcc_mmu
 CoCo/ovcc_mmu_swt
 CoCo/ovcc_nommu
+testlib

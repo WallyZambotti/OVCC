@@ -190,7 +190,10 @@ static void SetMMUslot(UINT8 task, UINT8 slotnum, UINT16 mempage)
 	{
 		memOffset = mempage * CoCoPageSize;
 		memPtr = MMUbank[task][slotnum];
+		/* unmap previous memory */
+		// if (memPtr) munmap(memPtr, CoCoPageSize); /* attempted fix for memory leak, probably not needed */
 		//fprintf(stderr, "task %d slot %d page %d mem %x", task, slotnum, mempage, memPtr);
+		/* map new meory */
 		MMUbank[task][slotnum] = (PUINT8)mmap(memPtr, CoCoPageSize, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FIXED, CoCoMemFD, memOffset);
 
 		if ((void*)memPtr != (void*)MMUbank[task][slotnum])
@@ -210,6 +213,11 @@ static void UpdateMMap(void)
 	UINT8 slotNo;
 	UINT16 page;
 
+	/*
+		It may be worth trying to map ROM pages into RAM when attempting to map pages 3C-3F into the lower slots
+		when the RomMap is set as in 32K internal mode. * note 1
+	*/
+
 	for (int slotNo = 0; slotNo < 8; slotNo++)
 	{
 		if (MapType || slotNo < 4) // memory pages are always memory below bank 4 or if MapType is RAM
@@ -217,6 +225,7 @@ static void UpdateMMap(void)
 			if (MmuEnabled)
 			{
 				page = MmuRegisters[MmuTask][slotNo];
+				//if (!MapType && page >= 0x3C && page <= 0x3F) page = RamMask[CurrentRamConfig] + slotNo - 3; // * note 1
 				SetMMUslot(MmuTask, slotNo, page);
 			}
 			else  // map the default pages 
@@ -240,7 +249,7 @@ static void UpdateMMap(void)
 				page = RamMask[CurrentRamConfig] + slotNo - 3;
 				break;
 			case 3: // 32 External
-					page = RamMask[CurrentRamConfig] + slotNo + 1;
+				page = RamMask[CurrentRamConfig] + slotNo + 1;
 				break;
 			}
 			SetMMUslot(MmuTask, slotNo, page);

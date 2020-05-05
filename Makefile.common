@@ -10,7 +10,7 @@ endif
 ODIR = obj
 
 DEBUG=#-g
-OPT=-O2 # -Og
+OPT=-O2 # -flto # -Og
 WARN = -w # -Wall
 PTHREAD = -pthread
 
@@ -29,7 +29,7 @@ LDFLAGS += $(LIBS) #-Wl,-export-all-symbols # -export-dynamic
 OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 $(TARGET): $(OBJS)
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(CC) -o $@ $(OPT) $^ $(LDFLAGS)
 
 testlib: $(ODIR)/testlib.o
 	$(CC) -o $@ $< $(LIBS)
