@@ -1,5 +1,5 @@
 # change application name here (executable output name)
-TARGET=testlib
+TARGET=becker.dll
  
 # compiler
 CC=gcc
@@ -37,12 +37,6 @@ UNUSEDOBJS=
 
 _OBJS=	becker.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
-
-testlib: obj/testlib.o becker.dll 
-	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
-
-$(ODIR)/testlib.o: testlib.c
-	$(CC) -O0 -g -c $(SDLINC) $< -o $@
 
 becker.dll: $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 

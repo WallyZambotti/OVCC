@@ -362,6 +362,13 @@ void MmuRomShare(unsigned short romsize, unsigned char *rom)
 // 	fprintf(stderr, "\n");
 // }
 
+#ifdef __MINGW32__
+PUINT8 GetPakExtMem()
+{
+	return NULL;
+}
+#endif
+
 void SetSWMmu()
 {
 	MmuInit=MmuInit_sw;

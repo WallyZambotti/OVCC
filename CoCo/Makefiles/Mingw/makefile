@@ -32,13 +32,13 @@ LIBS=$(AGARLIB) $(SDLLIB) -lregex
 
 LDFLAGS=$(LIBS) #-Wl,-export-all-symbols # -export-dynamic 
 
-_OBJS=	vcc.o coco3.o config.o fileops.o hd6309.o hd6309turbo.o iobus.o logger.o mc6809.o \
-	mc6821.o pakinterface.o quickload.o tcc1014mmu.o tcc1014registers.o \
+_OBJS=	vcc.o coco3.o config.o fileops.o hd6309.o iobus.o logger.o mc6809.o \
+	mc6821.o pakinterface.o quickload.o tcc1014mmu_nomm.o tcc1014registers.o \
 	throttle.o _xdebug.o cassette.o SDLInterface.o tcc1014graphicsSDL.o keyboardSDL.o \
-	keyboardLayoutSDL.o joystickinputSDL.o audioSDL.o vccgui.o iniman.o \
-	hd6309asmP0-00-7F.o hd6309asmP0-80-FF.o hd6309asmP1-00-FF.o hd6309asmP2-00-FF.o \
-	hd6309asmReg2Reg.o hd6309cea.o hd6309pshpul.o hd6309saveflags.o hd6309tfrexg.o
-_UNUSED_OBJS = hd6309-a.o fixedtexture.o
+	keyboardLayoutSDL.o joystickinputSDL.o audioSDL.o vccgui.o iniman.o tcc1014mmu_common.o
+	
+_UNUSED_OBJS = hd6309-a.o fixedtexture.o hd6309asmP0-00-7F.o hd6309asmP0-80-FF.o hd6309asmP1-00-FF.o hd6309asmP2-00-FF.o \
+	hd6309asmReg2Reg.o hd6309cea.o hd6309pshpul.o hd6309saveflags.o hd6309tfrexg.o hd6309turbo.o 
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
  
 ovcc: $(OBJS)
@@ -102,8 +102,11 @@ $(ODIR)/pakinterface.o: pakinterface.c defines.h tcc1014mmu.h pakinterface.h con
 $(ODIR)/quickload.o: quickload.c defines.h pakinterface.h vcc.h coco3.h tcc1014mmu.h fileops.h 
 	$(CC) -c $(CCFLAGS) $< -o $@
 
-$(ODIR)/tcc1014mmu.o: tcc1014mmu.c defines.h tcc1014mmu.h iobus.h tcc1014graphicsSDL.h config.h pakinterface.h hd6309.h \
+$(ODIR)/tcc1014mmu_nomm.o: tcc1014mmu_nomm.c defines.h tcc1014mmu.h iobus.h tcc1014graphicsSDL.h config.h pakinterface.h hd6309.h \
 	logger.h 
+	$(CC) -c $(CCFLAGS) $< -o $@
+
+$(ODIR)/tcc1014mmu_common.o: tcc1014mmu_common.c defines.h tcc1014mmu.h 
 	$(CC) -c $(CCFLAGS) $< -o $@
 
 $(ODIR)/tcc1014registers.o: tcc1014registers.c defines.h tcc1014registers.h tcc1014graphicsSDL.h coco3.h keyboard.h tcc1014mmu.h \
