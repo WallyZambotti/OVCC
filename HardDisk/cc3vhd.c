@@ -27,7 +27,7 @@ This file is part of VCC (Virtual Color Computer).
 *	FF83          Command/status register
 *	FF84          Buffer address (high byte)
 *	FF85          Buffer address (low byte)
-*	FF86		  Drive select (0 or 1)
+*	FF86		  		Drive select (0 or 1)
 *
 *	Set the other registers, and then issue a command to FF83 as follows:
 *
@@ -75,11 +75,12 @@ typedef union
 
 } Address;
 
-static FILE *HardDrive= NULL ;
+static int DriveSelect = 0;
+static FILE *HardDrive[2]= { NULL, NULL } ;
 static SECOFF SectorOffset;
 static Address DMAaddress;
 static unsigned char SectorBuffer[SECTORSIZE];
-static unsigned char Mounted=0,WpHD=0;
+static unsigned char Mounted[2]= {0, 0},WpHD[2]={0, 0};
 static unsigned short ScanCount=0;
 static unsigned long LastSectorNum=0;
 static char DStatus[128]="";
@@ -88,27 +89,27 @@ unsigned long BytesMoved=0;
 
 void HDcommand(unsigned char);
 
-int MountHD(char FileName[MAX_PATH])
+int MountHD(char FileName[MAX_PATH], int drive)
 {
-	if (HardDrive!=NULL)	//Unmount any existing image
-		UnmountHD();
-	WpHD=0;
-	Mounted=1;
+	if (HardDrive[drive]!=NULL)	//Unmount any existing image
+		UnmountHD(drive);
+	WpHD[drive]=0;
+	Mounted[drive]=1;
 	Status = HD_OK;
 	SectorOffset.All = 0;
 	DMAaddress.word = 0;
-	HardDrive = fopen(FileName, "rb+");
+	HardDrive[drive] = fopen(FileName, "rb+");
 
-	if (HardDrive == NULL)	//Can't open read/write. try read only
+	if (HardDrive[drive] == NULL)	//Can't open read/write. try read only
 	{
-		HardDrive = fopen(FileName, "rb");
-		WpHD=1;
+		HardDrive[drive] = fopen(FileName, "rb");
+		WpHD[drive]=1;
 	}
 
-	if (HardDrive == NULL)	//Giving up
+	if (HardDrive[drive] == NULL)	//Giving up
 	{
-		WpHD=0;
-		Mounted=0;
+		WpHD[drive]=0;
+		Mounted[drive]=0;
 		Status = HD_NODSK;
 		return(0);
 	}
@@ -116,13 +117,13 @@ int MountHD(char FileName[MAX_PATH])
 	return(1);
 }
 
-void UnmountHD(void)
+void UnmountHD(int drive)
 {
-	if (HardDrive != NULL)
+	if (HardDrive[drive] != NULL)
 	{
-		fclose(HardDrive);
-		HardDrive = NULL;
-		Mounted = 0;
+		fclose(HardDrive[drive]);
+		HardDrive[drive] = NULL;
+		Mounted[drive] = 0;
 		Status = HD_NODSK;
 	}
 	return;
@@ -132,7 +133,7 @@ void HDcommand(unsigned char Command)
 {
 	unsigned short Temp=0;
 
-	if (Mounted==0)
+	if (Mounted[DriveSelect]==0)
 	{
 		Status = HD_NODSK;
 		return;
@@ -147,18 +148,18 @@ void HDcommand(unsigned char Command)
 			return;
 		}
 
-		fseek(HardDrive, (off_t)SectorOffset.All, SEEK_SET);
-		BytesMoved = fread(SectorBuffer, 1, SECTORSIZE, HardDrive);
+		fseek(HardDrive[DriveSelect], (off_t)SectorOffset.All, SEEK_SET);
+		BytesMoved = fread(SectorBuffer, 1, SECTORSIZE, HardDrive[DriveSelect]);
 
 		for (Temp=0; Temp < SECTORSIZE;Temp++)
 			MemWrite(SectorBuffer[Temp],Temp+DMAaddress.word);
 
 		Status = HD_OK;
-		sprintf(DStatus,"HD: Rd Sec %000000.6X",SectorOffset.All>>8);
+		sprintf(DStatus,"HD%d: Rd %000000.6X", DriveSelect, SectorOffset.All>>8);
 	break;
 
 	case SECTOR_WRITE:
-		if (WpHD == 1 )
+		if (WpHD[DriveSelect] == 1 )
 		{
 			Status = HD_WP;
 			return;
@@ -173,14 +174,14 @@ void HDcommand(unsigned char Command)
 		for (Temp=0; Temp <SECTORSIZE;Temp++)
 			SectorBuffer[Temp]=MemRead(Temp+DMAaddress.word);
 
-		fseek(HardDrive, (off_t)SectorOffset.All, SEEK_SET);
-		BytesMoved = fwrite(SectorBuffer, 1, SECTORSIZE, HardDrive);
+		fseek(HardDrive[DriveSelect], (off_t)SectorOffset.All, SEEK_SET);
+		BytesMoved = fwrite(SectorBuffer, 1, SECTORSIZE, HardDrive[DriveSelect]);
 		Status = HD_OK;
-		sprintf(DStatus,"HD: Wr Sec %000000.6X",SectorOffset.All>>8);
+		sprintf(DStatus,"HD%d: Wr %000000.6X", DriveSelect, SectorOffset.All>>8);
 	break;
 
 	case DISK_FLUSH:
-		//FlushFileBuffers(HardDrive);
+		//FlushFileBuffers(HardDrive[DriveSelect]);
 		SectorOffset.All=0;
 		DMAaddress.word=0;
 		Status = HD_OK;
@@ -204,10 +205,10 @@ void DiskStatus(char *Temp)
 	if (ScanCount > 63)
 	{
 		ScanCount=0;
-		if (Mounted==1)
-			strcpy(DStatus,"HD:IDLE");
+		if (Mounted[DriveSelect]==1)
+			sprintf(DStatus, "HD%d:IDLE", DriveSelect);
 		else
-			strcpy(DStatus,"HD:No Image!");
+			sprintf(DStatus, "HD%d:No Image!", DriveSelect);
 	}
 	return;
 }
@@ -234,6 +235,13 @@ void IdeWrite(unsigned char data,unsigned char port)
 		break;
 	case 5:
 		DMAaddress.Byte.lsb=data;
+		break;
+	case 6:
+		//fprintf(stderr, "DS%d\n", (int)data);
+		if (data >=0 && data <= 1) 
+		{
+			DriveSelect=data; // 0 or 1 otherwise no change
+		}
 		break;
 	}
 	return;

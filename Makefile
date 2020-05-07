@@ -1,5 +1,5 @@
 export TARGETOS = Linux
-export TARGETARCH = ARm
+export TARGETARCH = AMD
 
 ifeq ($(TARGETOS),Linux)
 DIRS = CoCo becker FD502 HardDisk mpi orch90 Ramdisk SuperIDE mpu
