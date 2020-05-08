@@ -33,7 +33,7 @@ typedef int BOOL;
 
 #define MAX_PATH 260
 
-static char moduleName[27] = { "Glenside-IDE /w Clock 000" };
+static char moduleName[27] = { "Glenside-IDE w Clock 000" };
 
 static char FileName[MAX_PATH] = { "" };
 static char IniFile[MAX_PATH] = { "" };
