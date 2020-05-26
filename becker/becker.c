@@ -56,6 +56,7 @@ static float WriteSpeed = 0;
 
 // hostname and port
 
+static char tmpdwaddress[MAX_PATH];
 static char dwaddress[MAX_PATH];
 static unsigned short dwsport = 65504;
 static char curaddress[MAX_PATH];
@@ -539,7 +540,7 @@ void ADDCALL ModuleStatus(char *DWStatus)
 
 void OKCallback(AG_Event *event)
 {
-	dw_setaddr(dwaddress);
+	dw_setaddr(tmpdwaddress);
 	dw_setport(serverPort);
 	SaveConfig();
 	AG_CloseFocusedWindow();
@@ -560,14 +561,15 @@ void ConfigBecker(AG_Event *event)
 
 	// Server Address
 
-	AG_Textbox *tbx = AG_TextboxNew(win, AG_TEXTBOX_HFILL, "Server Address:", NULL);
-	AG_TextboxBindASCII(tbx, dwaddress, sizeof(dwaddress));
+	AG_Textbox *tbx = AG_TextboxNewS(win, AG_TEXTBOX_HFILL, "Server Address:");
+	strcpy(tmpdwaddress,dwaddress);
+	AG_TextboxBindASCII(tbx, tmpdwaddress, sizeof(tmpdwaddress));
 	AG_TextboxSizeHint(tbx, "127.0.0.1 or some long name");
 
 	// Server Port
 
 	sprintf(serverPort, "%d", dwsport);
-	tbx = AG_TextboxNew(win, AG_TEXTBOX_HFILL, "Server Port:", NULL);
+	tbx = AG_TextboxNewS(win, AG_TEXTBOX_HFILL, "Server Port:");
 	AG_TextboxBindASCII(tbx, serverPort, sizeof(serverPort));
 	AG_TextboxSizeHint(tbx, "65504 or whatever");
 	
