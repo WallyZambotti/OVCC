@@ -124,6 +124,15 @@ void Run(AG_Event *event)
     AG_TextMsg(AG_MSG_INFO, "Emulation State set to running!");
 }
 
+void Halt(AG_Event *event)
+{
+    SystemState2 *state = AG_PTR(1);
+
+    state->EmulationRunning = FALSE;
+
+    AG_TextMsg(AG_MSG_INFO, "Emulation State set to halt!");
+}
+
 int LoadIniFile(AG_Event *event)
 {
     SystemState2 *state = AG_PTR(1);
@@ -1756,6 +1765,7 @@ void DecorateWindow(SystemState2 *EmuState2)
     AG_MenuItem *itemFile = AG_MenuNode(menu->root, "File", NULL);
     {
         AG_MenuAction(itemFile, "Run", NULL, Run, "%p", EmuState2);
+        AG_MenuAction(itemFile, "Halt", NULL, Halt, "%p", EmuState2);
         AG_MenuAction(itemFile, "Save Config", NULL, SaveConf, "%p", EmuState2);
         AG_MenuAction(itemFile, "Load Config", NULL, LoadConf, "%p", EmuState2);
         AG_MenuSeparator(itemFile);
