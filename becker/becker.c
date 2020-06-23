@@ -166,6 +166,9 @@ int dw_write( char dwdata)
 void killDWTCPThread(void)
 {
 	// close socket to cause io thread to die
+	DWTCPEnabled = false;
+	usleep(TCP_RETRY_DELAY*1000);
+
 	if (dwSocket != 0)
 #ifdef __MINGW32__
 			closesocket(dwSocket);
@@ -174,7 +177,7 @@ void killDWTCPThread(void)
 #endif
 
 	dwSocket = 0;
-	
+		
 	// reset buffer po
 	InReadPos = 0;
 	InWritePos = 0;
@@ -370,6 +373,9 @@ unsigned  DWTCPThread(void)
 #endif
 			
 	dwSocket = 0;
+
+	sprintf(msg,"DWTCPConnection thread terminated\n");
+	fprintf(stderr, "%s", msg);
 
 	return(0);
 }
@@ -599,8 +605,11 @@ void ADDCALL ModuleConfig(unsigned char func)
 	{
 	case 0: // Destroy Menus
 	{
+		killDWTCPThread();
 		AG_MenuDel(itemConfig);
 		AG_MenuDel(itemSeperator);
+		itemConfig = NULL;
+		itemSeperator = NULL;
 	}
 	break;
 

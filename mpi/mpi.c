@@ -164,10 +164,13 @@ void ADDCALL ModuleConfig(unsigned char func)
 	{
 	case 0: // Destroy Menus
 		AG_MenuDel(itemConfig);
+		itemConfig = NULL;
 		AG_MenuDel(itemSeperator);
+		itemSeperator = NULL;
 		for(int i = 0 ; i < MAXPAX ; i++)
 		{
 			AG_MenuDel(itemMenu[i]);
+			itemMenu[i] = NULL;
 		}
 	break;
 

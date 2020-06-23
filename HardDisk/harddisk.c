@@ -111,6 +111,13 @@ void ADDCALL ModuleConfig(unsigned char func)
 		AG_MenuDel(itemLoadHDD[1]);
 		AG_MenuDel(itemMenu[1]);
 		AG_MenuDel(itemSeperator);
+		itemEjectHDD[0] = NULL;
+		itemLoadHDD[0] = NULL;
+		itemMenu[0] = NULL;
+		itemEjectHDD[1] = NULL;
+		itemLoadHDD[1] = NULL;
+		itemMenu[1] = NULL;
+		itemSeperator = NULL;
 		UnmountHD(0);
 		UnmountHD(1);
 		break;

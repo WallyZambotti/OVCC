@@ -133,15 +133,21 @@ void ADDCALL ModuleConfig(unsigned char func)
 		int drv;
 
 		AG_MenuDel(itemConfig);
+		itemConfig = NULL;
 
 		for (drv = 0 ; drv < MAX_DRIVES ; drv++)
 		{
 			AG_MenuDel(itemEjectFD[drv]);
 			AG_MenuDel(itemLoadFD[drv]);
 			AG_MenuDel(itemMenu[drv]);
+			itemEjectFD[drv] = NULL;
+			itemLoadFD[drv] = NULL;
+			itemMenu[drv] = NULL;
 		}
 
 		AG_MenuDel(itemSeperator);
+		itemSeperator = NULL;
+
 	}
 	break;
 

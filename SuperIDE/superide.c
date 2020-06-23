@@ -161,10 +161,18 @@ void ADDCALL ModuleConfig(unsigned char func)
 	switch (func)
 	{
 	case 0: // Destroy Menus
+		AG_MenuDel(itemMasterEject);
+		itemMasterEject = NULL;
 		AG_MenuDel(itemMaster);
+		itemMaster = NULL;
+		AG_MenuDel(itemSlaveEject);
+		itemSlaveEject = NULL;
 		AG_MenuDel(itemSlave);
+		itemSlave = NULL;
 		AG_MenuDel(itemConfig);
+		itemConfig = NULL;
 		AG_MenuDel(itemSeperator);
+		itemSeperator = NULL;
 		break;
 
 	case 1: // Update ini file
