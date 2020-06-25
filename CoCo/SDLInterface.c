@@ -48,7 +48,7 @@ bool CreateSDLWindow(SystemState2 *CWState)
     }
 
     CWState->agwin = AG_WindowNew(AG_WINDOW_MAIN);
-    AG_WindowSetCaption(CWState->agwin, "OVCC 1.2.0");
+    AG_WindowSetCaption(CWState->agwin, "OVCC 1.2.1");
     AG_WindowSetGeometryAligned(CWState->agwin, AG_WINDOW_ALIGNMENT_NONE, 644, 536);
     AG_WindowSetCloseAction(CWState->agwin, AG_WINDOW_DETACH);
 
@@ -81,6 +81,7 @@ void CheckSurfacesSDL()
 void DisplayFlipSDL(SystemState2 *DFState)	// Double buffering flip
 {
     //fprintf(stderr, "3(%2.3f)", timems());
+	//if (DFState->EmulationRunning == 0) return;
 	AG_Redraw(DFState->fx);
 }
 
@@ -106,12 +107,11 @@ unsigned char LockScreenSDL(SystemState2 *LSState)
 {
 	char message[256]="";
 
-	if (LSState->EmulationRunning == 0) return 0;
+	//if (LSState->EmulationRunning == 0) return 0;
 	//fprintf(stderr, "0.");
     //Texture is already locked
     if(LSState->Pixels != NULL)
     {
-		//fprintf(stderr, "!");
         //SDL_LogDebug(SDL_LOG_CATEGORY_ERROR, "LockScreen : Texture is already locked!\n" );
         return 1;
     }
@@ -131,18 +131,18 @@ unsigned char LockScreenSDL(SystemState2 *LSState)
 	LSState->PTRsurface16=(unsigned short *)LSState->Pixels;
 	LSState->PTRsurface24=(RGB24bit *)LSState->Pixels;
 	LSState->PTRsurface32=(unsigned int *)LSState->Pixels;
-	LSState->EmulationRunning = 1;
+	//LSState->EmulationRunning = 1;
 
 	return 0;
 }
 
 void UnlockScreenSDL(SystemState2 *USState)
 {
-	if (USState->EmulationRunning == 0) 
-	{
-		//fprintf(stderr, "*");
-		return;
-	}
+	// if (USState->EmulationRunning == 0) 
+	// {
+	// 	//fprintf(stderr, "*");
+	// 	return;
+	// }
 	DisplayFlipSDL(USState);
 	return;
 }
@@ -164,8 +164,10 @@ void DoClsSDL(SystemState2 *CLStatus)
 {
 	unsigned short x=0,y=0;
 
-	if(LockScreenSDL(CLStatus))
-		return;
+	// if(LockScreenSDL(CLStatus))
+	// 	return;
+
+	LockScreenSDL(CLStatus);
 
 	for (y=0;y<480;y++)
 	{

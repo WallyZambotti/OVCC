@@ -122,6 +122,7 @@ void Run(AG_Event *event)
     state->EmulationRunning = TRUE;
 
     AG_TextMsg(AG_MSG_INFO, "Emulation State set to running!");
+    DoClsSDL(state);
 }
 
 void Halt(AG_Event *event)
@@ -869,7 +870,7 @@ void SetStatusBarText(const char *text, SystemState2 *STState)
 {
     if (sdl == NULL || sdl->r == NULL) return;
     
-    if (STState->EmulationRunning) AG_LabelText(status, "%s", text);
+    /* if (STState->EmulationRunning) */ AG_LabelText(status, "%s", text);
 }
 
 void PopulateAudioDevices(AG_Tlist *list)
@@ -1597,7 +1598,7 @@ void About(AG_Event *ev)
     AG_WindowSetCloseAction(AboutWin, AG_WINDOW_DETACH);
 
 	AG_Label *lbl = AG_LabelNewPolled(AboutWin, AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
-        "OVCC 1.2.0\n"
+        "OVCC 1.2.1\n"
         "SDL2 / AGAR 1.5.0 modifications by:"
         "Walter Zambotti\n"
         "Forked from VCC 2.01B (1.43)\n"
