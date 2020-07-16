@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "mpu.h"
 #include "gpuprimitives.h"
 #include "gputextures.h"

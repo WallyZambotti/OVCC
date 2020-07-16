@@ -18,7 +18,6 @@ This file is part of VCC (Virtual Color Computer).
 
 #include <agar/core.h>
 #include <agar/gui.h>
-#include <SDL2/SDL.h>
 #include <stdbool.h>
 #include "defines.h"
 #include "stdio.h"
@@ -34,22 +33,21 @@ static unsigned int Color=0;
 //Function Prototypes for this module
 void DisplayFlip2(SystemState2 *);
 
-bool CreateSDLWindow(SystemState2 *CWState)
+bool CreateAGARWindow(SystemState2 *CWState)
 {
 	char message[256]="";
-	SDL_Rect rStatBar;
 
 	// Initialize AGAR
 
-    if (AG_InitCore(NULL, 0) == -1 || AG_InitGraphics("sdl2") == -1)
+    if (AG_InitCore(NULL, 0) == -1 || AG_InitGraphics("glx") == -1)
     {
         fprintf(stderr, "Init failed: %s\n", AG_GetError());
         return FALSE;
     }
 
     CWState->agwin = AG_WindowNew(AG_WINDOW_MAIN);
-    AG_WindowSetCaption(CWState->agwin, "OVCC 1.2.1");
-    AG_WindowSetGeometryAligned(CWState->agwin, AG_WINDOW_ALIGNMENT_NONE, 644, 536);
+    AG_WindowSetCaption(CWState->agwin, "OVCC 1.3.0");
+    AG_WindowSetGeometryAligned(CWState->agwin, AG_WINDOW_ALIGNMENT_NONE, 644, 538);
     AG_WindowSetCloseAction(CWState->agwin, AG_WINDOW_DETACH);
 
 	return TRUE;
@@ -80,9 +78,11 @@ void CheckSurfacesSDL()
 
 void DisplayFlipSDL(SystemState2 *DFState)	// Double buffering flip
 {
+	extern char redrawfx; // This is used by AG_RedrawOnChange() setup in vccgui.c
     //fprintf(stderr, "3(%2.3f)", timems());
-	//if (DFState->EmulationRunning == 0) return;
-	AG_Redraw(DFState->fx);
+	AG_PixmapUpdateSurface(DFState->fx, 0);
+	AG_PixmapSetSurface(DFState->fx, 0);
+	redrawfx = !redrawfx; // just needs to be changed
 }
 
 /*
@@ -105,33 +105,9 @@ void DisplayFlipSDL(SystemState2 *DFState)	// Double buffering flip
 
 unsigned char LockScreenSDL(SystemState2 *LSState)
 {
-	char message[256]="";
-
-	//if (LSState->EmulationRunning == 0) return 0;
-	//fprintf(stderr, "0.");
-    //Texture is already locked
-    if(LSState->Pixels != NULL)
-    {
-        //SDL_LogDebug(SDL_LOG_CATEGORY_ERROR, "LockScreen : Texture is already locked!\n" );
-        return 1;
-    }
-
-	//fprintf(stderr, "1.");
-    //fprintf(stderr, "1(%2.3f)", timems());
-	AG_PostEvent(NULL, LSState->fx, "lock-texture", "%p", LSState);
-
-	if (LSState->Pixels == NULL)
-	{
-		//fprintf(stderr, "?");
-		//SDL_LogDebug(SDL_LOG_CATEGORY_ERROR, "LockScreen : Unable to lock texture!\n");
-		return 1;
-	}
-
-	LSState->PTRsurface8=(unsigned char *)LSState->Pixels;
-	LSState->PTRsurface16=(unsigned short *)LSState->Pixels;
-	LSState->PTRsurface24=(RGB24bit *)LSState->Pixels;
-	LSState->PTRsurface32=(unsigned int *)LSState->Pixels;
-	//LSState->EmulationRunning = 1;
+	// fprintf(stderr, "1.");
+    // fprintf(stderr, "1(%2.3f)", timems());
+	// AG_PostEvent(LSState->fx, "lock-texture", "%p", LSState);
 
 	return 0;
 }
@@ -147,12 +123,6 @@ void UnlockScreenSDL(SystemState2 *USState)
 	return;
 }
 
-void SetStatusBarTextSDL(char *TextBuffer,SystemState2 *STState)
-{
-	puts("SetStatusBarText2() - needs implementing!\n");
-	return;
-}
-
 void ClsSDL(unsigned int ClsColor, SystemState2 *CLState)
 {
 	CLState->ResetPending=3; //Tell Main loop to hold Emu
@@ -163,9 +133,6 @@ void ClsSDL(unsigned int ClsColor, SystemState2 *CLState)
 void DoClsSDL(SystemState2 *CLStatus)
 {
 	unsigned short x=0,y=0;
-
-	// if(LockScreenSDL(CLStatus))
-	// 	return;
 
 	LockScreenSDL(CLStatus);
 
@@ -217,14 +184,15 @@ float StaticSDL(SystemState2 *STState)
 
 	LockScreenSDL(STState);
 
-	if (STState->Renderer == NULL) return(0);
+	if (STState->Pixels == NULL) return(0);
 
 	for (y=0;y<480;y++)
 	{
 		for (x=0;x<640;x++)
 		{
+			if(STState->Pixels == NULL) return (0.0);
 			Temp=rand() & 255;
-			STState->PTRsurface32[x + (y*STState->SurfacePitch) ]=Temp | (Temp<<8) | (Temp <<16);
+			STState->PTRsurface32[x + (y*STState->SurfacePitch)] = Temp | (Temp<<8) | (Temp<<16) | (255<<24);
 		}
 	}
 

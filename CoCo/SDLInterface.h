@@ -20,8 +20,7 @@ This file is part of VCC (Virtual Color Computer).
 
 void UnlockScreenSDL(SystemState2 *);
 unsigned char LockScreenSDL(SystemState2 *);
-void SetStatusBarTextSDL( char *,SystemState2 *);
-bool CreateSDLWindow(SystemState2 *);
+bool CreateAGARWindow(SystemState2 *);
 void ClsSDL(unsigned int,SystemState2 *);
 void DoClsSDL(SystemState2 *);
 unsigned char SetInfoBandSDL( unsigned char);

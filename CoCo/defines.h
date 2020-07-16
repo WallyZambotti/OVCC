@@ -85,7 +85,7 @@ typedef struct _tagPOINT
 typedef struct 
 {
     AG_Window       *agwin;
-    AG_Fixed        *fx;
+    AG_Pixmap       *fx;
     SDL_Window		*Window;
     SDL_Renderer	*Renderer;
     AG_Window       *ConfigDialog;

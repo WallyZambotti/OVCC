@@ -810,7 +810,7 @@ void BrowseSlot(AG_Event *event)
 {
 	int slot = AG_INT(1);
 	
-    AG_Window *fdw = AG_WindowNew(AG_WINDOW_DIALOG);
+    AG_Window *fdw = AG_WindowNew(0);
     AG_WindowSetCaption(fdw, "Program Paks");
     AG_WindowSetGeometryAligned(fdw, AG_WINDOW_ALIGNMENT_NONE, 500, 500);
     AG_WindowSetCloseAction(fdw, AG_WINDOW_DETACH);

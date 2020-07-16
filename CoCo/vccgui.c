@@ -18,19 +18,19 @@ This file is part of VCC (Virtual Color Computer).
 
 #include <agar/core.h>
 #include <agar/gui.h>
-#include <SDL2/SDL.h>
-#include <agar/agar/core/types.h>
+#include <agar/core/types.h>
 #include "defines.h"
 #include "audio.h"
 #include "config.h"
 #include "keyboard.h"
 #include "joystickinputSDL.h"
-#include "sdl2driver.h"
 #include "throttle.h"
 
 #ifndef Ulong
 #define Ulong unsigned long
 #endif
+
+char redrawfx = 0;
 
 void SetStatusBarText(const char *, SystemState2 *);
 
@@ -58,7 +58,6 @@ static AG_Combo *comDev, *comQual;
 static AG_MenuItem *itemCartridge = NULL, *itemEjectCart = NULL;
 static AG_Label *status = NULL;
 static AG_Fixed *fx = NULL;
-static AG_DriverSDL2Ghost *sdl = NULL;
 
 static int soundDev = 0;
 static int soundQuality = 3;
@@ -149,7 +148,7 @@ void LoadConf(AG_Event *event)
 {
     SystemState2 *state = AG_PTR(1);
 
-    AG_Window *fdw = AG_WindowNew(AG_WINDOW_DIALOG);
+    AG_Window *fdw = AG_WindowNew(0);
     AG_WindowSetCaption(fdw, "Select Ini File");
     AG_WindowSetGeometryAligned(fdw, AG_WINDOW_ALIGNMENT_NONE, 500, 500);
     AG_WindowSetCloseAction(fdw, AG_WINDOW_DETACH);
@@ -178,7 +177,7 @@ void SaveConf(AG_Event *event)
 {
     SystemState2 *state = AG_PTR(1);
 
-    AG_Window *fdw = AG_WindowNew(AG_WINDOW_DIALOG);
+    AG_Window *fdw = AG_WindowNew(0);
     AG_WindowSetCaption(fdw, "Select Ini File");
     AG_WindowSetGeometryAligned(fdw, AG_WINDOW_ALIGNMENT_NONE, 500, 500);
     AG_WindowSetCloseAction(fdw, AG_WINDOW_DETACH);
@@ -757,7 +756,7 @@ int LoadCasette(AG_Event *event)
 
 void BrowseTape(AG_Event *event)
 {
-    AG_Window *fdw = AG_WindowNew(AG_WINDOW_DIALOG);
+    AG_Window *fdw = AG_WindowNew(0);
     AG_WindowSetCaption(fdw, "Select Tape");
     AG_WindowSetGeometryAligned(fdw, AG_WINDOW_ALIGNMENT_NONE, 500, 500);
     AG_WindowSetCloseAction(fdw, AG_WINDOW_DETACH);
@@ -800,7 +799,7 @@ int SelectBitBangerFile(AG_Event *event)
 
 void OpenBitBanger()
 {
-    AG_Window *fdw = AG_WindowNew(AG_WINDOW_DIALOG);
+    AG_Window *fdw = AG_WindowNew(0);
     AG_WindowSetCaption(fdw, "Select BitBanger");
     AG_WindowSetGeometryAligned(fdw, AG_WINDOW_ALIGNMENT_NONE, 500, 500);
     AG_WindowSetCloseAction(fdw, AG_WINDOW_DETACH);
@@ -868,9 +867,7 @@ void PrintMonitorChange(AG_Event *event)
 
 void SetStatusBarText(const char *text, SystemState2 *STState)
 {
-    if (sdl == NULL || sdl->r == NULL) return;
-    
-    /* if (STState->EmulationRunning) */ AG_LabelText(status, "%s", text);
+    AG_LabelText(status, "%s", text);
 }
 
 void PopulateAudioDevices(AG_Tlist *list)
@@ -1169,7 +1166,6 @@ void Configure(AG_Event *ev)
         hbox = AG_BoxNewHoriz(vbox, AG_HBOX_HFILL);
 
         vbox1 = AG_BoxNewVert(hbox, 0);
-        AG_VBoxSetPadding(vbox1, 10);
         vbox2 = AG_BoxNewVert(hbox, AG_VBOX_HFILL);
 
         // Left Joystick device Radio
@@ -1299,7 +1295,6 @@ void Configure(AG_Event *ev)
         hbox = AG_BoxNewHoriz(vbox, AG_HBOX_HFILL);
 
         vbox1 = AG_BoxNewVert(hbox, 0);
-        AG_VBoxSetPadding(vbox1, 10);
         vbox2 = AG_BoxNewVert(hbox, AG_VBOX_HFILL);
 
         // Right Joystick device Radio
@@ -1547,7 +1542,7 @@ static void LoadCart(AG_Event *event)
 
     if (inLoadCart) return;
     
-    AG_Window *fdw = AG_WindowNew(AG_WINDOW_DIALOG);
+    AG_Window *fdw = AG_WindowNew(0);
     AG_WindowSetCaption(fdw, "Load Pak/Cartridge");
     AG_WindowSetGeometryAligned(fdw, AG_WINDOW_ALIGNMENT_NONE, 500, 500);
     AG_WindowSetCloseAction(fdw, AG_WINDOW_DETACH);
@@ -1592,24 +1587,23 @@ void About(AG_Event *ev)
         return;
     }
 
-    AboutWin = AG_WindowNew(AG_WINDOW_DIALOG);
+    AboutWin = AG_WindowNew(0);
     AG_WindowSetCaption(AboutWin, "OVCC About");
     AG_WindowSetGeometryAligned(AboutWin, AG_WINDOW_ALIGNMENT_NONE, 500, 250);
     AG_WindowSetCloseAction(AboutWin, AG_WINDOW_DETACH);
 
 	AG_Label *lbl = AG_LabelNewPolled(AboutWin, AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
-        "OVCC 1.2.1\n"
-        "SDL2 / AGAR 1.5.0 modifications by:"
+        "OVCC 1.3.0\n"
         "Walter Zambotti\n"
         "Forked from VCC 2.01B (1.43)\n"
         "Copy Righted Joseph Forgione (GNU General Public License)\n"
         "\n"
         "Keyboard Shortcuts\n"
-        "F3 - Inc CPU Frequency    F4 - Dec CPU Frequency\n"
+        "F3 - Inc CPU Frequency   F4 - Dec CPU Frequency\n"
         "F7 - Exit OVCC                  F12 - About\n"
-        "F5 - Soft Reset                 F9 - Hard Reset\n"
-        "F6 - Monitor Type              F10 - Fullscreen Status\n"
-        "F8 - Throttle                     F11 - Fullscreen\n"
+        "F5 - Soft Reset                  F9 - Hard Reset\n"
+        "F6 - Monitor Type             F10 - Fullscreen Status\n"
+        "F8 - Throttle                      F11 - Fullscreen\n"
     );
 
     AG_ActionFn(AboutWin, "F12", About, NULL);
@@ -1697,20 +1691,13 @@ void ButtonDownUp(AG_Event *event)
     Nor would we call the SDL_RenderCopy because that would be superfluous.)
 */
 
-void FXdrawn(AG_Event *event)
-{
-    SystemState2 *SState = AG_PTR(1);
+// void FXdrawn(AG_Event *event)
+// {
+//     SystemState2 *SState = AG_PTR(1);
 
-    //fprintf(stderr, "4(%2.3f)", timems());
-    if (SState->Pixels != NULL)
-    {
-        SDL_UnlockTexture(SState->Texture);
-        SState->Pixels = NULL;
-    }
-
-    SDL_RenderCopy(SState->Renderer, SState->Texture, NULL, (SDL_Rect*)&SState->fx->wid.x);
-    //fprintf(stderr, "5(%2.3f)-", timems());
-}
+//     //fprintf(stderr, "4(%2.3f)", timems());
+//     //fprintf(stderr, "5(%2.3f)-", timems());
+// }
 
 /*
     LockTexture is Step 2 in the drawing process which is triggered after
@@ -1727,13 +1714,8 @@ void FXdrawn(AG_Event *event)
 void LockTexture(AG_Event *event)
 {
     SystemState2 *SState = AG_PTR(1);
-    int pitch;
-
-    if (SState->Pixels == NULL) 
-    {
-        //fprintf(stderr, "2(%2.3f)", timems());
-        SDL_LockTexture(SState->Texture, NULL, &SState->Pixels, &pitch);
-    }
+    write(0, ".", 1);
+//     fprintf(stderr, "2(%2.3f)", timems());
 }
 
 void WindowDetached(AG_Event *event)
@@ -1745,7 +1727,6 @@ void WindowDetached(AG_Event *event)
     AG_ThreadCancel(SState->emuThread);
 
 	SState->Pixels = NULL;
-    SState->Renderer = NULL;
     SState->EmulationRunning = 0;
     
 	WriteIniFile(); //Save Any changes to ini File
@@ -1758,7 +1739,6 @@ void WindowDetached(AG_Event *event)
 void DecorateWindow(SystemState2 *EmuState2)
 {
     AG_Window *win = EmuState2->agwin;
-    sdl = (AG_DriverSDL2Ghost *)((AG_Widget *)win)->drv;
 
 	// Menus
 
@@ -1797,10 +1777,19 @@ void DecorateWindow(SystemState2 *EmuState2)
         AG_MenuAction(itemHelp, "About OVCC", NULL, About, NULL);
     }
 
-    // The primary CoCo drawing surface is loosely associated to a rescalable Fixed widget.
+    // The primary CoCo drawing surface are two surfaces of a rescalable Pixmap widget.
 
-    AG_Fixed *fx = AG_FixedNew(win, AG_FIXED_EXPAND | AG_FIXED_NO_UPDATE);
+    AG_Surface *flip = AG_SurfaceRGB(640, 480, 32, AG_SURFACE_PACKED /*| AG_SURFACE_MAPPED */, 0xFF, 0xFF00, 0xFF0000);
+
+    AG_Pixmap *fx = AG_PixmapFromSurface(win, AG_PIXMAP_EXPAND | AG_PIXMAP_RESCALE, flip);
+    AG_PixmapSetSurface(fx, 0); // set surface to 1 but pixels to surface 0
+    //AG_RedrawOnTick(fx, 1000/60);             /* 60fps */    
+    AG_RedrawOnChange(fx, 1000/60, &redrawfx);
+
 	EmuState2->fx = fx;
+	EmuState2->Pixels = fx->wid.surfaces[0]->pixels;
+	EmuState2->PTRsurface32=(unsigned int *)EmuState2->Pixels;
+    EmuState2->SurfacePitch = 640;
 
     // The Status Bar
 
@@ -1822,15 +1811,12 @@ void PrepareEventCallBacks(SystemState2 *EmuState2)
         AG_WIDGET_UNFOCUSED_KEYDOWN |
         AG_WIDGET_UNFOCUSED_KEYUP |
         AG_WIDGET_UNFOCUSED_BUTTONDOWN |
-        AG_WIDGET_UNFOCUSED_BUTTONUP |
-        AG_WIDGET_USE_DRAWN;
-
+        AG_WIDGET_UNFOCUSED_BUTTONUP ;
     AG_SetEvent(EmuState2->fx, "mouse-motion", MouseMotion, NULL);
 	AG_SetEvent(EmuState2->fx, "key-down", KeyDownUp, "%i", AG_KEY_PRESSED);
 	AG_SetEvent(EmuState2->fx, "key-up", KeyDownUp, "%i", AG_KEY_RELEASED);
 	AG_SetEvent(EmuState2->fx, "mouse-button-down", ButtonDownUp, "%i", AG_BUTTON_PRESSED);
 	AG_SetEvent(EmuState2->fx, "mouse-button-up", ButtonDownUp, "%i", AG_BUTTON_RELEASED);
-    AG_SetEvent(EmuState2->fx, "widget-drawn", FXdrawn, "%p", EmuState2);
     AG_SetEvent(EmuState2->fx, "lock-texture", LockTexture, "%p", EmuState2);
     AG_SetEvent(EmuState2->agwin, "window-detached", WindowDetached, "%p", EmuState2);
 

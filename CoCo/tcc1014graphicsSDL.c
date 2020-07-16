@@ -26,6 +26,8 @@ This file is part of VCC (Virtual Color Computer).
 #include "math.h"
 #include <stdio.h>
 
+#define ALPHA1 (0xFF<<24)
+
 void SetupDisplay(void); //This routine gets called every time a software video register get updated.
 void MakeRGBPalette (void);
 void MakeCMPpalette(void);
@@ -99,7 +101,9 @@ void UpdateScreenSDL (SystemState2 *USState32)
 	long Xpitch=USState32->SurfacePitch;
 	Carry1=1;
 	Pcolor=0;
-	
+
+	if (USState32->Pixels == NULL) return;
+
 	if ( (HorzCenter!=0) & (BoarderChange>0) )
 		for (unsigned short x=0;x<HorzCenter;x++)
 		{
@@ -3181,8 +3185,8 @@ void UpdateScreenSDL (SystemState2 *USState32)
 
 void DrawTopBoarderSDL(SystemState2 *DTState)
 {
-
 	unsigned short x;
+
 	if (BoarderChange==0)
 		return;
 
@@ -3517,7 +3521,7 @@ void MakeRGBPaletteSDL(void)
 		r= ColorTable32Bit [(Index & 32) >> 4 | (Index & 4) >> 2];	
 		g= ColorTable32Bit [(Index & 16) >> 3 | (Index & 2) >> 1];	
 		b= ColorTable32Bit [(Index & 8 ) >> 2 | (Index & 1) ];		
-		PalleteLookup32[1][Index]= (r* 65536) + (g* 256) + b;
+		PalleteLookup32[1][Index]= (b * 65536) + (g * 256) + r + ALPHA1;
 		
 		
 		
@@ -3586,7 +3590,7 @@ void MakeCMPpaletteSDL(void)	//Stolen from M.E.S.S.
 		rr= (unsigned char)r;
 		gg= (unsigned char)g;
 		bb= (unsigned char)b;
-		PalleteLookup32[0][Index]= (rr<<16) | (gg<<8) | bb;
+		PalleteLookup32[0][Index]= (bb<<16) | (gg<<8) | rr | ALPHA1 ;
 		rr=rr>>3;
 		gg=gg>>3;
 		bb=bb>>3;

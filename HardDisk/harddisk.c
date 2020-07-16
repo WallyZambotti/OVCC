@@ -21,9 +21,9 @@ typedef int BOOL;
 
 #include <agar/core.h>
 #include <agar/gui.h>
+#include <stdio.h>
 #include "harddisk.h"
 #include <sys/types.h>
-#include <stdio.h>
 #include <unistd.h>
 #include "cc3vhd.h"
 #include "defines.h"
@@ -247,7 +247,7 @@ static void LoadHardDisk(AG_Event *event)
 {
 	int disk = AG_INT(1);
 
-	AG_Window *fdw = AG_WindowNew(AG_WINDOW_DIALOG);
+	AG_Window *fdw = AG_WindowNew(0);
 	AG_WindowSetCaption(fdw, "Select HDD file");
 	AG_WindowSetGeometryAligned(fdw, AG_WINDOW_ALIGNMENT_NONE, 500, 500);
 	AG_WindowSetCloseAction(fdw, AG_WINDOW_DETACH);

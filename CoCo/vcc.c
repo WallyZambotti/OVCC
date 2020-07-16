@@ -40,7 +40,6 @@ This file is part of VCC (Virtual Color Computer).
 #include "quickload.h"
 #include "throttle.h"
 #include "logger.h"
-#include "sdl2driver.h"
 #include "SDLInterface.h"
 
 SystemState2 EmuState2;
@@ -96,8 +95,6 @@ static char g_szAppName[MAX_LOADSTRING] = "";
 bool BinaryRunning;
 static unsigned char FlagEmuStop=TH_RUNNING;
 
-static AG_DriverSDL2Ghost *sdl;
-
 void DecorateWindow(SystemState2 *);
 void PrepareEventCallBacks(SystemState2 *);
 
@@ -150,7 +147,7 @@ int main(int argc, char **argv)
 	EmuState2.WindowSize.x=640;
 	EmuState2.WindowSize.y=480;
 	
-	if (!CreateSDLWindow(&EmuState2))
+	if (!CreateAGARWindow(&EmuState2))
 	{
 		fprintf(stderr,"Can't create SDL Window\n");
 	}
@@ -158,23 +155,7 @@ int main(int argc, char **argv)
 	DecorateWindow(&EmuState2);
 	AG_WindowShow(EmuState2.agwin);
 
-    sdl = (AG_DriverSDL2Ghost *)((AG_Widget *)EmuState2.agwin)->drv;
-    EmuState2.Window = sdl->w;
-	// AGAR create an SDL Window with PRESENTVSYNC
-	// There is no way to pass custom flags when that occurs.
-	// So the renderer associated with the window must be destroyed 
-	// and and a new unsync'd renderer substituted in it's place
-	SDL_DestroyRenderer(sdl->r);
-	sdl->r = SDL_CreateRenderer(sdl->w, -1, SDL_RENDERER_ACCELERATED);
-    EmuState2.Renderer = sdl->r;
-	EmuState2.Texture = SDL_CreateTexture(sdl->r, sdl->f, SDL_TEXTUREACCESS_STREAMING, 640, 480);
     EmuState2.SurfacePitch = 640;
-
-	if (EmuState2.Texture == NULL)
-	{
-		fprintf(stderr, "Cannot create SDL Texture! : %s\n", SDL_GetError());
-		return (0);
-	}
 
 	PrepareEventCallBacks(&EmuState2);
 
@@ -202,9 +183,8 @@ int main(int argc, char **argv)
 	
     AG_EventLoop();
 	
-	//EmuState2.Pixels = NULL;
-	//EmuState2.Renderer = NULL;
-	//EmuState2.EmulationRunning = 0;
+	EmuState2.Pixels = NULL;
+	EmuState2.EmulationRunning = 0;
 
 	//AG_ThreadCancel(threadID);
 
