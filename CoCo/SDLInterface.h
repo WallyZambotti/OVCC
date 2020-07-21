@@ -18,8 +18,7 @@ This file is part of VCC (Virtual Color Computer).
     along with VCC (Virtual Color Computer).  If not, see <http://www.gnu.org/licenses/>.
 */
 
-void UnlockScreenSDL(SystemState2 *);
-unsigned char LockScreenSDL(SystemState2 *);
+void UpdateAGAR(SystemState2 *);
 bool CreateAGARWindow(SystemState2 *);
 void ClsSDL(unsigned int,SystemState2 *);
 void DoClsSDL(SystemState2 *);

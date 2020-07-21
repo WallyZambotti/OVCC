@@ -30,7 +30,7 @@ This file is part of VCC (Virtual Color Computer).
 #define Ulong unsigned long
 #endif
 
-char redrawfx = 0;
+int redrawfx = 0;
 
 void SetStatusBarText(const char *, SystemState2 *);
 
@@ -1777,14 +1777,14 @@ void DecorateWindow(SystemState2 *EmuState2)
         AG_MenuAction(itemHelp, "About OVCC", NULL, About, NULL);
     }
 
-    // The primary CoCo drawing surface are two surfaces of a rescalable Pixmap widget.
+    // The primary CoCo drawing surface is the surface of a rescalable Pixmap widget.
 
     AG_Surface *flip = AG_SurfaceRGB(640, 480, 32, AG_SURFACE_PACKED /*| AG_SURFACE_MAPPED */, 0xFF, 0xFF00, 0xFF0000);
 
     AG_Pixmap *fx = AG_PixmapFromSurface(win, AG_PIXMAP_EXPAND | AG_PIXMAP_RESCALE, flip);
     AG_PixmapSetSurface(fx, 0); // set surface to 1 but pixels to surface 0
-    //AG_RedrawOnTick(fx, 1000/60);             /* 60fps */    
-    AG_RedrawOnChange(fx, 1000/60, &redrawfx);
+    AG_BindInt(fx, "redrawfx", &redrawfx);
+    AG_RedrawOnChange(fx, 1000/60, "redrawfx");
 
 	EmuState2->fx = fx;
 	EmuState2->Pixels = fx->wid.surfaces[0]->pixels;

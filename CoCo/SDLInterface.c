@@ -39,7 +39,7 @@ bool CreateAGARWindow(SystemState2 *CWState)
 
 	// Initialize AGAR
 
-    if (AG_InitCore(NULL, 0) == -1 || AG_InitGraphics("glx") == -1)
+    if (AG_InitCore(NULL, 0) == -1 || AG_InitGraphics("sdl2") == -1)
     {
         fprintf(stderr, "Init failed: %s\n", AG_GetError());
         return FALSE;
@@ -53,56 +53,6 @@ bool CreateAGARWindow(SystemState2 *CWState)
 	return TRUE;
 }
 
-/*--------------------------------------------------------------------------*/
-// Checks if the memory associated with surfaces is lost and restores if necessary.
-void CheckSurfacesSDL()
-{
-	// Not sure if this is relevant in SDL
-}
-/*--------------------------------------------------------------------------*/
-
-/*
-	DisplayFlipSDL is step 3 in the drawing process
-	and is called after the texture pixels have been updated
-	and are ready to bo rendered to screen.
-
-	All it does is request AGAR redraw the fx widget.
-
-	Because the fx widget has the widget-drawn event registered
-	against it, this will cause step 4 the FXdrawn (vccgui.c) to be evoked.
-
-	Because FXdrawn will be evoked by the AGAR
-	event manager it will occur in the primary AGAR
-	thread avoiding any multi thread complications.
-*/
-
-void DisplayFlipSDL(SystemState2 *DFState)	// Double buffering flip
-{
-	extern char redrawfx; // This is used by AG_RedrawOnChange() setup in vccgui.c
-    //fprintf(stderr, "3(%2.3f)", timems());
-	AG_PixmapUpdateSurface(DFState->fx, 0);
-	AG_PixmapSetSurface(DFState->fx, 0);
-	redrawfx = !redrawfx; // just needs to be changed
-}
-
-/*
-	LockScreenSDL is step 1 in the drawing process
-	and is called to lock the drawing texture prior
-	to attempting to manipulate (draw) the texture
-	pixels.
-
-	It Posts a "lock-texture" event that will be processed
-	by the AGAR event manager which will cause any function
-	(step 2) registered to the event to be evoked.
-
-	Currently step 2 the LockTexture function in vccgui.c is
-	registered against this event.
-
-	Because LockTexture will be evoked by the AGAR
-	event manager it will occur in the primary AGAR
-	thread avoiding any multi thread complications.
-*/
-
 unsigned char LockScreenSDL(SystemState2 *LSState)
 {
 	// fprintf(stderr, "1.");
@@ -112,14 +62,13 @@ unsigned char LockScreenSDL(SystemState2 *LSState)
 	return 0;
 }
 
-void UnlockScreenSDL(SystemState2 *USState)
+void UpdateAGAR(SystemState2 *USState)
 {
-	// if (USState->EmulationRunning == 0) 
-	// {
-	// 	//fprintf(stderr, "*");
-	// 	return;
-	// }
-	DisplayFlipSDL(USState);
+	extern char redrawfx; // This is used by AG_RedrawOnChange() setup in vccgui.c
+    //fprintf(stderr, "3(%2.3f)", timems());
+	AG_PixmapUpdateSurface(USState->fx, 0);
+	AG_PixmapSetSurface(USState->fx, 0);
+	redrawfx = !redrawfx; // just needs to be changed
 	return;
 }
 
@@ -134,8 +83,6 @@ void DoClsSDL(SystemState2 *CLStatus)
 {
 	unsigned short x=0,y=0;
 
-	LockScreenSDL(CLStatus);
-
 	for (y=0;y<480;y++)
 	{
 		for (x=0;x<640;x++)
@@ -144,7 +91,7 @@ void DoClsSDL(SystemState2 *CLStatus)
 		}
 	}
 
-	UnlockScreenSDL(CLStatus);
+	UpdateAGAR(CLStatus);
 	return;
 }
 
@@ -182,8 +129,6 @@ float StaticSDL(SystemState2 *STState)
 	static char Message[]=" Signal Missing! Press F9";
 	static unsigned char GreyScales[4]={128,135,184,191};
 
-	LockScreenSDL(STState);
-
 	if (STState->Pixels == NULL) return(0);
 
 	for (y=0;y<480;y++)
@@ -210,6 +155,6 @@ float StaticSDL(SystemState2 *STState)
 		TextY=rand()%470;
 	}
 
-	UnlockScreenSDL(STState);
+	UpdateAGAR(STState);
 	return(CalculateFPS());
 }

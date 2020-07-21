@@ -84,7 +84,7 @@ unsigned char Lpf[4]={192,199,225,225}; // 2 is really undefined but I gotta put
 unsigned char VcenterTable[4]={29,23,12,12};
 
 // BEGIN of 32 Bit render loop *****************************************************************************************
-void UpdateScreenSDL (SystemState2 *USState32)
+void UpdateScreen (SystemState2 *USState32)
 {
 	register unsigned int YStride=0;
 	unsigned char Pixel=0;

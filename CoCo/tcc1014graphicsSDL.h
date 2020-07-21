@@ -19,7 +19,7 @@ This file is part of VCC (Virtual Color Computer).
 */
 
 
-void UpdateScreenSDL(SystemState2 *);
+void UpdateScreen(SystemState2 *);
 
 void DrawBottomBoarderSDL(SystemState2 *);
 

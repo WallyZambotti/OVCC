@@ -93,11 +93,6 @@ float RenderFrame (SystemState2 *RFState2, unsigned long DCnt)
 	for (RFState2->LineCounter=0;RFState2->LineCounter<4;RFState2->LineCounter++)		//4 non-Rendered top Boarder lines
 		CPUCycle();
 
-	if (!(FrameCounter % RFState2->FrameSkip))
-	{	
-		if (LockScreenSDL(RFState2))
-			return(0);
-	}
 	for (RFState2->LineCounter=0;RFState2->LineCounter<(TopBoarder-4);RFState2->LineCounter++) 		
 	{
 		if (!(FrameCounter % RFState2->FrameSkip)) 
@@ -112,7 +107,7 @@ float RenderFrame (SystemState2 *RFState2, unsigned long DCnt)
 		CPUCycle();
 		if (!(FrameCounter % RFState2->FrameSkip))
 		{
-			UpdateScreenSDL(RFState2);
+			UpdateScreen(RFState2);
 		}
 	} 
 	irq_fs(1);  //End of active display FS goes High to Low
@@ -129,7 +124,7 @@ float RenderFrame (SystemState2 *RFState2, unsigned long DCnt)
 
 	if (!(FrameCounter % RFState2->FrameSkip))
 	{
-		UnlockScreenSDL(RFState2);
+		UpdateAGAR(RFState2);
 		SetBoarderChangeSDL(0);
 	}
 
