@@ -272,6 +272,8 @@ unsigned char ReadNamedIniFile(char *iniFilePath)
 		CurrentConfig.KeyMap = 0;	//Default to DECB Mapping
 	vccKeyboardBuildRuntimeTableSDL((keyboardlayout_e)CurrentConfig.KeyMap);
 
+	CurrentConfig.dummyMenuPadMax = GetPrivateProfileInt("Misc","MenuPadMax",24,iniFilePath);
+
 	CheckPath(CurrentConfig.ModulePath);
 	CheckPath(CurrentConfig.ExternalBasicImage);
 

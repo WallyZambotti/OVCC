@@ -57,6 +57,7 @@ typedef struct  {
 	char			ExternalBasicImage[MAX_PATH];
 	char			ModulePath[MAX_PATH];
 	char			PathtoExe[MAX_PATH];
+	unsigned short	dummyMenuPadMax;
 } STRConfig;
 	
 #endif

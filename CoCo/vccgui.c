@@ -1803,9 +1803,12 @@ void DecorateWindow(SystemState2 *EmuState2)
 void PadDummyCartMenus(void)
 {
     int dummyTot = 0;
-    AG_MenuItem *DummyItems[MAX_CART_MENU];
 
-    for (int dummycnt = itemCartridge->nSubItems ; dummycnt < MAX_CART_MENU ; dummycnt++)
+    if ((CurrentConfig.dummyMenuPadMax - itemCartridge->nSubItems) < 1) return;
+
+    AG_MenuItem **DummyItems = malloc(sizeof(void*)*CurrentConfig.dummyMenuPadMax);
+
+    for (int dummycnt = itemCartridge->nSubItems ; dummycnt < CurrentConfig.dummyMenuPadMax ; dummycnt++)
     {
         DummyItems[dummyTot] = AG_MenuNode(itemCartridge, "", NULL);
         dummyTot++;
