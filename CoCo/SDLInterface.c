@@ -39,7 +39,7 @@ bool CreateAGARWindow(SystemState2 *CWState)
 
 	// Initialize AGAR
 
-    if (AG_InitCore(NULL, 0) == -1 || AG_InitGraphics("sdl2") == -1)
+    if (AG_InitCore(NULL, 0) == -1 || AG_InitGraphics(NULL) == -1)
     {
         fprintf(stderr, "Init failed: %s\n", AG_GetError());
         return FALSE;

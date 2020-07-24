@@ -55,6 +55,7 @@ static AG_Combo *comLeftKeyLeft, *comLeftKeyRight, *comLeftKeyUp, *comLeftKeyDow
 static AG_Combo *comRightKeyLeft, *comRightKeyRight, *comRightKeyUp, *comRightKeyDown, *comRightKeyFire1, *comRightKeyFire2;
 static AG_Combo *comDev, *comQual;
 
+static AG_Menu *menu;
 static AG_MenuItem *itemCartridge = NULL, *itemEjectCart = NULL;
 static AG_Label *status = NULL;
 static AG_Fixed *fx = NULL;
@@ -1742,7 +1743,7 @@ void DecorateWindow(SystemState2 *EmuState2)
 
 	// Menus
 
-    AG_Menu *menu = AG_MenuNew(win, AG_MENU_HFILL);
+    menu = AG_MenuNew(win, AG_MENU_HFILL);
     AG_MenuItem *itemFile = AG_MenuNode(menu->root, "File", NULL);
     {
         AG_MenuAction(itemFile, "Run", NULL, Run, "%p", EmuState2);
@@ -1795,6 +1796,28 @@ void DecorateWindow(SystemState2 *EmuState2)
 
     AG_Statusbar *statusBar = AG_StatusbarNew(win, AG_BOX_FRAME | AG_STATUSBAR_HFILL);
     status = AG_StatusbarAddLabel(statusBar, "Ready");
+}
+
+#define MAX_CART_MENU 24
+
+void PadDummyCartMenus(void)
+{
+    int dummyTot = 0;
+    AG_MenuItem *DummyItems[MAX_CART_MENU];
+
+    for (int dummycnt = itemCartridge->nSubItems ; dummycnt < MAX_CART_MENU ; dummycnt++)
+    {
+        DummyItems[dummyTot] = AG_MenuNode(itemCartridge, "", NULL);
+        dummyTot++;
+    }
+
+    AG_MenuExpand(menu, itemCartridge, 0, 0);
+    AG_MenuCollapse(itemCartridge);
+
+    for (int dummycnt = 0 ; dummycnt < dummyTot ; dummycnt++)
+    {
+        AG_MenuDel(DummyItems[dummycnt]);
+    }
 }
 
 void PrepareEventCallBacks(SystemState2 *EmuState2)

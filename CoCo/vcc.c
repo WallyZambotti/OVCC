@@ -96,6 +96,8 @@ bool BinaryRunning;
 static unsigned char FlagEmuStop=TH_RUNNING;
 
 void DecorateWindow(SystemState2 *);
+void AddDummyCartMenus(void);
+void RemoveDummyCartMenus(void);
 void PrepareEventCallBacks(SystemState2 *);
 
 /*--------------------------------------------------------------------------*/
@@ -153,6 +155,7 @@ int main(int argc, char **argv)
 	}
 	
 	DecorateWindow(&EmuState2);
+
 	AG_WindowShow(EmuState2.agwin);
 
     EmuState2.SurfacePitch = 640;
@@ -162,6 +165,7 @@ int main(int argc, char **argv)
 	ClsSDL(0, &EmuState2);
 
 	LoadConfig(&EmuState2);			//Loads the default config file Vcc.ini from the exec directory
+	PadDummyCartMenus();
 	EmuState2.ResetPending=2;
 	SetClockSpeed(1);	//Default clock speed .89 MHZ	
 	BinaryRunning = true;
