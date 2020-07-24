@@ -1806,7 +1806,7 @@ void PadDummyCartMenus(void)
 
     if ((CurrentConfig.dummyMenuPadMax - itemCartridge->nSubItems) < 1) return;
 
-    AG_MenuItem **DummyItems = malloc(sizeof(void*)*CurrentConfig.dummyMenuPadMax);
+    AG_MenuItem **DummyItems = malloc(sizeof(void*)*(CurrentConfig.dummyMenuPadMax - itemCartridge->nSubItems));
 
     for (int dummycnt = itemCartridge->nSubItems ; dummycnt < CurrentConfig.dummyMenuPadMax ; dummycnt++)
     {
@@ -1821,6 +1821,8 @@ void PadDummyCartMenus(void)
     {
         AG_MenuDel(DummyItems[dummycnt]);
     }
+
+    free(DummyItems);
 }
 
 void PrepareEventCallBacks(SystemState2 *EmuState2)
