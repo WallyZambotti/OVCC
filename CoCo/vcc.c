@@ -587,12 +587,10 @@ void FullScreenToggleAGAR(void)
 	{	
 		AG_WindowMaximize(EmuState2.agwin);
 		AG_WindowUnmaximize(EmuState2.agwin);
-		write(0, "^", 1);
 	}
 	else{
 		AG_WindowMinimize(EmuState2.agwin);
 		AG_WindowUnminimize(EmuState2.agwin);
-		write(0, "v", 1);
 	}
 
 	EmuState2.Resizing = 0;
