@@ -1,36 +1,47 @@
 # OVCC
 
+(This is the previous guide for OVCC upto 1.2.1 that was dependent on a custom version of AGAR 1.5.0 that included SDL2 driver support)
+
 The portable and open Virtual Colo(u)r Computer. GNU General Public License.
 
 Developed from VCC 1.43 (2.01) by Joseph Forgione. GNU General Public License.
 
+
+Compiling guide.
+
+
 OVCC Dependancies:
 
-AGAR (libraries)
-
-The binary library for Windows are available frmo the AGAR download site. https://libagar.org/download.html
-
-The binary libraries for Ubuntu 18.04 & 20.04 are available from:
-
-https://drive.google.com/drive/folders/1V2a27j_n9BoMDaHfvzDtAXcfv_IL_TBV?usp=sharing
-
-SDL2 (libraries)
-
-Install SDL2 as per your distribution guidelines.
-
-Compiling AGAR.
-
-If compiling the original AGAR 1.6.0 source is available from https://libagar.org/download.html
+the original AGAR 1.5.0 source is available from https://libagar.org/download.html
 
 AGAR also has its dependancies so read the compilation documentation for the relevant platforms here https://libagar.org/docs/
 
+OVCC requires additional AGAR SDL2 drivers and feature patches in order to compile.
+
+The source for those additional patches and drivers are located here:
+
+https://drive.google.com/drive/folders/1AwqpwM3JeLzOXsBsxrChQUqCO-TRxheG?usp=sharing
+
+Alternatively you can download a copy of the source (for Linux/OSX) with the patches already installed from: 
+
+https://github.com/WallyZambotti/AGAR-SDL2  (does not contain the Docs directory)
+
+Look in the Docs directory for instructions on including the patches for your platform. (Mingw or Linux/OSX)  The github version does not contain the Docs directory but there is an included readme that the github repo brings to your attention.
+
 Build AGAR as per AGAR documentation with the exception/addition of the configuration options mentioned in the forementioned Docs.
 
-Compiling OVCC
+./configure --with-sdl2 --without-sdl  # if you don't intend to debug AGAR
 
-Once AGAR 1.6.0 and SDL2 are installed clone this OVCC repository change into the top directory and locate the makefile.
+./configure --enable-debug --with-sdl2 --without-sdl # if you intend to DEBUG AGAR
+
+./configure --with-sdl2 --without-sdl --with-libtool=/usr/bin/libtool # if the configuration can't locate the libtool
+
+( sdl2 driver cannot coexist with the sdl driver -
+  you may need to explicitly define the "libtool" for the configuration to use if the 'make depends all' fails with libtool errors)
   
-Edit the two first lines of the makefile to reflect you environment:
+  Once AGAR is built and installed clone this OVCC repository change into the top directory and locate the makefile.
+  
+  Edit the two first lines of the makefile to reflect you environment:
   
 export TARGETOS = Linux  # options are Linux or Mingw
 
