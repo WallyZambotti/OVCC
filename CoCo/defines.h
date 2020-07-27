@@ -86,11 +86,7 @@ typedef struct
 {
     AG_Window       *agwin;
     AG_Pixmap       *fx;
-    SDL_Window		*Window;
-    SDL_Renderer	*Renderer;
-    AG_Window       *ConfigDialog;
     AG_Thread       emuThread;
-    SDL_Texture		*Texture;
     Uint16          Rendering;
     Uint16          Resizing;
     void            *Pixels;

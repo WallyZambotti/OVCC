@@ -122,7 +122,7 @@ void Run(AG_Event *event)
     state->EmulationRunning = TRUE;
 
     AG_TextMsg(AG_MSG_INFO, "Emulation State set to running!");
-    DoClsSDL(state);
+    DoClsAGAR(state);
 }
 
 void Halt(AG_Event *event)
@@ -292,7 +292,6 @@ void Apply(AG_Event *event)
 
     if (OpenClose == DO_CLOSE)
     {
-        //AG_CloseFocusedWindow();
         AG_WindowHide(win);
     }
 }
@@ -954,7 +953,7 @@ void Configure(AG_Event *ev)
 
     AG_WindowSetGeometryAligned(win, AG_WINDOW_ALIGNMENT_NONE, 640, 316);
     AG_WindowSetCaptionS(win, "OVCC Options");
-    AG_WindowSetCloseAction(win, AG_WINDOW_DETACH);
+    AG_WindowSetCloseAction(win, AG_WINDOW_HIDE);
 
     nb = AG_NotebookNew(win, AG_NOTEBOOK_EXPAND);
     tab = AG_NotebookAdd(nb, "Audio", AG_BOX_HORIZ);
@@ -1583,19 +1582,19 @@ void About(AG_Event *ev)
 
     if (AboutWin != NULL)
     {
-        AG_ObjectDetach(AboutWin);
-        AboutWin = NULL;
+        AG_WindowShow(AboutWin);
         return;
     }
 
     AboutWin = AG_WindowNew(0);
     AG_WindowSetCaption(AboutWin, "OVCC About");
     AG_WindowSetGeometryAligned(AboutWin, AG_WINDOW_ALIGNMENT_NONE, 500, 250);
-    AG_WindowSetCloseAction(AboutWin, AG_WINDOW_DETACH);
+    AG_WindowSetCloseAction(AboutWin, AG_WINDOW_HIDE);
 
 	AG_Label *lbl = AG_LabelNewPolled(AboutWin, AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
         "OVCC 1.3.0\n"
         "Walter Zambotti\n"
+        "using AGAR 1.6.0 GUI\n"
         "Forked from VCC 2.01B (1.43)\n"
         "Copy Righted Joseph Forgione (GNU General Public License)\n"
         "\n"
@@ -1665,52 +1664,6 @@ void ButtonDownUp(AG_Event *event)
 
 	//fprintf(stderr, "%s: Button %d, updown %i,\n", AGOBJECT(w)->name, b, state);
 }
-
-/*
-    FXdrawn is Step 4 (and last) in the drawing process which is triggered after
-    step 3 DisplayFlipSDL (SDLInterface.c) is evoked.
-
-    This is the call back function registered against the fx widget-drawn event.
-
-    It has only one purpose draw the texture over the coordinates of
-    the fx (fixed) widget.  As the fx widget has no content of its own
-    this is safe and perfect for what we need!
-
-    As this function is trigger indirectly via the AGAR event
-    manager it runs inside the primary AGAR thread avoiding multi
-    threading complications.
-
-    SDL_RenderPresent should be never be called here or anywhere else) and is 
-    not necessary because:
-    We have only entered this call back because AGAR is redrawing this Widget
-    as part of redrawing the whole screen.  Part of redrawing the whole screen
-    will include a SDL_RenderPresent being issued by AGAR!
-
-    (Outside of this call back if we want to force a redraw we would still not 
-    call SDL_RenderPresent but instead force AGAR to redraw the widget by calling
-    AG_Redraw(AG_Widget * widget) which would cause this callback to be envoked.
-    Nor would we call the SDL_RenderCopy because that would be superfluous.)
-*/
-
-// void FXdrawn(AG_Event *event)
-// {
-//     SystemState2 *SState = AG_PTR(1);
-
-//     //fprintf(stderr, "4(%2.3f)", timems());
-//     //fprintf(stderr, "5(%2.3f)-", timems());
-// }
-
-/*
-    LockTexture is Step 2 in the drawing process which is triggered after
-    step 1 LockScreenSDL (SDLInterface.c) is evoked.
-
-    It has only one purpose Lock the texture and update the
-    pixels pointer with address of the locked pixels.    
-
-    As this function is trigger indirectly via the AGAR event
-    manager it runs inside the primary AGAR thread avoiding multi
-    threading complications.
-*/
 
 void LockTexture(AG_Event *event)
 {

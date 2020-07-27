@@ -1,5 +1,5 @@
-#ifndef __SDLINTERFACE_H__
-#define __SDLINTERFACE_H__
+#ifndef __AGARINTERFACE_H__
+#define __AGARINTERFACE_H__
 /*
 Copyright 2015 by Joseph Forgione
 This file is part of VCC (Virtual Color Computer).
@@ -20,12 +20,12 @@ This file is part of VCC (Virtual Color Computer).
 
 void UpdateAGAR(SystemState2 *);
 bool CreateAGARWindow(SystemState2 *);
-void ClsSDL(unsigned int,SystemState2 *);
-void DoClsSDL(SystemState2 *);
-unsigned char SetInfoBandSDL( unsigned char);
-unsigned char SetResizeSDL(unsigned char);
-unsigned char SetAspectSDL(unsigned char);
-float StaticSDL(SystemState2 *);
+void ClsAGAR(unsigned int,SystemState2 *);
+void DoClsAGAR(SystemState2 *);
+unsigned char SetInfoBandAGAR( unsigned char);
+unsigned char SetResizeAGAR(unsigned char);
+unsigned char SetAspectAGAR(unsigned char);
+float StaticAGAR(SystemState2 *);
 
 #define MAX_LOADSTRING 100
 

@@ -27,7 +27,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "joystickinputSDL.h"
 #include "vcc.h"
 #include "tcc1014mmu.h"
-#include "tcc1014graphicsSDL.h"
+#include "tcc1014graphicsAGAR.h"
 #include "tcc1014registers.h"
 #include "hd6309.h"
 #include "mc6809.h"
@@ -40,7 +40,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "quickload.h"
 #include "throttle.h"
 #include "logger.h"
-#include "SDLInterface.h"
+#include "AGARInterface.h"
 
 SystemState2 EmuState2;
 static bool DialogOpen=false;
@@ -78,7 +78,6 @@ void (*MmuWrite8)(UINT8, UINT8, UINT16)=NULL;
 UINT8 (*MemRead8)(UINT16)=NULL;
 void (*MemWrite8)(UINT8, UINT16)=NULL;
 void (*SetDistoRamBank)(UINT8)=NULL;
-void FullScreenToggle(void);
 
 // Message handlers
 
@@ -88,8 +87,8 @@ char *GlobalExecFolder;
 char *GlobalFullName;
 char *GlobalShortName;
 void HandleSDLevent(SDL_Event);
-void FullScreenToggleSDL(void);
-void InvalidateBoarderSDL(void);
+void FullScreenToggleAGAR(void);
+void InvalidateBoarderAGAR(void);
 
 static char g_szAppName[MAX_LOADSTRING] = "";
 bool BinaryRunning;
@@ -151,7 +150,7 @@ int main(int argc, char **argv)
 	
 	if (!CreateAGARWindow(&EmuState2))
 	{
-		fprintf(stderr,"Can't create SDL Window\n");
+		fprintf(stderr,"Can't create AGAR Window\n");
 	}
 	
 	DecorateWindow(&EmuState2);
@@ -162,7 +161,7 @@ int main(int argc, char **argv)
 
 	PrepareEventCallBacks(&EmuState2);
 
-	ClsSDL(0, &EmuState2);
+	ClsAGAR(0, &EmuState2);
 
 	LoadConfig(&EmuState2);			//Loads the default config file Vcc.ini from the exec directory
 	PadDummyCartMenus();
@@ -220,7 +219,7 @@ void DoSoftReset()
 
 void ToggleMonitorType()
 {
-	SetMonitorTypeSDL(!SetMonitorTypeSDL(QUERY));
+	SetMonitorTypeAGAR(!SetMonitorTypeAGAR(QUERY));
 }
 
 void ToggleThrottleSpeed()
@@ -230,8 +229,8 @@ void ToggleThrottleSpeed()
 
 void ToggleScreenStatus()
 {
-	SetInfoBandSDL(!SetInfoBandSDL(QUERY));
-    InvalidateBoarderSDL();
+	SetInfoBandAGAR(!SetInfoBandAGAR(QUERY));
+    InvalidateBoarderAGAR();
 }
 
 void ToggleFullScreen()
@@ -240,6 +239,8 @@ void ToggleFullScreen()
 	{
 		FlagEmuStop = TH_REQWAIT;
 		EmuState2.FullScreen = !EmuState2.FullScreen;
+		FullScreenToggleAGAR();
+		FlagEmuStop = TH_RUNNING;
 	}
 }
 
@@ -358,7 +359,7 @@ void DoHardReset(SystemState2* const HRState)
 	mc6883_reset();	//Captures interal rom pointer for CPU Interupt Vectors
 	CPUInit();
 	CPUReset();		// Zero all CPU Registers and sets the PC to VRESET
-	GimeResetSDL();
+	GimeResetAGAR();
 	UpdateBusPointer();
 	EmuState2.TurboSpeedFlag=1;
 	EmuState2.TurboSpeedFlag=1;
@@ -372,7 +373,7 @@ static void SoftReset(void)
 	mc6883_reset(); 
 	PiaReset();
 	CPUReset();
-	GimeResetSDL();
+	GimeResetAGAR();
 	MmuReset();
 	CopyRom();
 	ResetBus();
@@ -527,19 +528,19 @@ void EmuLoop(void)
 				case 2:	//Hard Reset
 					//printf("hard reset\n");
 					UpdateConfig();
-					DoClsSDL(&EmuState2);
+					DoClsAGAR(&EmuState2);
 					DoHardReset(&EmuState2);
 					break;
 
 				case 3:
 					//printf("docls\n");
-					DoClsSDL(&EmuState2);
+					DoClsAGAR(&EmuState2);
 					break;
 
 				case 4:
 					//printf("upd conf\n");
 					UpdateConfig();
-					DoClsSDL(&EmuState2);
+					DoClsAGAR(&EmuState2);
 					break;
 
 				default:
@@ -551,7 +552,7 @@ void EmuLoop(void)
 			if (EmuState2.EmulationRunning == 1) {
 				FPS += RenderFrame(&EmuState2, LC);
 			} else {
-				FPS += StaticSDL(&EmuState2);
+				FPS += StaticAGAR(&EmuState2);
 			}
 		}
 
@@ -577,25 +578,26 @@ void EmuLoop(void)
 	return;
 }
 
-void FullScreenToggleSDL(void)
+void FullScreenToggleAGAR(void)
 {
-	bool SDLrecreateTexture(SystemState2*);
-
 	EmuState2.EmulationRunning = 0;
 	PauseAudioSDL(true);
 
 	if (EmuState2.FullScreen)
 	{	
-		SDL_SetWindowFullscreen(EmuState2.Window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		AG_WindowMaximize(EmuState2.agwin);
+		AG_WindowUnmaximize(EmuState2.agwin);
+		write(0, "^", 1);
 	}
 	else{
-		SDL_SetWindowFullscreen(EmuState2.Window, 0);
+		AG_WindowMinimize(EmuState2.agwin);
+		AG_WindowUnminimize(EmuState2.agwin);
+		write(0, "v", 1);
 	}
 
 	EmuState2.Resizing = 0;
 	EmuState2.EmulationRunning = 1;
-	InvalidateBoarderSDL();
-	EmuState2.ConfigDialog=NULL;
+	InvalidateBoarderAGAR();
 	PauseAudioSDL(false);
 	return;
 }

@@ -87,9 +87,9 @@ extern "C"
 {
 #endif
 	
-	void			vccKeyboardBuildRuntimeTableSDL(keyboardlayout_e keyBoardLayout);
-	void			vccKeyboardHandleKeySDL(unsigned short, unsigned short, unsigned short);
-	unsigned char	vccKeyboardGetScanSDL(unsigned char);
+	void			vccKeyboardBuildRuntimeTableAGAR(keyboardlayout_e keyBoardLayout);
+	void			vccKeyboardHandleKeyAGAR(unsigned short, unsigned short, unsigned short);
+	unsigned char	vccKeyboardGetScanAGAR(unsigned char);
 
 	void			joystickSDL(short unsigned, short unsigned);
 	unsigned short	get_pot_valueSDL(unsigned char pot);

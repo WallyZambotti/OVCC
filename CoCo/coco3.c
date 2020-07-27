@@ -19,7 +19,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "stdio.h"
 #include <math.h>
 #include "defines.h"
-#include "tcc1014graphicsSDL.h"
+#include "tcc1014graphicsAGAR.h"
 #include "tcc1014registers.h"
 #include "mc6821.h"
 #include "hd6309.h"
@@ -85,7 +85,7 @@ float RenderFrame (SystemState2 *RFState2, unsigned long DCnt)
 	LC = 0;
 
 //********************************Start of frame Render*****************************************************
-	SetBlinkStateSDL(BlinkPhase);
+	SetBlinkStateAGAR(BlinkPhase);
 	irq_fs(0);				//FS low to High transition start of display Boink needs this
 	for (RFState2->LineCounter=0;RFState2->LineCounter<13;RFState2->LineCounter++)		//Vertical Blanking 13 H lines 
 		CPUCycle();
@@ -97,7 +97,7 @@ float RenderFrame (SystemState2 *RFState2, unsigned long DCnt)
 	{
 		if (!(FrameCounter % RFState2->FrameSkip)) 
 		{
-			DrawTopBoarderSDL(RFState2);
+			DrawTopBoarderAGAR(RFState2);
 		}
 		CPUCycle();
 	}
@@ -118,14 +118,14 @@ float RenderFrame (SystemState2 *RFState2, unsigned long DCnt)
 		CPUCycle();
 		if (!(FrameCounter % RFState2->FrameSkip))
 		{
-			DrawBottomBoarderSDL(RFState2);
+			DrawBottomBoarderAGAR(RFState2);
 		}
 	}
 
 	if (!(FrameCounter % RFState2->FrameSkip))
 	{
 		UpdateAGAR(RFState2);
-		SetBoarderChangeSDL(0);
+		SetBoarderChangeAGAR(0);
 	}
 
 	for (RFState2->LineCounter=0;RFState2->LineCounter<6;RFState2->LineCounter++)		//Vertical Retrace 6 H lines

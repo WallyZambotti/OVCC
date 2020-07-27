@@ -72,7 +72,7 @@
 	| [Cntl][   ][Alt][       Space       ][ @ ][   ][   ][Cntl]   [LftA][DnA][RgtA] |
 	+--------------------------------------------------------------------------------+
 	*/
-keytranslationentry_t keyTranslationsCoCoSDL[] =
+keytranslationentry_t keyTranslationsCoCoAGAR[] =
 {
 	// ScanCode1,     ScanCode2,      Row1,  Col1,  Row2, Col2    Char  
 	{ AG_KEY_A,          0,              1,     1,     0,    0 }, //   A
@@ -203,7 +203,7 @@ keytranslationentry_t keyTranslationsCoCoSDL[] =
 	| [Cntl][   ][Alt][       Space       ][Alt][   ][   ][Cntl]   [LftA][DnA][RgtA]  |
 	+---------------------------------------------------------------------------------+
 	*/
-keytranslationentry_t keyTranslationsNaturalSDL[] =
+keytranslationentry_t keyTranslationsNaturalAGAR[] =
 {
 	// ScanCode1,     ScanCode2,      Row1,  Col1,  Row2, Col2    Char  
 	{ AG_KEY_A,          0,              1,     1,     0,    0 }, //   A
@@ -340,7 +340,7 @@ Differences from Natural layout:
 	CLR				TAB
 	ESC/BREAK		GRAVE (`)
 */
-keytranslationentry_t keyTranslationsCompactSDL[] =
+keytranslationentry_t keyTranslationsCompactAGAR[] =
 {
 	// ScanCode1,     ScanCode2,      Row1,  Col1,  Row2, Col2    Char  
 	{ AG_KEY_A,          0,              1,     1,     0,    0 }, //   A

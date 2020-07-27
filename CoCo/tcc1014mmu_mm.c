@@ -26,7 +26,7 @@ This file is part of OVCC (Open Virtual Color Computer).
 #include "tcc1014mmu.h"
 #include "iobus.h"
 #include "config.h"
-#include "tcc1014graphicsSDL.h"
+#include "tcc1014graphicsAGAR.h"
 #include "pakinterface.h"
 #include "logger.h"
 #include "hd6309.h"
@@ -112,7 +112,7 @@ static PUINT8 MmuInit_hw(UINT8  RamConfig)
 		return(NULL);
 
 	taskmemory = ptrCoCoTask0Mem; // default to first task 0
-	SetVidMaskSDL(VidMask[CurrentRamConfig]);
+	SetVidMaskAGAR(VidMask[CurrentRamConfig]);
 
 	InternalRomBuffer = Create32KROMMemory();
 	if (InternalRomBuffer == NULL)
@@ -512,12 +512,12 @@ void SetDistoRamBank_hw(UINT8  data)
 		return;
 		break;
 	case 2:	//2048K
-		SetVideoBankSDL(data & 3);
+		SetVideoBankAGAR(data & 3);
 		SetMmuPrefix(0);
 		return;
 		break;
 	case 3:	//8192K	//No Can 3 
-		SetVideoBankSDL(data & 0x0F);
+		SetVideoBankAGAR(data & 0x0F);
 		SetMmuPrefix( (data & 0x30)>>4);
 		return;
 		break;

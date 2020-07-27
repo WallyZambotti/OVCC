@@ -111,7 +111,7 @@ static keytranslationentry_t KeyTransTable[KBTABLE_ENTRY_COUNT];	// run-time key
 
 	should be a push instead of a pull?
 */
-unsigned char vccKeyboardGetScanSDL(unsigned char Col)
+unsigned char vccKeyboardGetScanAGAR(unsigned char Col)
 {
 	unsigned char temp;
 	unsigned char x;
@@ -462,7 +462,7 @@ static int keyTransCompare(const void * e1, const void * e2)
 
 	The entries are sorted.  Any SHIFT + [char] entries need to be placed first
 */
-void vccKeyboardBuildRuntimeTableSDL(keyboardlayout_e keyBoardLayout)
+void vccKeyboardBuildRuntimeTableAGAR(keyboardlayout_e keyBoardLayout)
 {
 	int Index1 = 0;
 	int Index2 = 0;
@@ -474,15 +474,15 @@ void vccKeyboardBuildRuntimeTableSDL(keyboardlayout_e keyBoardLayout)
 	switch (keyBoardLayout)
 	{
 		case kKBLayoutCoCo:
-			keyLayoutTable = keyTranslationsCoCoSDL;
+			keyLayoutTable = keyTranslationsCoCoAGAR;
 		break;
 
 		case kKBLayoutNatural:
-			keyLayoutTable = keyTranslationsNaturalSDL;
+			keyLayoutTable = keyTranslationsNaturalAGAR;
 			break;
 
 		case kKBLayoutCompact:
-			keyLayoutTable = keyTranslationsCompactSDL;
+			keyLayoutTable = keyTranslationsCompactAGAR;
 			break;
 
 		//case kKBLayoutCustom:

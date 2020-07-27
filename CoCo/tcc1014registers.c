@@ -19,7 +19,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "defines.h"
 #include "tcc1014mmu.h"
 #include "tcc1014registers.h"
-#include "tcc1014graphicsSDL.h"
+#include "tcc1014graphicsAGAR.h"
 #include "coco3.h"
 #include "keyboard.h"
 #include "vcc.h"
@@ -95,15 +95,15 @@ void GimeWrite(unsigned char port,unsigned char data)
 		break;
 
 	case 0x98:
-		SetGimeVmodeSDL(data);
+		SetGimeVmodeAGAR(data);
 		break;
 
 	case 0x99:
-		SetGimeVresSDL(data);
+		SetGimeVresAGAR(data);
 		break;
 
 	case 0x9A:
-		SetGimeBoarderColorSDL(data);
+		SetGimeBoarderColorAGAR(data);
 		break;
 
 	case 0x9B:
@@ -115,11 +115,11 @@ void GimeWrite(unsigned char port,unsigned char data)
 
 	case 0x9D:
 	case 0x9E:
-		SetVerticalOffsetRegisterSDL ((GimeRegisters[0x9D]<<8) | GimeRegisters[0x9E]);
+		SetVerticalOffsetRegisterAGAR((GimeRegisters[0x9D]<<8) | GimeRegisters[0x9E]);
 		break;
 
 	case 0x9F:
-		SetGimeHorzOffsetSDL(data);
+		SetGimeHorzOffsetAGAR(data);
 		break;
 
 	case 0xA0:
@@ -157,7 +157,7 @@ void GimeWrite(unsigned char port,unsigned char data)
 	case 0xBD:
 	case 0xBE:
 	case 0xBF:
-		SetGimePalletSDL(port-0xB0,data & 63);
+		SetGimePalletAGAR(port-0xB0,data & 63);
 		break;
 	}
 	return;
@@ -191,7 +191,7 @@ unsigned char GimeRead(unsigned char port)
 
 void SetInit0(unsigned char data)
 {
-	SetCompatModeSDL ( !!(data & 128));
+	SetCompatModeAGAR ( !!(data & 128));
 	Set_MmuEnabled (!!(data & 64)); //MMUEN
 	SetRomMap ( data & 3);			//MC0-MC1
 	SetVectors( data & 8);			//MC3
@@ -367,7 +367,7 @@ void sam_write(unsigned char data ,unsigned char port)
 		Dis_Offset= Dis_Offset & (0xFF-mask); //Shut the bit off
 		if (port & 1)
 			Dis_Offset= Dis_Offset | mask;
-		SetGimeVdgOffsetSDL(Dis_Offset);
+		SetGimeVdgOffsetAGAR(Dis_Offset);
 	}
 
 	if ((port >=0xC0) & (port <=0xC5))	//VDG Mode
@@ -378,7 +378,7 @@ void sam_write(unsigned char data ,unsigned char port)
 		VDG_Mode = VDG_Mode & (0xFF-mask);
 		if (port & 1)
 			VDG_Mode = VDG_Mode | mask;
-		SetGimeVdgModeSDL(VDG_Mode);
+		SetGimeVdgModeAGAR(VDG_Mode);
 	}
 
 	if ( (port==0xDE) | (port ==0xDF))

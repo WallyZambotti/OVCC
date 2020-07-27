@@ -25,7 +25,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "mc6821.h"
 #include "hd6309.h"
 #include "keyboard.h"
-#include "tcc1014graphicsSDL.h"
+#include "tcc1014graphicsAGAR.h"
 #include "tcc1014registers.h"
 #include "coco3.h"
 #include "pakinterface.h"
@@ -72,7 +72,7 @@ unsigned char pia0_read(unsigned char port)
 			{
 				unsigned char scan;
 				rega[1]=(rega[1] & 63);
-				scan = vccKeyboardGetScanSDL(rega[2]);
+				scan = vccKeyboardGetScanAGAR(rega[2]);
 				return (scan); //Read
 			}
 			else
@@ -198,7 +198,7 @@ void pia1_write(unsigned char data,unsigned char port)
 		if (ddb)
 		{
 			regb[port]=(data & regb_dd[port]); 
-			SetGimeVdgMode2SDL( (regb[2] & 248) >>3);
+			SetGimeVdgMode2AGAR( (regb[2] & 248) >>3);
 			Ssample=(regb[port] & 2)<<6;
 		}
 		else

@@ -24,7 +24,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "iobus.h"
 //#include "cc3rom.h"
 #include "config.h"
-#include "tcc1014graphicsSDL.h"
+#include "tcc1014graphicsAGAR.h"
 #include "pakinterface.h"
 #include "logger.h"
 #include "hd6309.h"
@@ -75,7 +75,7 @@ unsigned char * MmuInit_sw(unsigned char RamConfig)
 		else 
 			memory[Index1]=0xFF;
 	}
-	SetVidMaskSDL(VidMask[CurrentRamConfig]);
+	SetVidMaskAGAR(VidMask[CurrentRamConfig]);
 	if (InternalRomBuffer != NULL)
 		free(InternalRomBuffer);
 	InternalRomBuffer=NULL;
@@ -266,12 +266,12 @@ void SetDistoRamBank_sw(unsigned char data)
 		return;
 		break;
 	case 2:	//2048K
-		SetVideoBankSDL(data & 3);
+		SetVideoBankAGAR(data & 3);
 		SetMmuPrefix(0);
 		return;
 		break;
 	case 3:	//8192K	//No Can 3 
-		SetVideoBankSDL(data & 0x0F);
+		SetVideoBankAGAR(data & 0x0F);
 		SetMmuPrefix( (data & 0x30)>>4);
 		return;
 		break;

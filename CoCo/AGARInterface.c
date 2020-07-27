@@ -21,8 +21,8 @@ This file is part of VCC (Virtual Color Computer).
 #include <stdbool.h>
 #include "defines.h"
 #include "stdio.h"
-#include "tcc1014graphicsSDL.h"
-#include "SDLInterface.h"
+#include "tcc1014graphicsAGAR.h"
+#include "AGARInterface.h"
 #include "throttle.h"
 
 static unsigned char InfoBand=1;
@@ -53,7 +53,7 @@ bool CreateAGARWindow(SystemState2 *CWState)
 	return TRUE;
 }
 
-unsigned char LockScreenSDL(SystemState2 *LSState)
+unsigned char LockScreenAGAR(SystemState2 *LSState)
 {
 	// fprintf(stderr, "1.");
     // fprintf(stderr, "1(%2.3f)", timems());
@@ -72,14 +72,14 @@ void UpdateAGAR(SystemState2 *USState)
 	return;
 }
 
-void ClsSDL(unsigned int ClsColor, SystemState2 *CLState)
+void ClsAGAR(unsigned int ClsColor, SystemState2 *CLState)
 {
 	CLState->ResetPending=3; //Tell Main loop to hold Emu
 	Color=ClsColor;
 	return;
 }
 
-void DoClsSDL(SystemState2 *CLStatus)
+void DoClsAGAR(SystemState2 *CLStatus)
 {
 	unsigned short x=0,y=0;
 
@@ -95,21 +95,21 @@ void DoClsSDL(SystemState2 *CLStatus)
 	return;
 }
 
-unsigned char SetInfoBandSDL(unsigned char Tmp)
+unsigned char SetInfoBandAGAR(unsigned char Tmp)
 {
 	if (Tmp!=QUERY)
 		InfoBand=Tmp;
 	return(InfoBand);
 }
 
-unsigned char SetResizeSDL(unsigned char Tmp)
+unsigned char SetResizeAGAR(unsigned char Tmp)
 {
 	if (Tmp!=QUERY)
 		Resizeable=Tmp;
 	return(Resizeable);
 }
 
-unsigned char SetAspectSDL(unsigned char Tmp)
+unsigned char SetAspectAGAR(unsigned char Tmp)
 {
 	if (Tmp!=QUERY)
 		ForceAspect=Tmp;
@@ -117,7 +117,7 @@ unsigned char SetAspectSDL(unsigned char Tmp)
 }
 
 
-float StaticSDL(SystemState2 *STState)
+float StaticAGAR(SystemState2 *STState)
 {
 	unsigned short x=0;
 	static unsigned short y=0;

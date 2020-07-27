@@ -23,7 +23,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "defines.h"
 #include "resource.h"
 #include "config.h"
-#include "tcc1014graphicsSDL.h"
+#include "tcc1014graphicsAGAR.h"
 #include "mc6821.h"
 #include "vcc.h"
 #include "tcc1014mmu.h"
@@ -34,7 +34,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "keyboard.h"
 #include "fileops.h"
 #include "cassette.h"
-#include "SDLInterface.h"
+#include "AGARInterface.h"
 
 //#include "logger.h"
 #include <assert.h>
@@ -270,7 +270,7 @@ unsigned char ReadNamedIniFile(char *iniFilePath)
 	CurrentConfig.KeyMap = GetPrivateProfileInt("Misc","KeyMapIndex",0,iniFilePath);
 	if (CurrentConfig.KeyMap>3)
 		CurrentConfig.KeyMap = 0;	//Default to DECB Mapping
-	vccKeyboardBuildRuntimeTableSDL((keyboardlayout_e)CurrentConfig.KeyMap);
+	vccKeyboardBuildRuntimeTableAGAR((keyboardlayout_e)CurrentConfig.KeyMap);
 
 	CurrentConfig.dummyMenuPadMax = GetPrivateProfileInt("Misc","MenuPadMax",24,iniFilePath);
 
@@ -344,7 +344,7 @@ void ConfigLoadIniFile(char * filename)
 	ReadNamedIniFile(filename);
     UpdateConfig();
 	InsertModule (CurrentConfig.ModulePath);
-    DoClsSDL(&EmuState2);
+    DoClsAGAR(&EmuState2);
     DoHardReset(&EmuState2);
 	// And then perform a dummy read of the default Vcc.ini file to direct any futher 
 	// config changes to the correct ini file
@@ -379,14 +379,12 @@ void ConfigOKApply(int close)
 
 	CurrentConfig=TempConfig;
 
-	vccKeyboardBuildRuntimeTableSDL((keyboardlayout_e)CurrentConfig.KeyMap);
+	vccKeyboardBuildRuntimeTableAGAR((keyboardlayout_e)CurrentConfig.KeyMap);
 
 	RightSDL = TempRight;
 	LeftSDL = TempLeft;
 
 	SetStickNumbersSDL(LeftSDL.DiDevice,RightSDL.DiDevice);
-
-	if (close) EmuState2.ConfigDialog = NULL;
 }
 
 void GetIniFilePath( char *Path)
@@ -402,9 +400,9 @@ INIman *GetIniMan(void)
 
 void UpdateConfig (void)
 {
-	SetResizeSDL(CurrentConfig.Resize);
-	SetAspectSDL(CurrentConfig.Aspect);
-	SetScanLinesSDL(CurrentConfig.ScanLines);
+	SetResizeAGAR(CurrentConfig.Resize);
+	SetAspectAGAR(CurrentConfig.Aspect);
+	SetScanLinesAGAR(CurrentConfig.ScanLines);
 	SetFrameSkip(CurrentConfig.FrameSkip);
 	SetAutoStart(CurrentConfig.AutoStart);
 	SetSpeedThrottle(CurrentConfig.SpeedThrottle);
@@ -412,7 +410,7 @@ void UpdateConfig (void)
 	SetRamSize(CurrentConfig.RamSize);
 	SetCpuType(CurrentConfig.CpuType);
 	SetMmuType(CurrentConfig.MmuType);
-	SetMonitorTypeSDL(CurrentConfig.MonitorType);
+	SetMonitorTypeAGAR(CurrentConfig.MonitorType);
 	SetCartAutoStart(CurrentConfig.CartAutoStart);
 	if (CurrentConfig.RebootNow)
 		DoReboot();
