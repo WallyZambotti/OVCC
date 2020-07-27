@@ -633,8 +633,9 @@ void BuildMenu(void)
 		}
 	}
 
-	itemConfig = AG_MenuNode(menuAnchor, "FD-502 Config", NULL);
-	AG_MenuAction(itemConfig, "Config", NULL, ConfigFD502, NULL);
+	//itemConfig = AG_MenuNode(menuAnchor, "FD-502 Config", NULL);
+	//AG_MenuAction(itemConfig, "Config", NULL, ConfigFD502, NULL);
+	itemConfig = AG_MenuAction(menuAnchor, "FD-502 Config", NULL, ConfigFD502, NULL);
 }
 
 long CreateDiskHeader(char *FileName, unsigned char Type, unsigned char Tracks, unsigned char DblSided)

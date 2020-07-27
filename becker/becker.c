@@ -594,8 +594,9 @@ void BuildMenu(void)
 	if (itemConfig == NULL)
 	{
         itemSeperator = AG_MenuSeparator(menuAnchor);
-	    itemConfig = AG_MenuNode(menuAnchor, "DriveWire Server", NULL);
-		AG_MenuAction(itemConfig, "Config", NULL, ConfigBecker, NULL);
+	    // itemConfig = AG_MenuNode(menuAnchor, "DriveWire Server", NULL);
+		// AG_MenuAction(itemConfig, "Config", NULL, ConfigBecker, NULL);
+		itemConfig = AG_MenuAction(menuAnchor, "Config DW Server", NULL, ConfigBecker, NULL);
 	}
 }
 

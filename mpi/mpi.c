@@ -850,6 +850,7 @@ void BuildMenu(void)
 		}
 	}
 
-	itemConfig = AG_MenuNode(menuAnchor, "MPI Config", NULL);
-	AG_MenuAction(itemConfig, "Config", NULL, ConfigMPI, NULL);
+	// itemConfig = AG_MenuNode(menuAnchor, "MPI Config", NULL);
+	// AG_MenuAction(itemConfig, "Config", NULL, ConfigMPI, NULL);
+	itemConfig = AG_MenuAction(menuAnchor, "MPI Config", NULL, ConfigMPI, NULL);
 }

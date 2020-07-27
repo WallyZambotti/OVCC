@@ -358,8 +358,9 @@ void BuildMenu(void)
             itemSlaveEject = AG_MenuAction(itemSlave, "Eject : ", NULL, UnloadHardDisk, "%i", 1);
 		}
 
-		itemConfig = AG_MenuNode(menuAnchor, "IDE Config", NULL);
-		AG_MenuAction(itemConfig, "Config", NULL, ConfigIDE, NULL);
+		// itemConfig = AG_MenuNode(menuAnchor, "IDE Config", NULL);
+		// AG_MenuAction(itemConfig, "Config", NULL, ConfigIDE, NULL);
+		itemConfig = AG_MenuAction(menuAnchor, "IDE Config", NULL, ConfigIDE, NULL);
 	}
 }
 
