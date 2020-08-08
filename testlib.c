@@ -1,3 +1,4 @@
+#include <agar/core.h>
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,4 +43,8 @@ int main(int argc, char** argv)
     if (fptr_ModuleName) fptr_ModuleName(moduleName, NULL);
 
    fprintf(stderr, "Module name : %s\n", moduleName);
+
+    extern AG_Object agDrivers; 
+    fprintf(stderr, "&agDrivers %p\n", &agDrivers);
+
 }

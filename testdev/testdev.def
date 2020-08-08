@@ -1,0 +1,3 @@
+LIBRARY testdev.dll
+EXPORTS
+  ModuleName
