@@ -586,7 +586,7 @@ void FullScreenToggleAGAR(void)
 	if (EmuState2.FullScreen)
 	{	
 		AG_WindowMaximize(EmuState2.agwin);
-		AG_WindowUnmaximize(EmuState2.agwin);
+		//AG_WindowUnmaximize(EmuState2.agwin);
 	}
 	else{
 		AG_WindowMinimize(EmuState2.agwin);

@@ -7006,7 +7006,7 @@ void cpu_nmi(void)
 	return;
 }
 
-static unsigned short CalculateEA(unsigned char postbyte)
+static unsigned short CalculateEAOLD(unsigned char postbyte)
 {
 	static unsigned short int ea = 0;
 	static signed char byte = 0;
@@ -7154,7 +7154,7 @@ static unsigned short CalculateEA(unsigned char postbyte)
 			ea = (*xfreg16[Register]);
 			(*xfreg16[Register]) += 2;
 			ea = MemRead16(ea);
-			CycleCounter += 6;
+			CycleCounter += NatEmuCycles65;
 			break;
 
 		case 18: // possibly illegal instruction
@@ -7165,7 +7165,7 @@ static unsigned short CalculateEA(unsigned char postbyte)
 			(*xfreg16[Register]) -= 2;
 			ea = (*xfreg16[Register]);
 			ea = MemRead16(ea);
-			CycleCounter += 6;
+			CycleCounter += NatEmuCycles65;
 			break;
 
 		case 20: // Indirect no offset 
@@ -7201,8 +7201,8 @@ static unsigned short CalculateEA(unsigned char postbyte)
 		case 25: // indirect 16 bit offset
 			ea = (*xfreg16[Register]) + IMMADDRESS(PC_REG);
 			ea = MemRead16(ea);
-			CycleCounter += 7;
 			PC_REG += 2;
+			CycleCounter += NatEmuCycles76;
 			break;
 
 		case 26: // indirect F reg offset
@@ -7214,7 +7214,7 @@ static unsigned short CalculateEA(unsigned char postbyte)
 		case 27: // indirect D reg offset
 			ea = (*xfreg16[Register]) + D_REG;
 			ea = MemRead16(ea);
-			CycleCounter += 7;
+			CycleCounter += NatEmuCycles75;
 			break;
 
 		case 28: // indirect 8 bit PC relative
@@ -7227,21 +7227,21 @@ static unsigned short CalculateEA(unsigned char postbyte)
 		case 29: //indirect 16 bit PC relative
 			ea = PC_REG + IMMADDRESS(PC_REG) + 2;
 			ea = MemRead16(ea);
-			CycleCounter += 8;
 			PC_REG += 2;
+			CycleCounter += NatEmuCycles86;
 			break;
 
 		case 30: // indirect W reg offset
 			ea = (*xfreg16[Register]) + W_REG;
 			ea = MemRead16(ea);
-			CycleCounter += 7;
+			CycleCounter += 4;
 			break;
 
 		case 31: // extended indirect
 			ea = IMMADDRESS(PC_REG);
 			ea = MemRead16(ea);
-			CycleCounter += 8;
 			PC_REG += 2;
+			CycleCounter += NatEmuCycles54;
 			break;
 
 		} //END Switch
@@ -7255,6 +7255,800 @@ static unsigned short CalculateEA(unsigned char postbyte)
 		CycleCounter += 1;
 	}
 	return(ea);
+}
+
+static unsigned short CalculateEA(unsigned char postbyte)
+{
+	static unsigned short int ea = 0;
+	static signed char byte = 0;
+	static unsigned char Register;
+
+	switch (postbyte ^ 0x80)
+	{
+	case 0: // Post inc by 1 X
+		CycleCounter += NatEmuCycles21;
+		ea = X_REG;
+		X_REG += 1;
+		return(ea);
+		break;
+
+	case 1: // post inc by 2 X
+		CycleCounter += NatEmuCycles32;
+		ea = X_REG;
+		X_REG += 2;
+		return(ea);
+		break;
+
+	case 2: // pre dec by 1 X
+		CycleCounter += NatEmuCycles21;
+		X_REG -= 1;
+		return(X_REG);
+		break;
+
+	case 3: // pre dec by 2 X
+		CycleCounter += NatEmuCycles32;
+		X_REG -= 2;
+		return(X_REG);
+		break;
+
+	case 4: // no offset X
+		return(X_REG);
+		break;
+
+	case 5: // B reg offset X
+		CycleCounter += 1;
+		return(X_REG + ((signed char)B_REG));
+		break;
+
+	case 6: // A reg offset X
+		CycleCounter += 1;
+		return(X_REG + ((signed char)A_REG));
+		break;
+
+	case 7: // E reg offset X
+		CycleCounter += 1;
+		return(X_REG + ((signed char)E_REG));
+		break;
+
+	case 8: // 8 bit offset X
+		CycleCounter += 1;
+		return(X_REG + (signed char)MemRead8(PC_REG++));
+		break;
+
+	case 9: // 16 bit offset X
+		CycleCounter += NatEmuCycles43;
+		ea = X_REG + IMMADDRESS(PC_REG);
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 10: // F reg offset X
+		CycleCounter += 1;
+		return(X_REG + ((signed char)F_REG));
+		break;
+
+	case 11: // D reg offset X
+		CycleCounter += NatEmuCycles42;
+		return(X_REG + D_REG);
+		break;
+
+	case 12: // 8 bit PC relative
+		CycleCounter += 1;
+		ea = (signed short)PC_REG + (signed char)MemRead8(PC_REG) + 1;
+		PC_REG++;
+		return(ea);
+		break;
+
+	case 13: // 16 bit PC relative
+		CycleCounter += NatEmuCycles53;
+		ea = PC_REG + IMMADDRESS(PC_REG) + 2;
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 14: // W reg offset X
+		CycleCounter += 4;
+		return(X_REG + W_REG);
+		break;
+
+	case 15: // No offset from W reg
+		ea = W_REG;
+		break;
+
+	case 16: // Indirect no offset from W reg
+		CycleCounter += 3;
+		return(MemRead16(W_REG));
+		break;
+
+	case 17: // Indirect post inc by 2 X
+		CycleCounter += NatEmuCycles65;
+		ea = X_REG;
+		X_REG += 2;
+		return(MemRead16(ea));
+		break;
+
+	case 18: // possibly illegal instruction
+		CycleCounter += 6;
+		return(0);
+		break;
+
+	case 19: // Indirect pre dec by 2 X
+		CycleCounter += NatEmuCycles65;
+		X_REG -= 2;
+		return(MemRead16(X_REG));
+		break;
+
+	case 20: // Indirect no offset X
+		CycleCounter += 3;
+		return(MemRead16(X_REG));
+		break;
+
+	case 21: // Indirect B reg offset X
+		CycleCounter += 4;
+		return(MemRead16(X_REG + ((signed char)B_REG)));
+		break;
+
+	case 22: // indirect A reg offset X
+		CycleCounter += 4;
+		return(MemRead16(X_REG + ((signed char)A_REG)));
+		break;
+
+	case 23: // indirect E reg offset X
+		CycleCounter += 4;
+		return(MemRead16(X_REG + ((signed char)E_REG)));
+		break;
+
+	case 24: // indirect 8 bit offset X
+		CycleCounter += 4;
+		return(MemRead16(X_REG + (signed char)MemRead8(PC_REG++)));
+		break;
+
+	case 25: // indirect 16 bit offset X
+		CycleCounter += NatEmuCycles76;
+		ea = MemRead16(X_REG + IMMADDRESS(PC_REG));
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 26: // indirect F reg offset X
+		CycleCounter += 4;
+		return(MemRead16(X_REG + ((signed char)F_REG)));
+		break;
+
+	case 27: // indirect D reg offset X
+		CycleCounter += NatEmuCycles75;
+		return(MemRead16(X_REG + D_REG));
+		break;
+
+	case 28: // indirect 8 bit PC relative
+		CycleCounter += 4;
+		ea = MemRead16((signed short)PC_REG + (signed char)MemRead8(PC_REG) + 1);
+		PC_REG++;
+		return(ea);
+		break;
+
+	case 29: //indirect 16 bit PC relative
+		CycleCounter += NatEmuCycles86;
+		ea = MemRead16(PC_REG + IMMADDRESS(PC_REG) + 2);
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 30: // indirect W reg offset X
+		CycleCounter += 4;
+		return(MemRead16(X_REG + W_REG));
+		break;
+
+	case 31: // extended indirect
+		CycleCounter += NatEmuCycles54;
+		ea = MemRead16(IMMADDRESS(PC_REG));
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 32: // Post inc by 1 Y
+		CycleCounter += NatEmuCycles21;
+		ea = Y_REG;
+		Y_REG += 1;
+		return(ea);
+		break;
+
+	case 33: // post in by 2 Y
+		CycleCounter += NatEmuCycles32;
+		ea = Y_REG;
+		Y_REG += 2;
+		return(ea);
+		break;
+
+	case 34: // pre dec by 1 Y
+		CycleCounter += NatEmuCycles21;
+		Y_REG -= 1;
+		return(Y_REG);
+		break;
+
+	case 35: // pre dec by 2 Y
+		CycleCounter += NatEmuCycles32;
+		Y_REG -= 2;
+		return(Y_REG);
+		break;
+
+	case 36: // no offset Y
+		return(Y_REG);
+		break;
+
+	case 37: // B reg offset Y
+		CycleCounter += 1;
+		return(Y_REG + ((signed char)B_REG));
+		break;
+
+	case 38: // A reg offset Y
+		CycleCounter += 1;
+		return(Y_REG + ((signed char)A_REG));
+		break;
+
+	case 39: // E reg offset Y
+		CycleCounter += 1;
+		return(Y_REG + ((signed char)E_REG));
+		break;
+
+	case 40: // 8 bit offset Y
+		CycleCounter += 1;
+		return(Y_REG + (signed char)MemRead8(PC_REG++));
+		break;
+
+	case 41: // 16 bit offset Y
+		CycleCounter += NatEmuCycles43;
+		ea = Y_REG + IMMADDRESS(PC_REG);
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 42: // F reg offset Y
+		CycleCounter += 1;
+		return(Y_REG + ((signed char)F_REG));
+		break;
+
+	case 43: // D reg offset Y
+		CycleCounter += NatEmuCycles42;
+		return(Y_REG + D_REG);
+		break;
+
+	case 44: // 8 bit PC relative
+		CycleCounter += 1;
+		ea = (signed short)PC_REG + (signed char)MemRead8(PC_REG) + 1;
+		PC_REG++;
+		return(ea);
+		break;
+
+	case 45: // 16 bit PC relative
+		CycleCounter += NatEmuCycles53;
+		ea = PC_REG + IMMADDRESS(PC_REG) + 2;
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 46: // W reg offset Y
+		CycleCounter += 4;
+		return(Y_REG + W_REG);
+		break;
+
+	case 47: // 16 bit offset from W reg
+		CycleCounter += 2;
+		ea = W_REG + IMMADDRESS(PC_REG);
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 48: // Indirect 16 bit offset from W reg
+		CycleCounter += 5;
+		ea = MemRead16(W_REG + IMMADDRESS(PC_REG));
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 49: // Indirect post inc by 2 Y
+		CycleCounter += NatEmuCycles65;
+		ea = Y_REG;
+		Y_REG += 2;
+		return(MemRead16(ea));
+		break;
+
+	case 50: // possibly illegal instruction
+		CycleCounter += 6;
+		return(0);
+		break;
+
+	case 51: // Indirect pre dec by 2 Y
+		CycleCounter += NatEmuCycles65;
+		Y_REG -= 2;
+		return(MemRead16(Y_REG));
+		break;
+
+	case 52: // Indirect no offset Y
+		CycleCounter += 3;
+		return(MemRead16(Y_REG));
+		break;
+
+	case 53: // Indirect B reg offset Y
+		CycleCounter += 4;
+		return(MemRead16(Y_REG + ((signed char)B_REG)));
+		break;
+
+	case 54: // indirect A reg offset Y
+		CycleCounter += 4;
+		return(MemRead16(Y_REG + ((signed char)A_REG)));
+		break;
+
+	case 55: // indirect E reg offset Y
+		CycleCounter += 4;
+		return(MemRead16(Y_REG + ((signed char)E_REG)));
+		break;
+
+	case 56: // indirect 8 bit offset Y
+		CycleCounter += 4;
+		return(MemRead16(Y_REG + (signed char)MemRead8(PC_REG++)));
+		break;
+
+	case 57: // indirect 16 bit offset Y
+		CycleCounter += NatEmuCycles76;
+		ea = MemRead16(Y_REG + IMMADDRESS(PC_REG));
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 58: // indirect F reg offset Y
+		CycleCounter += 4;
+		return(MemRead16(Y_REG + ((signed char)F_REG)));
+		break;
+
+	case 59: // indirect D reg offset Y
+		CycleCounter += NatEmuCycles75;
+		return(MemRead16(Y_REG + D_REG));
+		break;
+
+	case 60: // indirect 8 bit PC relative
+		CycleCounter += 4;
+		ea = MemRead16((signed short)PC_REG + (signed char)MemRead8(PC_REG) + 1);
+		PC_REG++;
+		return(ea);
+		break;
+
+	case 61: //indirect 16 bit PC relative
+		CycleCounter += NatEmuCycles86;
+		ea = MemRead16(PC_REG + IMMADDRESS(PC_REG) + 2);
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 62: // indirect W reg offset Y
+		CycleCounter += 4;
+		return(MemRead16(Y_REG + W_REG));
+		break;
+
+	case 63: // extended indirect ? maybe be illegal ?
+		CycleCounter += NatEmuCycles54;
+		ea = MemRead16(IMMADDRESS(PC_REG));
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 64: // Post inc by 1 U
+		CycleCounter += NatEmuCycles21;
+		ea = U_REG;
+		U_REG += 1;
+		return(ea);
+		break;
+
+	case 65: // post in by 2 U
+		CycleCounter += NatEmuCycles32;
+		ea = U_REG;
+		U_REG += 2;
+		return(ea);
+		break;
+
+	case 66: // pre dec by 1 U
+		CycleCounter += NatEmuCycles21;
+		U_REG -= 1;
+		return(U_REG);
+		break;
+
+	case 67: // pre dec by 2 U
+		CycleCounter += NatEmuCycles32;
+		U_REG -= 2;
+		return(U_REG);
+		break;
+
+	case 68: // no offset U
+		return(U_REG);
+		break;
+
+	case 69: // B reg offset U
+		CycleCounter += 1;
+		return(U_REG + ((signed char)B_REG));
+		break;
+
+	case 70: // A reg offset U
+		CycleCounter += 1;
+		return(U_REG + ((signed char)A_REG));
+		break;
+
+	case 71: // E reg offset U
+		CycleCounter += 1;
+		return(U_REG + ((signed char)E_REG));
+		break;
+
+	case 72: // 8 bit offset U
+		CycleCounter += 1;
+		return(U_REG + (signed char)MemRead8(PC_REG++));
+		break;
+
+	case 73: // 16 bit offset U
+		CycleCounter += NatEmuCycles43;
+		ea = U_REG + IMMADDRESS(PC_REG);
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 74: // F reg offset U
+		CycleCounter += 1;
+		return(U_REG + ((signed char)F_REG));
+		break;
+
+	case 75: // D reg offset U
+		CycleCounter += NatEmuCycles42;
+		return(U_REG + D_REG);
+		break;
+
+	case 76: // 8 bit PC relative
+		CycleCounter += 1;
+		ea = (signed short)PC_REG + (signed char)MemRead8(PC_REG) + 1;
+		PC_REG++;
+		return(ea);
+		break;
+
+	case 77: // 16 bit PC relative
+		CycleCounter += NatEmuCycles53;
+		ea = PC_REG + IMMADDRESS(PC_REG) + 2;
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 78: // W reg offset U
+		CycleCounter += 4;
+		return(U_REG + W_REG);
+		break;
+
+	case 79: // Post inc by 2 from W reg
+		CycleCounter += 1;
+		ea = W_REG;
+		W_REG += 2;
+		return(ea);
+		break;
+
+	case 80: // Indirect post inc by 2 from W reg
+		CycleCounter += 5;
+		ea = MemRead16(W_REG + IMMADDRESS(PC_REG));
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 81: // Indirect post inc by 2 U
+		CycleCounter += NatEmuCycles65;
+		ea = U_REG;
+		U_REG += 2;
+		return(MemRead16(ea));
+		break;
+
+	case 82: // possibly illegal instruction
+		CycleCounter += 6;
+		return(0);
+		break;
+
+	case 83: // Indirect pre dec by 2 U
+		CycleCounter += NatEmuCycles65;
+		U_REG -= 2;
+		return(MemRead16(U_REG));
+		break;
+
+	case 84: // Indirect no offset U
+		CycleCounter += 3;
+		return(MemRead16(U_REG));
+		break;
+
+	case 85: // Indirect B reg offset U
+		CycleCounter += 4;
+		return(MemRead16(U_REG + ((signed char)B_REG)));
+		break;
+
+	case 86: // indirect A reg offset U
+		CycleCounter += 4;
+		return(MemRead16(U_REG + ((signed char)A_REG)));
+		break;
+
+	case 87: // indirect E reg offset U
+		CycleCounter += 4;
+		return(MemRead16(U_REG + ((signed char)E_REG)));
+		break;
+
+	case 88: // indirect 8 bit offset U
+		CycleCounter += 4;
+		return(MemRead16(U_REG + (signed char)MemRead8(PC_REG++)));
+		break;
+
+	case 89: // indirect 16 bit offset U
+		CycleCounter += NatEmuCycles76;
+		ea = MemRead16(U_REG + IMMADDRESS(PC_REG));
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 90: // indirect F reg offset U
+		CycleCounter += 4;
+		return(MemRead16(U_REG + ((signed char)F_REG)));
+		break;
+
+	case 91: // indirect D reg offset U
+		CycleCounter += NatEmuCycles75;
+		return(MemRead16(U_REG + D_REG));
+		break;
+
+	case 92: // indirect 8 bit PC relative
+		CycleCounter += 4;
+		ea = MemRead16((signed short)PC_REG + (signed char)MemRead8(PC_REG) + 1);
+		PC_REG++;
+		return(ea);
+		break;
+
+	case 93: //indirect 16 bit PC relative
+		CycleCounter += NatEmuCycles86;
+		ea = MemRead16(PC_REG + IMMADDRESS(PC_REG) + 2);
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 94: // indirect W reg offset U
+		CycleCounter += 4;
+		return(MemRead16(U_REG + W_REG));
+		break;
+
+	case 95: // extended indirect ? maybe be illegal ?
+		CycleCounter += NatEmuCycles54;
+		ea = MemRead16(IMMADDRESS(PC_REG));
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 96: // Post inc by 1 S
+		CycleCounter += NatEmuCycles21;
+		ea = S_REG;
+		S_REG += 1;
+		return(ea);
+		break;
+
+	case 97: // post in by 2 S
+		CycleCounter += NatEmuCycles32;
+		ea = S_REG;
+		S_REG += 2;
+		return(ea);
+		break;
+
+	case 98: // pre dec by 1 S
+		CycleCounter += NatEmuCycles21;
+		S_REG -= 1;
+		return(S_REG);
+		break;
+
+	case 99: // pre dec by 2 S
+		CycleCounter += NatEmuCycles32;
+		S_REG -= 2;
+		return(S_REG);
+		break;
+
+	case 100: // no offset S
+		return(S_REG);
+		break;
+
+	case 101: // B reg offset S
+		CycleCounter += 1;
+		return(S_REG + ((signed char)B_REG));
+		break;
+
+	case 102: // A reg offset S
+		CycleCounter += 1;
+		return(S_REG + ((signed char)A_REG));
+		break;
+
+	case 103: // E reg offset S
+		CycleCounter += 1;
+		return(S_REG + ((signed char)E_REG));
+		break;
+
+	case 104: // 8 bit offset S
+		CycleCounter += 1;
+		return(S_REG + (signed char)MemRead8(PC_REG++));
+		break;
+
+	case 105: // 16 bit offset S
+		CycleCounter += NatEmuCycles43;
+		ea = S_REG + IMMADDRESS(PC_REG);
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 106: // F reg offset S
+		CycleCounter += 1;
+		return(S_REG + ((signed char)F_REG));
+		break;
+
+	case 107: // D reg offset S
+		CycleCounter += NatEmuCycles42;
+		return(S_REG + D_REG);
+		break;
+
+	case 108: // 8 bit PC relative
+		CycleCounter += 1;
+		ea = (signed short)PC_REG + (signed char)MemRead8(PC_REG) + 1;
+		PC_REG++;
+		return(ea);
+		break;
+
+	case 109: // 16 bit PC relative
+		CycleCounter += NatEmuCycles53;
+		ea = PC_REG + IMMADDRESS(PC_REG) + 2;
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 110: // W reg offset S
+		CycleCounter += 4;
+		return(S_REG + W_REG);
+		break;
+
+	case 111: // Pre dec by 2 from W reg
+		CycleCounter += 1;
+		W_REG -= 2;
+		return(W_REG);
+		break;
+
+	case 112: // Indirect pre dec by 2 from W reg
+		CycleCounter += 4;
+		W_REG -= 2;
+		return(MemRead16(W_REG));
+		break;
+
+	case 113: // Indirect post inc by 2 S
+		CycleCounter += NatEmuCycles65;
+		ea = S_REG;
+		S_REG += 2;
+		return(MemRead16(ea));
+		break;
+
+	case 114: // possibly illegal instruction
+		CycleCounter += 6;
+		return(0);
+		break;
+
+	case 115: // Indirect pre dec by 2 S
+		CycleCounter += NatEmuCycles65;
+		S_REG -= 2;
+		return(MemRead16(S_REG));
+		break;
+
+	case 116: // Indirect no offset S
+		CycleCounter += 3;
+		return(MemRead16(S_REG));
+		break;
+
+	case 117: // Indirect B reg offset S
+		CycleCounter += 4;
+		return(MemRead16(S_REG + ((signed char)B_REG)));
+		break;
+
+	case 118: // indirect A reg offset S
+		CycleCounter += 4;
+		return(MemRead16(S_REG + ((signed char)A_REG)));
+		break;
+
+	case 119: // indirect E reg offset S
+		CycleCounter += 4;
+		return(MemRead16(S_REG + ((signed char)E_REG)));
+		break;
+
+	case 120: // indirect 8 bit offset S
+		CycleCounter += 4;
+		return(MemRead16(S_REG + (signed char)MemRead8(PC_REG++)));
+		break;
+
+	case 121: // indirect 16 bit offset S
+		CycleCounter += NatEmuCycles76;
+		ea = MemRead16(S_REG + IMMADDRESS(PC_REG));
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 122: // indirect F reg offset S
+		CycleCounter += 4;
+		return(MemRead16(S_REG + ((signed char)F_REG)));
+		break;
+
+	case 123: // indirect D reg offset S
+		CycleCounter += NatEmuCycles75;
+		return(MemRead16(S_REG + D_REG));
+		break;
+
+	case 124: // indirect 8 bit PC relative
+		CycleCounter += 4;
+		ea = MemRead16((signed short)PC_REG + (signed char)MemRead8(PC_REG) + 1);
+		PC_REG++;
+		return(ea);
+		break;
+
+	case 125: //indirect 16 bit PC relative
+		CycleCounter += NatEmuCycles86;
+		ea = MemRead16(PC_REG + IMMADDRESS(PC_REG) + 2);
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	case 126: // indirect W reg offset S
+		CycleCounter += 4;
+		return(MemRead16(S_REG + W_REG));
+		break;
+
+	case 127: // extended indirect ? maybe be illegal ?
+		CycleCounter += NatEmuCycles54;
+		ea = MemRead16(IMMADDRESS(PC_REG));
+		PC_REG += 2;
+		return(ea);
+		break;
+
+	// 5 bit offset X
+	case 128: case 129: case 130: case 131: case 132: case 133: case 134: case 135: case 136: case 137: case 138: case 139: case 140: case 141: case 142: case 143:
+		CycleCounter += 1;
+		return(X_REG + (signed char)(postbyte & 31));
+		break;
+
+	case 144: case 145: case 146: case 147: case 148: case 149: case 150: case 151: case 152: case 153: case 154: case 155: case 156: case 157: case 158: case 159:
+		CycleCounter += 1;
+		return(X_REG + (signed char)(postbyte | 0xE0));
+		break;
+
+	// 5 bit offset Y
+	case 160: case 161: case 162: case 163: case 164: case 165: case 166: case 167: case 168: case 169: case 170: case 171: case 172: case 173: case 174: case 175:
+		CycleCounter += 1;
+		return(Y_REG + (signed char)(postbyte & 31));
+		break;
+
+	case 176: case 177: case 178: case 179: case 180: case 181: case 182: case 183: case 184: case 185: case 186: case 187: case 188: case 189: case 190: case 191:
+		CycleCounter += 1;
+		return(Y_REG + (signed char)(postbyte | 0xE0));
+		break;
+
+	// 5 bit offset U
+	case 192: case 193: case 194: case 195: case 196: case 197: case 198: case 199: case 200: case 201: case 202: case 203: case 204: case 205: case 206: case 207:
+		CycleCounter += 1;
+		return(U_REG + (signed char)(postbyte & 31));
+		break;
+
+	case 208: case 209: case 210: case 211: case 212: case 213: case 214: case 215: case 216: case 217: case 218: case 219: case 220: case 221: case 222: case 223:
+		CycleCounter += 1;
+		return(U_REG + (signed char)(postbyte | 0xE0));
+		break;
+
+	// 5 bit offset S
+	case 224: case 225: case 226: case 227: case 228: case 229: case 230: case 231: case 232: case 233: case 234: case 235: case 236: case 237: case 238: case 239:
+		CycleCounter += 1;
+		return(S_REG + (signed char)(postbyte & 31));
+		break;
+
+	case 240: case 241: case 242: case 243: case 244: case 245: case 246: case 247: case 248: case 249: case 250: case 251: case 252: case 253: case 254: case 255:
+		CycleCounter += 1;
+		return(S_REG + (signed char)(postbyte | 0xE0));
+		break;
+
+	} //END Switch
+
+	return(0);
 }
 
 void setcc (unsigned char bincc)

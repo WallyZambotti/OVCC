@@ -36,7 +36,7 @@ extern UINT32 MemRead32(UINT16);
 extern void MemWrite32(UINT32, UINT16);
 
 extern unsigned char *GetPakExtMem();
-PUINT8 (*MmuInit)(UINT8);
+extern PUINT8 (*MmuInit)(UINT8);
 extern PUINT8 (*Getint_rom_pointer)(void);
 extern void (*SetMapType)(UINT8);
 extern void (*CopyRom)(void);
