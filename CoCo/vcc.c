@@ -49,6 +49,8 @@ static unsigned char AutoStart=1;
 static unsigned char Qflag=0;
 static char CpuName[20]="CPUNAME";
 static char MmuName[20]="MMUNAME";
+static int showLeftJoystickValues = 0;
+static int showRightJoystickValues = 0;
 
 char QuickLoadFile[256];
 /***Forward declarations of functions included in this code module*****/
@@ -244,35 +246,15 @@ void ToggleFullScreen()
 	}
 }
 
-void DoKeyBoardEvent(unsigned short key, unsigned short scancode, unsigned short state)
-{
-	vccKeyboardHandleKeySDL(key, scancode, state);
-}
-
 void DoMouseMotion(int ex, int ey)
 {
 	if (EmuState2.EmulationRunning)
 	{
 		int x = ex;
 		int y = ey;
-		x /= 10;
-		y /= 7.5;
+
 		joystickSDL(x,y);
 		//fprintf(stderr, "Mouse @ %i - %i\n", x, y);
-	}
-}
-
-void DoButton(int button, int state)
-{
-	switch (button)
-	{
-		case SDL_BUTTON_LEFT:
-			SetButtonStatusSDL(0, state);
-		break;
-
-		case SDL_BUTTON_RIGHT:
-			SetButtonStatusSDL(1, state);
-		break;
 	}
 }
 
@@ -347,6 +329,12 @@ void DoHardReset(SystemState2* const HRState)
 		break;
 		case 1: // 6309
 		CPUInit=HD6309Init;
+		switch (HRState->MouseType) // Mouse type determines which CPU exec we use
+		{
+			case 0: CPUExec=HD6309Exec; /* fprintf(stdout, "CPU Exec\n"); */ break;
+			case 1: CPUExec=HD6309ExecHiRes; /* fprintf(stdout, "CPU Exec Hi-Res\n"); */ break;
+			default: CPUExec=HD6309Exec; /* fprintf(stdout, "CPU Exec\n"); */ break;
+		}
 		CPUExec=HD6309Exec;
 		CPUReset=HD6309Reset;
 		CPUAssertInterupt=HD6309AssertInterupt;
@@ -557,18 +545,37 @@ void EmuLoop(void)
 		}
 
 		EndRender(EmuState2.FrameSkip);
-		FPS= FPS != 0 ? FPS/EmuState2.FrameSkip : GetCurrentFPS()/EmuState2.FrameSkip;
+		FPS = FPS != 0 ? FPS/EmuState2.FrameSkip : GetCurrentFPS()/EmuState2.FrameSkip;
 		GetModuleStatus(&EmuState2);
 
-		// if (++framecnt == 6)
-		// {
-			sprintf(ttbuff,"Skip:%2.2i|FPS:%3.0f|%s%s%s@%3.2fMhz|%s",EmuState2.FrameSkip,FPS,CpuName,NatEmuStat,MMUStat,EmuState2.CPUCurrentSpeed,EmuState2.StatusLine);
-			SetStatusBarText(ttbuff,&EmuState2);
-			//fprintf(stderr, "|");
-		// 	framecnt = 0;
-		// }
+		// Update status bar
 
-		if (Throttle )	//Do nothing until the frame is over returning unused time to OS
+		char tmpbuf[256];
+		sprintf(ttbuff, "Skip:%2.2i|FPS:%3.0f|%s%s%s@%3.2fMhz", EmuState2.FrameSkip,FPS,CpuName,NatEmuStat,MMUStat,EmuState2.CPUCurrentSpeed);
+
+		if(showLeftJoystickValues)
+		{
+			extern void GetLeftJoystickValues(int*, int*);
+			int joyx, joyy;
+			strcpy(tmpbuf, ttbuff);
+			GetLeftJoystickValues(&joyx, &joyy);
+			sprintf(ttbuff,"%s|LX:%3d-LY:%3d", tmpbuf, joyx,joyy);
+		}
+
+		if(showRightJoystickValues)
+		{
+			extern void GetRightJoystickValues(int*, int*);
+			int joyx, joyy;
+			strcpy(tmpbuf, ttbuff);
+			GetRightJoystickValues(&joyx, &joyy);
+			sprintf(ttbuff,"%s|RX:%3d-RY:%3d", tmpbuf, joyx,joyy);
+		}
+
+		strcpy(tmpbuf, ttbuff);
+		sprintf(ttbuff,"%s|%s", tmpbuf,EmuState2.StatusLine);
+		SetStatusBarText(ttbuff, &EmuState2);
+
+		if (Throttle)	//Do nothing until the frame is over returning unused time to OS
 		{
     		//fprintf(stderr, "4(%2.3f)", timems());
 			FrameWait();
@@ -598,4 +605,14 @@ void FullScreenToggleAGAR(void)
 	InvalidateBoarderAGAR();
 	PauseAudioSDL(false);
 	return;
+}
+
+void SetShowLeftJoystickValue(int showJoystickVal)
+{
+	showLeftJoystickValues = showJoystickVal;
+}
+
+void SetShowRightJoystickValue(int showJoystickVal)
+{
+	showRightJoystickValues = showJoystickVal;
 }

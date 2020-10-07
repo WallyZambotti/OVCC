@@ -122,6 +122,9 @@ int MC6809Exec( int CycleFor)
 {
 static unsigned char opcode=0;
 static unsigned char msn,lsn;
+static int dischargeCycles=0;
+static short dischargeContinuing = 0;
+int thisCycle = 0;
 CycleCounter=0; 
 
 while (CycleCounter<CycleFor) {
@@ -145,6 +148,20 @@ while (CycleCounter<CycleFor) {
 
 	if (SyncWaiting==1)
 		return(0);
+
+	extern short int DACdischarging;
+
+	if (DACdischarging)
+	{
+		thisCycle = CycleCounter;
+		extern unsigned short	get_pot_valueSDL(unsigned char);
+		unsigned short potValue = get_pot_valueSDL(GetMuxState());
+
+		dischargeCycles = (potValue + 169) * 12; // 169 = magic number. 12 = cycles
+		DACdischarging = 0;
+		dischargeContinuing = 1;
+		//fprintf(stdout, "+ %d", potValue); fflush(stdout);
+	}
 
 switch (MemRead8(pc.Reg++)){
 
@@ -2983,6 +3000,22 @@ default:
 //	MessageBox(0,"Unhandled Op","Ok",0);
 	break;
 	}//End Switch
+
+	if(dischargeContinuing)
+	{
+		if (dischargeCycles > 0)
+		{
+			dischargeCycles -= CycleCounter-thisCycle;
+			thisCycle = CycleCounter;
+		}
+		else // time to set comparator bit in PIA0
+		{
+			//fprintf(stdout, "-"); fflush(stdout);
+			extern unsigned char ComparatorSetByDischarge;
+			ComparatorSetByDischarge = 0x80;
+			dischargeContinuing = 0;
+		}
+	}
 }//End While
 
 return(CycleFor-CycleCounter);

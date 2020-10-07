@@ -33,6 +33,8 @@ This file is part of VCC (Virtual Color Computer).
 #include "logger.h"
 #include "resource.h"
 
+short int DACdischarging = 0;
+
 extern int gWindow;
 
 static unsigned char rega[4]={0,0,0,0};
@@ -126,8 +128,9 @@ unsigned char pia1_read(unsigned char port)
 				Flag=regb[port] ;//& regb_dd[port];
 				return(Flag);
 			}
-			else
+			else {
 				return(regb_dd[port]);
+			}
 		break;
 	}
 	return(0);
@@ -143,9 +146,15 @@ void pia0_write(unsigned char data,unsigned char port)
 	{
 	case 0:
 		if (dda)
+		{
 			rega[port]=data;
+			fprintf(stdout, "%2x  ", data); fflush(stdout);
+		}
 		else
+		{
 			rega_dd[port]=data;
+			//fprintf(stdout, "%2d-", data); fflush(stdout);
+		}
 		return;
 	case 2:
 		if (ddb)
@@ -172,6 +181,7 @@ void pia1_write(unsigned char data,unsigned char port)
 {
 	unsigned char dda,ddb;
 	static unsigned short LastSS=0;
+	static unsigned short chargeHigh = 0;
 	port-=0x20;
 
 	dda=(regb[1] & 4);
@@ -182,12 +192,27 @@ void pia1_write(unsigned char data,unsigned char port)
 		if (dda)
 		{
 			regb[port]=data;
+			//fprintf(stdout, "%2d+", data); fflush(stdout);
 			CaptureBit((regb[0]&2)>>1);
 			if (GetMuxState()==0)  
 				if ((regb[3] & 8)!=0)//==0 for cassette writes
 					Asample	= (regb[0] & 0xFC)>>1; //0 to 127
 				else
 					Csample = (regb[0] & 0xFC);
+			
+			if (chargeHigh && (data >> 2) == 0)
+			{
+				// A discharge from Max to Min has occurred.  Possible Hi-res joystick device in use
+				DACdischarging = 1;
+				// clear the comparator
+				regb[port] = regb[port] & 0X7F; 
+				extern unsigned char ComparatorSetByDischarge;
+				ComparatorSetByDischarge = 0;
+
+				// fprintf(stdout, "*"); fflush(stdout);
+			}
+
+			chargeHigh = ((data >> 2) == 63);
 		}
 		else
 			regb_dd[port]=data;

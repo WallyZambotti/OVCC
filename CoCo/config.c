@@ -155,7 +155,8 @@ void LoadConfig(SystemState2 *LCState)
 	RefreshJoystickStatus();
 	SoundInitSDL(SoundCards[CurrentConfig.SndOutDev].sdlID, CurrentConfig.AudioRate);
 	InsertModule (CurrentConfig.ModulePath);	// Should this be here?
-
+	LCState->MouseType = LeftSDL.HiRes | RightSDL.HiRes; //If either mouse is Hires we must support Hires
+	//fprintf(stdout, "Mouse Type %d\n", LCState->MouseType);
 	if (!AG_FileExists(IniFilePath))
 		WriteIniFile();
 }
@@ -557,6 +558,13 @@ void JoyStickConfigLeftJoyStick(int type)
 	TempLeft.UseMouse = (unsigned char)type;
 }
 
+void JoyStickConfigLeftEmulation(int type)
+{
+	TempLeft.HiRes = (unsigned char)type;
+	extern void SelectCPUExec(unsigned char);
+	SelectCPUExec(type);
+}
+
 void JoyStickConfigLeftJoyStickDevice(int dev)
 {
 	TempLeft.DiDevice = (unsigned char)dev;
@@ -595,6 +603,11 @@ void joyStickConfigLeftKeyFire2(int key)
 void JoyStickConfigRightJoyStick(int type)
 {
 	TempRight.UseMouse = (unsigned char)type;
+}
+
+void JoyStickConfigRightEmulation(int type)
+{
+	TempRight.HiRes = (unsigned char)type;
 }
 
 void JoyStickConfigRightJoyStickDevice(int dev)

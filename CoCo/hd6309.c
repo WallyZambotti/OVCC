@@ -6852,17 +6852,13 @@ void(*JmpVec3[256])(void) = {
 	InvalidInsHandler,		// FF
 };
 
-// static unsigned char op1, op2;
-// static unsigned short opstack[16];
-// static unsigned short addrstack[16];
-// static short int stckidx = 0;
+// Main CPU emu loop one loop for Normal Joystick and another for Hi-res joystick
 
 int HD6309Exec(int CycleFor)
 {
-
-	//static unsigned char opcode = 0;
 	CycleCounter = 0;
 	gCycleFor = CycleFor;
+
 	while (CycleCounter < CycleFor) {
 
 		if (PendingInterupts)
@@ -6886,6 +6882,72 @@ int HD6309Exec(int CycleFor)
 			return(0); // WDZ - Experimental SyncWaiting should still return used cycles (and not zero) by breaking from loop
 
 		JmpVec1[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
+	}//End While
+
+	return(CycleFor - CycleCounter);
+}
+
+int HD6309ExecHiRes(int CycleFor)
+{
+	CycleCounter = 0;
+	gCycleFor = CycleFor;
+	static int dischargeCycles=0;
+	static short dischargeContinuing = 0;
+	int thisCycle = 0;
+
+	while (CycleCounter < CycleFor) {
+
+		if (PendingInterupts)
+		{
+			if (PendingInterupts & 4)
+				cpu_nmi();
+
+			if (PendingInterupts & 2)
+				cpu_firq();
+
+			if (PendingInterupts & 1)
+			{
+				if (IRQWaiter == 0)	// This is needed to fix a subtle timming problem
+					cpu_irq();		// It allows the CPU to see $FF03 bit 7 high before
+				else				// The IRQ is asserted.
+					IRQWaiter -= 1;
+			}
+		}
+
+		if (SyncWaiting == 1)	//Abort the run nothing happens asyncronously from the CPU
+			return(0); // WDZ - Experimental SyncWaiting should still return used cycles (and not zero) by breaking from loop
+
+		extern short int DACdischarging;
+
+		if (DACdischarging)
+		{
+			thisCycle = CycleCounter;
+			extern unsigned short	get_pot_valueSDL(unsigned char);
+			unsigned short potValue = get_pot_valueSDL(GetMuxState());
+
+			dischargeCycles = (potValue + 169) * 12; // 169 = magic number. 12 = cycles
+			DACdischarging = 0;
+			dischargeContinuing = 1;
+			//fprintf(stdout, "+ %d", potValue); fflush(stdout);
+		}
+
+		JmpVec1[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
+
+		if(dischargeContinuing)
+		{
+			if (dischargeCycles > 0)
+			{
+				dischargeCycles -= CycleCounter-thisCycle;
+				thisCycle = CycleCounter;
+			}
+			else // time to set comparator bit in PIA0
+			{
+				//fprintf(stdout, "-"); fflush(stdout);
+				extern unsigned char ComparatorSetByDischarge;
+				ComparatorSetByDischarge = 0x80;
+				dischargeContinuing = 0;
+			}
+		}
 	}//End While
 
 	return(CycleFor - CycleCounter);

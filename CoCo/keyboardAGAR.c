@@ -81,6 +81,7 @@ static unsigned char RightButton2Status = 0;
 static unsigned char LeftStickNumber = 0;
 static unsigned char RightStickNumber = 0;
 
+unsigned char ComparatorSetByDischarge = 0;
 
 /*****************************************************************************/
 //
@@ -135,14 +136,31 @@ unsigned char vccKeyboardGetScanAGAR(unsigned char Col)
 	}
 	ret_val = 127 - ret_val;
 
-	//	MuxSelect=GetMuxState();	//Collect CA2 and CB2 from the PIA (1of4 Multiplexer)
-	StickValue = get_pot_valueSDL(GetMuxState());
-	if (StickValue != 0)		//OS9 joyin routine needs this (koronis rift works now)
+	switch (LeftSDL.HiRes)
 	{
-		if (StickValue >= DACState())		// Set bit of stick >= DAC output $FF20 Bits 7-2
-		{
-			ret_val |= 0x80;
-		}
+		case 0: // Regular joystick mouse
+			//	MuxSelect=GetMuxState();	//Collect CA2 and CB2 from the PIA (1of4 Multiplexer)
+			StickValue = get_pot_valueSDL(GetMuxState());
+			if (StickValue != 0)		//OS9 joyin routine needs this (koronis rift works now)
+			{
+				if (StickValue >= DACState())		// Set bit of stick >= DAC output $FF20 Bits 7-2
+				{
+					ret_val |= 0x80;
+				}
+			}
+			break;
+
+		case 1: // Hi-res joystick mouse
+			// if (ComparatorSetByDischarge) {
+			// 	fprintf(stdout, "#"); fflush(stdout);
+			// }
+
+			ret_val |= ComparatorSetByDischarge;  // this gets set in the main CPU exec loop if a DAC discharge has occurred
+			ComparatorSetByDischarge = 0;  // It appears reading the comparator bit clears the bit. So must do this!
+			break;
+
+		default:
+			break;
 	}
 
 	if (LeftButton1Status == 1)
@@ -594,11 +612,24 @@ void vccKeyboardBuildRuntimeTableAGAR(keyboardlayout_e keyBoardLayout)
 */
 void joystickSDL(unsigned short x,unsigned short y)
 {
+	switch (LeftSDL.HiRes)
+	{
+		case 0: // Regular joystick mouse
+			x /= 10;
+			y /= 7.5;
+			if (x>63) x=63;
+			if (y>63) y=63;
+			break;
 
-	if (x>63)
-		x=63;
-	if (y>63)
-		y=63;
+		case 1:  // Hi-res joystick mouse
+			y *= 1.3;
+			if (x>639) x=639;
+			if (y>639) y=639;
+			break;
+
+		default:
+			break;
+	}
 
 	if (LeftSDL.UseMouse==JOYSTICK_MOUSE)
 	{
@@ -612,6 +643,25 @@ void joystickSDL(unsigned short x,unsigned short y)
 	}
 
 	return;
+}
+
+void DoKeyBoardEvent(unsigned short key, unsigned short scancode, unsigned short state)
+{
+	vccKeyboardHandleKeySDL(key, scancode, state);
+}
+
+void DoButton(int button, int state)
+{
+	switch (button)
+	{
+		case SDL_BUTTON_LEFT:
+			SetButtonStatusSDL(0, state);
+		break;
+
+		case SDL_BUTTON_RIGHT:
+			SetButtonStatusSDL(1, state);
+		break;
+	}
 }
 
 /*****************************************************************************/
@@ -872,6 +922,17 @@ void SetButtonStatusSDL(unsigned char Side,unsigned char State) //Side=0 Left Bu
 		}
 }
 
+void GetLeftJoystickValues(int *joyx, int *joyy)
+{
+	*joyx = LeftStickX;
+	*joyy = LeftStickY;
+}
+
+void GetRightJoystickValues(int *joyx, int *joyy)
+{
+	*joyx = RightStickX;
+	*joyy = RightStickY;
+}
 /*****************************************************************************/
 
 

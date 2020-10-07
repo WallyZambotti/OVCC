@@ -101,6 +101,8 @@ static int rightKeyDown = 0;
 static int rightKeyFire1 = 0;
 static int rightKeyFire2 = 0;
 static int rightEmulation = 0;
+static int showLeftJoystickValue = 0;
+static int showRightJoystickValue = 0;
 static int autoStartEmu = 1;
 static int autoStartCart = 1;
 static char tapefile[512] = "<No Tape File!>";
@@ -567,7 +569,11 @@ void LeftEmulationChange(AG_Event *event)
 {
     int newSelection = AG_INT(1);
 
-    AG_TextMsg(AG_MSG_INFO, "Feature not implemented!");
+    extern void JoyStickConfigLeftEmulation(int);
+
+    // AG_TextMsg(AG_MSG_INFO, "Feature not implemented!");
+
+    JoyStickConfigLeftEmulation(leftEmulation);
 }
 
 void RightJoystickChange(AG_Event *event)
@@ -715,7 +721,27 @@ void RightEmulationChange(AG_Event *event)
 {
     int newSelection = AG_INT(1);
 
-    AG_TextMsg(AG_MSG_INFO, "Feature not implemented!");
+    extern void JoyStickConfigRightEmulation(int);
+
+    //AG_TextMsg(AG_MSG_INFO, "Feature not implemented!");
+
+    JoyStickConfigRightEmulation(rightEmulation);
+}
+
+void ShowLeftJoystickValueChange(AG_Event *event)
+{
+    //int newSelection = AG_INT(1);
+    extern void SetShowLeftJoystickValue(int);
+
+    SetShowLeftJoystickValue(showLeftJoystickValue);
+}
+
+void ShowRightJoystickValueChange(AG_Event *event)
+{
+    //int newSelection = AG_INT(1);
+    extern void SetShowRightJoystickValue(int);
+
+    SetShowRightJoystickValue(showRightJoystickValue);
 }
 
 void AutoStartEmuChange(AG_Event *event)
@@ -1288,6 +1314,11 @@ void Configure(AG_Event *ev)
         AG_SetEvent(com, "combo-selected", LeftKeyFire2ComboSelected, NULL);
         if (leftJoystick == JOYSTICK_KEYBOARD) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
+        // Option for display left joystick values in status bar
+
+        AG_Checkbox *xb = AG_CheckboxNewFn(vbox, 0, "Monitor left joystick", ShowLeftJoystickValueChange, NULL);
+        AG_BindInt(xb, "state", &showLeftJoystickValue);        
+
         // Right Joystick Config
 
         vbox = AG_BoxNewVert(tab, AG_BOX_FRAME);
@@ -1395,6 +1426,10 @@ void Configure(AG_Event *ev)
         AG_SetEvent(com, "combo-selected", RightKeyFire2ComboSelected, NULL);
         if (rightJoystick == JOYSTICK_KEYBOARD) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
+        // Option for display right joystick values in status bar
+
+        xb = AG_CheckboxNewFn(vbox, 0, "Monitor right joystick", ShowRightJoystickValueChange, NULL);
+        AG_BindInt(xb, "state", &showRightJoystickValue);        
 
         extern void JoyStickConfigRecordState();
         JoyStickConfigRecordState();
@@ -1592,7 +1627,7 @@ void About(AG_Event *ev)
     AG_WindowSetCloseAction(AboutWin, AG_WINDOW_HIDE);
 
 	AG_Label *lbl = AG_LabelNewPolled(AboutWin, AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
-        "OVCC 1.3.0\n"
+        "OVCC 1.4.0\n"
         "Walter Zambotti\n"
         "using AGAR 1.6.0 GUI\n"
         "Forked from VCC 2.01B (1.43)\n"

@@ -99,6 +99,7 @@ typedef struct
     unsigned char	TurboSpeedFlag;
     unsigned char	CpuType;
     unsigned char	MmuType;
+    unsigned char	MouseType;
     unsigned char	FrameSkip;
     unsigned char	BitDepth;
     unsigned char	*PTRsurface8;

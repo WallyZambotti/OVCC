@@ -87,12 +87,12 @@ extern "C"
 {
 #endif
 	
-	void			vccKeyboardBuildRuntimeTableAGAR(keyboardlayout_e keyBoardLayout);
+	void			vccKeyboardBuildRuntimeTableAGAR(keyboardlayout_e);
 	void			vccKeyboardHandleKeyAGAR(unsigned short, unsigned short, unsigned short);
 	unsigned char	vccKeyboardGetScanAGAR(unsigned char);
 
 	void			joystickSDL(short unsigned, short unsigned);
-	unsigned short	get_pot_valueSDL(unsigned char pot);
+	unsigned short	get_pot_valueSDL(unsigned char);
 	void			SetButtonStatusSDL(unsigned char, unsigned char);
 	void			SetStickNumbersSDL(unsigned char, unsigned char);
 

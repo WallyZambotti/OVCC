@@ -176,6 +176,24 @@ void SetLinesperScreen (unsigned char Lines)
 	return;
 }
 
+void SelectCPUExec(unsigned char type)
+{
+	switch(type)
+	{
+		case 0: // for normal mouse
+			CPUExec = HD6309Exec;
+			//fprintf(stdout, "CPU Exec\n");
+			break;
+		
+		case 1: // for Hires mouse
+			CPUExec = HD6309ExecHiRes;
+			//fprintf(stdout, "CPU Exec Hi-Res\n");
+			break;
+
+		default:
+			break;
+	}
+}
 
 int CPUCycle(void)	
 {
