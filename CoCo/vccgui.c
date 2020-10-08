@@ -1228,7 +1228,7 @@ void Configure(AG_Event *ev)
         radio = AG_RadioNewFn(vboxr, AG_RADIO_VFILL, radioItems2, LeftEmulationChange, NULL);
         AG_BindInt(radio, "value", &leftEmulation);
         leftEmulation = (int)LeftSDL.HiRes;
-        AG_WidgetDisable(radio);
+        //AG_WidgetDisable(radio);
 
         // Left Joystick Audio (Analog) Combo & again doesn't appear to have been implemented
 
@@ -1342,7 +1342,7 @@ void Configure(AG_Event *ev)
         vboxr = AG_BoxNewVert(vbox1, 0);
         radio = AG_RadioNewFn(vboxr, AG_RADIO_VFILL, radioItems2, RightEmulationChange, NULL);
         AG_BindInt(radio, "value", &rightEmulation);
-        AG_WidgetDisable(radio);
+        //AG_WidgetDisable(radio);
 
         // Right Joystick Audio (Analog) Combo
 
