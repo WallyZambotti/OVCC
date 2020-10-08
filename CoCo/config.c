@@ -561,8 +561,8 @@ void JoyStickConfigLeftJoyStick(int type)
 void JoyStickConfigLeftEmulation(int type)
 {
 	TempLeft.HiRes = (unsigned char)type;
-	extern void SelectCPUExec(unsigned char);
-	SelectCPUExec(type);
+	extern void SelectCPUExec(unsigned char, SystemState2*);
+	SelectCPUExec(type, &EmuState2);
 }
 
 void JoyStickConfigLeftJoyStickDevice(int dev)
