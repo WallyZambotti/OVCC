@@ -176,11 +176,11 @@ void SetLinesperScreen (unsigned char Lines)
 	return;
 }
 
-void SelectCPUExec(unsigned char type, SystemState2* EmuState)
+void SelectCPUExec(SystemState2* EmuState)
 {
 	if(EmuState->CpuType == 1) // 6309
 	{
-		switch(type)
+		switch(EmuState->MouseType)
 		{
 			case 0: // for normal mouse
 				CPUExec = HD6309Exec;
