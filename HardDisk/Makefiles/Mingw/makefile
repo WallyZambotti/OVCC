@@ -1,10 +1,10 @@
 # change application name here (executable output name)
-TARGET=testlib
+TARGET=harddisk.dll
  
 # compiler
-CC=gcc
+#CC=gcc
 # linker
-LD=gcc
+#LD=gcc
 # debug
 DEBUG=#-g
 # optimisation
@@ -35,20 +35,14 @@ UNUSEDOBJS=
 _OBJS=harddisk.o cloud9.o cc3vhd.o fileops.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-testlib: obj/testlib.o harddisk.dll
-	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
-
+harddisk.dll: $(OBJS)
+	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
+    
 $(ODIR):
 	mkdir -p $@
 
 $(OBJS): | $(ODIR)
 
-$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
-	$(CC) -O0 -g -c $(SDLINC) $< -o $@
-
-harddisk.dll: $(OBJS)
-	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
-    
 $(ODIR)/harddisk.o: harddisk.c harddisk.h defines.h cloud9.h ../CoCo/fileops.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 

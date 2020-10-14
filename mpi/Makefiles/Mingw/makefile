@@ -1,10 +1,10 @@
 # change application name here (executable output name)
-TARGET=testlib
+TARGET=mpi.dll
  
 # compiler
-CC=gcc
+#CC=gcc
 # linker
-LD=gcc
+#LD=gcc
 # Resource Compiler
 # RC=windres
 # debug
@@ -37,20 +37,14 @@ UNUSEDOBJS=
 _OBJS=mpi.o fileops.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-testlib: obj/testlib.o mpi.dll
-	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
-
+mpi.dll: $(OBJS)
+	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
+    
 $(ODIR):
 	mkdir -p $@
 
 $(OBJS): | $(ODIR)
 
-$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
-	$(CC) -O0 -g -c $(SDLINC) $< -o $@
-
-mpi.dll: $(OBJS)
-	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
-    
 $(ODIR)/mpi.o: mpi.c mpi.h ../CoCo/fileops.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 

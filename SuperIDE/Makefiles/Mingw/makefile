@@ -2,9 +2,9 @@
 TARGET=superide.dll
  
 # compiler
-CC=gcc
+#CC=gcc
 # linker
-LD=gcc
+#LD=gcc
 # debug
 DEBUG=#-g
 # optimisation
@@ -35,20 +35,14 @@ UNUSEDOBJS=
 _OBJS=superide.o cloud9.o fileops.o idebus.o logger.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-testlib: obj/testlib.o superide.dll
-	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
-
+superide.dll: $(OBJS)
+	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
+    
 $(ODIR):
 	mkdir -p $@
 
 $(OBJS): | $(ODIR)
 
-$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
-	$(CC) -O0 -g -c $(SDLINC) $< -o $@
-
-superide.dll: $(OBJS)
-	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
-    
 $(ODIR)/superide.o: superide.c superide.h defines.h idebus.h cloud9.h logger.h ../CoCo/fileops.h
 	$(CC) -c $(CCFLAGS) $< -o $@
     

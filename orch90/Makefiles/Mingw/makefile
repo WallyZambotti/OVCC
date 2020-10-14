@@ -1,10 +1,10 @@
 # change application name here (executable output name)
-TARGET=testlib
+TARGET=orch90.dll
  
 # compiler
-CC=gcc
+#CC=gcc
 # linker
-LD=gcc
+#LD=gcc
 # debug
 DEBUG=#-g
 # optimisation
@@ -35,20 +35,14 @@ UNUSEDOBJS=
 _OBJS=orch90.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-testlib: obj/testlib.o orch90.dll
-	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
-
+orch90.dll: $(OBJS)
+	$(LD) $(LDFLAGS) $(OBJS) -o $@ 
+    
 $(ODIR):
 	mkdir -p $@
 
 $(OBJS): | $(ODIR)
 
-$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
-	$(CC) -O0 -g -c $(SDLINC) $< -o $@
-
-orch90.dll: $(OBJS)
-	$(LD) $(LDFLAGS) $(OBJS) -o $@ 
-    
 $(ODIR)/orch90.o: orch90.c orch90.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 

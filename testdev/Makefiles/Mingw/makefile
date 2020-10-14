@@ -1,10 +1,10 @@
 # change application name here (executable output name)
-TARGET=testlib
+TARGET=testdev.dll
  
 # compiler
-CC=gcc
+#CC=gcc
 # linker
-LD=gcc
+#LD=gcc
 # debug
 DEBUG=#-g
 # optimisation
@@ -35,20 +35,14 @@ UNUSEDOBJS=
 _OBJS=	testdev.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-testlib: obj/testlib.o testdev.dll
-	$(LD) -o $@ $< $(LIBS) -Wl,--subsystem,console
-
+testdev.dll: $(OBJS)
+	$(LD) $(LDFLAGS) $(OBJS) testdev.def $(LIBS) -o $@ 
+    
 $(ODIR):
 	mkdir -p $@
 
 $(OBJS): | $(ODIR)
 
-$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
-	$(CC) -O0 -g -c $(AGARINC) $(SDLINC) $< -o $@
-
-testdev.dll: $(OBJS)
-	$(LD) $(LDFLAGS) $(OBJS) testdev.def $(LIBS) -o $@ 
-    
 $(ODIR)/testdev.o: testdev.c
 	$(CC) -c $(CCFLAGS) $< -o $@
 

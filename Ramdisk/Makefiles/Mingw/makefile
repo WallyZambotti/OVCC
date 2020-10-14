@@ -1,10 +1,10 @@
 # change application name here (executable output name)
-TARGET=testlib
+TARGET=ramdisk.dll
  
 # compiler
-CC=gcc
+#CC=gcc
 # linker
-LD=gcc
+#LD=gcc
 # debug
 DEBUG=#-g
 # optimisation
@@ -35,20 +35,14 @@ UNUSEDOBJS=
 _OBJS=	ramdisk.o memboard.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-testlib: obj/testlib.o ramdisk.dll
-	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
-
+ramdisk.dll: $(OBJS)
+	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
+    
 $(ODIR):
 	mkdir -p $@
 
 $(OBJS): | $(ODIR)
 
-$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
-	$(CC) -O0 -g -c $(SDLINC) $< -o $@
-
-ramdisk.dll: $(OBJS)
-	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
-    
 $(ODIR)/ramdisk.o: ramdisk.c memboard.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 

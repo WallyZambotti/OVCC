@@ -16,10 +16,10 @@ This file is part of VCC (Virtual Color Computer).
     along with VCC (Virtual Color Computer).  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "defines.h"
 #include <agar/core.h>
 #include <agar/gui.h>
 #include <agar/core/types.h>
-#include "defines.h"
 #include "audio.h"
 #include "config.h"
 #include "keyboard.h"

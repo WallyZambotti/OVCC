@@ -1,10 +1,10 @@
 # change application name here (executable output name)
-TARGET=testlib
+TARGET=mpu.dll
  
 # compiler
-CC=gcc
+#C=gcc
 # linker
-LD=gcc
+#LD=gcc
 # debug
 DEBUG=#-g
 # optimisation
@@ -35,20 +35,14 @@ UNUSEDOBJS=
 _OBJS=mpu.o fpu.o gpu.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-testlib: obj/testlib.o mpu.dll
-	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
-
+mpu.dll: $(OBJS)
+	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
+    
 $(ODIR):
 	mkdir -p $@
 
 $(OBJS): | $(ODIR)
 
-$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
-	$(CC) -O0 -g -c $(SDLINC) $< -o $@
-
-mpu.dll: $(OBJS)
-	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
-    
 $(ODIR)/mpu.o: mpu.c mpu.h defines.h ../CoCo/fileops.h
 	$(CC) -c $(CCFLAGS) $< -o $@
 

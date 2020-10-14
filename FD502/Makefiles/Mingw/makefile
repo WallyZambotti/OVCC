@@ -1,10 +1,10 @@
 # change application name here (executable output name)
-TARGET=testlib
+TARGET=fd502.dll
  
 # compiler
-CC=gcc
+#CC=gcc
 # linker
-LD=gcc
+#LD=gcc
 # debug
 DEBUG=#-g
 # optimisation
@@ -33,20 +33,14 @@ LDFLAGS=-shared $(PTHREAD) $(LIBS) -Wl,--out-implib,libfd502.a
 _OBJS=	fd502.o distortc.o wd1793.o fileops.o iniman.o
 OBJS= $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-testlib: obj/testlib.o fd502.dll
-	$(LD) -o $@ $< $(SDLLIB) -Wl,--subsystem,console
-
+fd502.dll: $(OBJS)
+	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
+    
 $(ODIR):
 	mkdir -p $@
 
 $(OBJS): | $(ODIR)
 
-$(ODIR)/testlib.o: ../testlib.c | $(ODIR)
-	$(CC) -O0 -g -c $(SDLINC) $< -o $@
-
-fd502.dll: $(OBJS)
-	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@ 
-    
 $(ODIR)/fd502.o: fd502.c fd502.h distortc.h wd1793.h ../CoCo/fileops.h
 	$(CC) -c $(CCFLAGS) $< -o $@
     
