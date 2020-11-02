@@ -7194,6 +7194,7 @@ static unsigned short CalculateEAOLD(unsigned char postbyte)
 				ea = MemRead16(W_REG);
 				CycleCounter += 3;
 				break;
+		break;
 			case 1: // Indirect 16 bit offset from W reg
 				ea = MemRead16(W_REG + IMMADDRESS(PC_REG));
 				PC_REG += 2;
@@ -7414,7 +7415,7 @@ static unsigned short CalculateEA(unsigned char postbyte)
 		break;
 
 	case 15: // No offset from W reg
-		ea = W_REG;
+		return(W_REG);
 		break;
 
 	case 16: // Indirect no offset from W reg
