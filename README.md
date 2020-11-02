@@ -4,6 +4,10 @@ The portable and open Virtual Colo(u)r Computer. GNU General Public License.
 
 Developed from VCC 1.43 (2.01) by Joseph Forgione. GNU General Public License.
 
+Binaries for Linux and Windows can be downloaded from here:
+
+https://drive.google.com/drive/folders/1xL8jWnwWLKL9D6K5ZNHIYRGNySIipEKV?usp=sharing
+
 OVCC Dependancies:
 
 AGAR (libraries)
