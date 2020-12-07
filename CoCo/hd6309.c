@@ -6854,15 +6854,27 @@ void(*JmpVec3[256])(void) = {
 
 // Main CPU emu loop one loop for Normal Joystick and another for Hi-res joystick
 
+static void *process = NULL, *pendIntr, *execInst;
+
 int HD6309Exec(int CycleFor)
 {
 	CycleCounter = 0;
 	gCycleFor = CycleFor;
+	if (process == NULL) 
+	{
+		process = &&execinst;
+		pendIntr = &&pendintr;
+		execInst = &&execinst;
+	}
 
 	while (CycleCounter < CycleFor) {
-
-		if (PendingInterupts)
-		{
+		
+		// Will goto either pendintr or execinst
+		goto *process;
+pendintr:
+		// write(0, ".", 1);
+		//if (PendingInterupts)
+		//{
 			if (PendingInterupts & 4)
 				cpu_nmi();
 
@@ -6876,11 +6888,11 @@ int HD6309Exec(int CycleFor)
 				else				// The IRQ is asserted.
 					IRQWaiter -= 1;
 			}
-		}
+		//}
 
-		if (SyncWaiting == 1)	//Abort the run nothing happens asyncronously from the CPU
-			return(0); // WDZ - Experimental SyncWaiting should still return used cycles (and not zero) by breaking from loop
-
+		// if (SyncWaiting == 1)	//Abort the run nothing happens asyncronously from the CPU
+		// 	return(0); // WDZ - not required because CycleCounter is set to CycleFor whenever SyncWaiting is set to 1
+execinst:
 		JmpVec1[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 	}//End While
 
@@ -7007,6 +7019,7 @@ void cpu_firq(void)
 		}
 	}
 	PendingInterupts=PendingInterupts & 253;
+	if (PendingInterupts == 0)  process = execInst; else process = pendIntr;
 	return;
 }
 
@@ -7038,6 +7051,7 @@ void cpu_irq(void)
 		cc[I]=1; 
 	} //Fi I test
 	PendingInterupts=PendingInterupts & 254;
+	if (PendingInterupts == 0)  process = execInst; else process = pendIntr;
 	return;
 }
 
@@ -7065,6 +7079,7 @@ void cpu_nmi(void)
 	cc[F]=1;
 	PC_REG=MemRead16(VNMI);
 	PendingInterupts=PendingInterupts & 251;
+	if (PendingInterupts == 0)  process = execInst; else process = pendIntr;
 	return;
 }
 
@@ -8165,6 +8180,8 @@ void HD6309AssertInterupt(unsigned char Interupt,unsigned char waiter)// 4 nmi 2
 {
 	SyncWaiting=0;
 	PendingInterupts=PendingInterupts | (1<<(Interupt-1));
+	process = pendIntr;
+	//write(0, "+", 1);
 	IRQWaiter=waiter;
 	return;
 }
@@ -8172,6 +8189,8 @@ void HD6309AssertInterupt(unsigned char Interupt,unsigned char waiter)// 4 nmi 2
 void HD6309DeAssertInterupt(unsigned char Interupt)// 4 nmi 2 firq 1 irq
 {
 	PendingInterupts=PendingInterupts & ~(1<<(Interupt-1));
+	if (PendingInterupts == 0)  process = execInst; else process = pendIntr;
+	//write(0, "-", 1);
 	InInterupt=0;
 	return;
 }
@@ -8233,13 +8252,14 @@ unsigned char GetSorceReg(unsigned char Tmp)
 	unsigned char Translate[]={0,0};
 	if ( (Source & 8) == (Dest & 8) ) //like size registers
 		return(Source );
-return(0);
+	return(0);
 }
 
 void HD6309ForcePC(unsigned short NewPC)
 {
 	PC_REG=NewPC;
 	PendingInterupts=0;
+	process = execInst;
 	SyncWaiting=0;
 	return;
 }
