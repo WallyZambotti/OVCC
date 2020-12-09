@@ -349,7 +349,7 @@ void DoHardReset(SystemState2* const HRState)
 	CPUReset();		// Zero all CPU Registers and sets the PC to VRESET
 	GimeResetAGAR();
 	UpdateBusPointer();
-	EmuState2.TurboSpeedFlag=1;
+	EmuState2.DoubleSpeedFlag=0;
 	EmuState2.TurboSpeedFlag=1;
 	ResetBus();
 	SetClockSpeed(1);

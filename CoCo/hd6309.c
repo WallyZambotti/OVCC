@@ -6854,7 +6854,9 @@ void(*JmpVec3[256])(void) = {
 
 // Main CPU emu loop one loop for Normal Joystick and another for Hi-res joystick
 
+void dummyinterupt(void) {}
 static void *process = NULL, *pendIntr, *execInst;
+void (*pendingnmi)(void) = dummyinterupt, (*pendingfirq)(void) = dummyinterupt, (*pendingirq)(void) = dummyinterupt;
 
 int HD6309Exec(int CycleFor)
 {
@@ -6867,31 +6869,22 @@ int HD6309Exec(int CycleFor)
 		execInst = &&execinst;
 	}
 
-	while (CycleCounter < CycleFor) {
-		
+	if (SyncWaiting == 1)	//Abort the run nothing happens asyncronously from the CPU
+	{
+		pendingnmi();
+		pendingfirq();
+		pendingirq();
+		return(0);	// is required because syncwaiting persists between calls to this function
+					// so while SyncWaiting only Pending Interupts are checked
+	}
+
+	while (CycleCounter < CycleFor) {	
 		// Will goto either pendintr or execinst
 		goto *process;
 pendintr:
-		// write(0, ".", 1);
-		//if (PendingInterupts)
-		//{
-			if (PendingInterupts & 4)
-				cpu_nmi();
-
-			if (PendingInterupts & 2)
-				cpu_firq();
-
-			if (PendingInterupts & 1)
-			{
-				if (IRQWaiter == 0)	// This is needed to fix a subtle timming problem
-					cpu_irq();		// It allows the CPU to see $FF03 bit 7 high before
-				else				// The IRQ is asserted.
-					IRQWaiter -= 1;
-			}
-		//}
-
-		// if (SyncWaiting == 1)	//Abort the run nothing happens asyncronously from the CPU
-		// 	return(0); // WDZ - not required because CycleCounter is set to CycleFor whenever SyncWaiting is set to 1
+		pendingnmi();
+		pendingfirq();
+		pendingirq();
 execinst:
 		JmpVec1[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 	}//End While
@@ -6977,7 +6970,7 @@ void Page_3(void) //11
 
 void cpu_firq(void)
 {
-	
+	/* write(0, "F", 1); */
 	if (!cc[F])
 	{
 		InInterupt=1; //Flag to indicate FIRQ has been asserted
@@ -7020,6 +7013,7 @@ void cpu_firq(void)
 	}
 	PendingInterupts=PendingInterupts & 253;
 	if (PendingInterupts == 0)  process = execInst; else process = pendIntr;
+	pendingfirq = dummyinterupt;
 	return;
 }
 
@@ -7027,6 +7021,7 @@ void cpu_irq(void)
 {
 	if (InInterupt==1) //If FIRQ is running postpone the IRQ
 		return;			
+	/* write(0, "I", 1); */
 	if ((!cc[I]) )
 	{
 		cc[E]=1;
@@ -7052,11 +7047,13 @@ void cpu_irq(void)
 	} //Fi I test
 	PendingInterupts=PendingInterupts & 254;
 	if (PendingInterupts == 0)  process = execInst; else process = pendIntr;
+	pendingirq = dummyinterupt;
 	return;
 }
 
 void cpu_nmi(void)
 {
+	/* write(0, "N", 1); */
 	cc[E]=1;
 	MemWrite8( pc.B.lsb,--S_REG);
 	MemWrite8( pc.B.msb,--S_REG);
@@ -7080,6 +7077,7 @@ void cpu_nmi(void)
 	PC_REG=MemRead16(VNMI);
 	PendingInterupts=PendingInterupts & 251;
 	if (PendingInterupts == 0)  process = execInst; else process = pendIntr;
+	pendingnmi = dummyinterupt;
 	return;
 }
 
@@ -8175,12 +8173,21 @@ unsigned char getmd(void)
 			binmd=binmd | (1<<bit);
 		return(binmd);
 }
+
+void interuptwaiter(void)
+{
+	pendingirq = cpu_irq;
+}
 	
 void HD6309AssertInterupt(unsigned char Interupt,unsigned char waiter)// 4 nmi 2 firq 1 irq
 {
 	SyncWaiting=0;
 	PendingInterupts=PendingInterupts | (1<<(Interupt-1));
 	process = pendIntr;
+	/* printf("[%x]", Interupt); fflush(stdout); */
+	if (Interupt == 3) { pendingnmi = cpu_nmi; /* write(0, "n", 1); */ }
+	if (Interupt == 2) { pendingfirq = cpu_firq; /* write(0, "f", 1); */ }
+	if (Interupt == 1) { /* write(0, "i", 1); */ if (waiter) pendingirq = interuptwaiter; else pendingirq = cpu_irq; }
 	//write(0, "+", 1);
 	IRQWaiter=waiter;
 	return;
@@ -8191,6 +8198,9 @@ void HD6309DeAssertInterupt(unsigned char Interupt)// 4 nmi 2 firq 1 irq
 	PendingInterupts=PendingInterupts & ~(1<<(Interupt-1));
 	if (PendingInterupts == 0)  process = execInst; else process = pendIntr;
 	//write(0, "-", 1);
+	if (Interupt == 3) pendingnmi = dummyinterupt; 
+	if (Interupt == 2) pendingfirq = dummyinterupt; 
+	if (Interupt == 1) pendingirq = dummyinterupt; 
 	InInterupt=0;
 	return;
 }
@@ -8259,7 +8269,8 @@ void HD6309ForcePC(unsigned short NewPC)
 {
 	PC_REG=NewPC;
 	PendingInterupts=0;
-	process = execInst;
+	pendingirq = pendingfirq = pendingnmi = dummyinterupt;
+	//process = execInst;
 	SyncWaiting=0;
 	return;
 }
