@@ -8181,26 +8181,32 @@ void interuptwaiter(void)
 	
 void HD6309AssertInterupt(unsigned char Interupt,unsigned char waiter)// 4 nmi 2 firq 1 irq
 {
-	SyncWaiting=0;
-	PendingInterupts=PendingInterupts | (1<<(Interupt-1));
-	process = pendIntr;
 	/* printf("[%x]", Interupt); fflush(stdout); */
-	if (Interupt == 3) { pendingnmi = cpu_nmi; /* write(0, "n", 1); */ }
-	if (Interupt == 2) { pendingfirq = cpu_firq; /* write(0, "f", 1); */ }
-	if (Interupt == 1) { /* write(0, "i", 1); */ if (waiter) pendingirq = interuptwaiter; else pendingirq = cpu_irq; }
+	switch (Interupt)
+	{
+		case 1: if (waiter) pendingirq = interuptwaiter; else pendingirq = cpu_irq; PendingInterupts |= 0x01; break;
+		case 2: pendingfirq = cpu_firq; PendingInterupts |= 0x02; break;
+		case 3: pendingnmi = cpu_nmi; PendingInterupts |= 0x04; break;
+		default: break;
+	}
 	//write(0, "+", 1);
 	IRQWaiter=waiter;
+	SyncWaiting=0;
+	process = pendIntr;
 	return;
 }
 
 void HD6309DeAssertInterupt(unsigned char Interupt)// 4 nmi 2 firq 1 irq
 {
-	PendingInterupts=PendingInterupts & ~(1<<(Interupt-1));
-	if (PendingInterupts == 0)  process = execInst; else process = pendIntr;
 	//write(0, "-", 1);
-	if (Interupt == 3) pendingnmi = dummyinterupt; 
-	if (Interupt == 2) pendingfirq = dummyinterupt; 
-	if (Interupt == 1) pendingirq = dummyinterupt; 
+	switch (Interupt)
+	{
+		case 1: pendingirq = dummyinterupt; PendingInterupts &= 0xFE; break;
+		case 2: pendingfirq = dummyinterupt; PendingInterupts &= 0xFD; break;
+		case 3: pendingnmi = dummyinterupt; PendingInterupts &= 0xFB; break;
+		default: break;
+	}
+	if (PendingInterupts == 0)  process = execInst; else process = pendIntr;
 	InInterupt=0;
 	return;
 }
