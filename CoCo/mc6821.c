@@ -148,7 +148,7 @@ void pia0_write(unsigned char data,unsigned char port)
 		if (dda)
 		{
 			rega[port]=data;
-			fprintf(stdout, "%2x  ", data); fflush(stdout);
+			//fprintf(stdout, "%2x  ", data); fflush(stdout);
 		}
 		else
 		{
