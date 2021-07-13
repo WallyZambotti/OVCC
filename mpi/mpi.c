@@ -196,10 +196,10 @@ void ADDCALL ModuleConfig(unsigned char func)
 void ADDCALL AssertInterupt(ASSERTINTERUPT Dummy)
 {
 	AssertInt=Dummy;
-	for (Temp=0;Temp<4;Temp++)
+	for (int modidx=0;modidx<4;modidx++)
 	{
-		if(SetInteruptCallPointerCalls[Temp] !=NULL)
-			SetInteruptCallPointerCalls[Temp](AssertInt);
+		if(SetInteruptCallPointerCalls[modidx] !=NULL)
+			SetInteruptCallPointerCalls[modidx](AssertInt);
 	}
 	return;
 }
@@ -232,11 +232,11 @@ unsigned char ADDCALL PackPortRead(unsigned char Port)
 	}
 
 	Temp2=0;
-	for (Temp=0;Temp<4;Temp++)
+	for (int modidx=0;modidx<4;modidx++)
 	{
-		if ( PakPortReadCalls[Temp] !=NULL)
+		if ( PakPortReadCalls[modidx] !=NULL)
 		{
-			Temp2=PakPortReadCalls[Temp](Port); //Find a Module that return a value 
+			Temp2=PakPortReadCalls[modidx](Port); //Find a Module that return a value 
 			if (Temp2!= 0)
 				return(Temp2);
 		}
@@ -246,9 +246,9 @@ unsigned char ADDCALL PackPortRead(unsigned char Port)
 
 void ADDCALL HeartBeat(void)
 {
-	for (Temp=0;Temp<4;Temp++)
-		if (HeartBeatCalls[Temp] != NULL)
-			HeartBeatCalls[Temp]();
+	for (int modidx=0;modidx<4;modidx++)
+		if (HeartBeatCalls[modidx] != NULL)
+			HeartBeatCalls[modidx]();
 	return;
 }
 
@@ -286,12 +286,12 @@ void ADDCALL ModuleStatus(char *MyStatus)
 {
 	char TempStatus[64]="";
 	sprintf(MyStatus,"MPI:%i,%i",ChipSelectSlot,SpareSelectSlot);
-	for (Temp=0;Temp<4;Temp++)
+	for (int modidx=0;modidx<4;modidx++)
 	{
 		strcpy(TempStatus,"");
-		if (ModuleStatusCalls[Temp] != NULL)
+		if (ModuleStatusCalls[modidx] != NULL)
 		{
-			ModuleStatusCalls[Temp](TempStatus);
+			ModuleStatusCalls[modidx](TempStatus);
 			strcat(MyStatus,"|");
 			strcat(MyStatus,TempStatus);
 		}
@@ -302,9 +302,9 @@ void ADDCALL ModuleStatus(char *MyStatus)
 unsigned short ADDCALL ModuleAudioSample(void)
 {
 	unsigned short TempSample=0;
-	for (Temp=0;Temp<4;Temp++)
-		if (ModuleAudioSampleCalls[Temp] != NULL)
-			TempSample+=ModuleAudioSampleCalls[Temp]();
+	for (int modidx=0;modidx<4;modidx++)
+		if (ModuleAudioSampleCalls[modidx] != NULL)
+			TempSample+=ModuleAudioSampleCalls[modidx]();
 		
 	return(TempSample) ;
 }
@@ -313,32 +313,32 @@ unsigned char ADDCALL ModuleReset(void)
 {
 	ChipSelectSlot=SwitchSlot;	
 	SpareSelectSlot=SwitchSlot;	
-	for (Temp=0;Temp<4;Temp++)
+	for (int modidx=0;modidx<4;modidx++)
 	{
 		BankedCartOffset[Temp]=0; //Do I need to keep independant selects?
 		
-		if (SetInteruptCallPointerCalls[Temp] !=NULL)
-			SetInteruptCallPointerCalls[Temp](AssertInt);
+		if (SetInteruptCallPointerCalls[modidx] !=NULL)
+			SetInteruptCallPointerCalls[modidx](AssertInt);
 
-		if (DmaMemPointerCalls[Temp] !=NULL)
-			DmaMemPointerCalls[Temp](MemRead8,MemWrite8);
+		if (DmaMemPointerCalls[modidx] !=NULL)
+			DmaMemPointerCalls[modidx](MemRead8,MemWrite8);
 
-		if (MmuMemPointerCalls[Temp] !=NULL)
-			MmuMemPointerCalls[Temp](MmuRead8,MmuWrite8);
+		if (MmuMemPointerCalls[modidx] !=NULL)
+			MmuMemPointerCalls[modidx](MmuRead8,MmuWrite8);
 
-		if (Temp == ChipSelectSlot)
-			if (PakRomShareCalls[Temp] != NULL)
-				PakRomShareCalls[Temp](PakRomAddr);
+		if (modidx == ChipSelectSlot)
+			if (PakRomShareCalls[modidx] != NULL)
+				PakRomShareCalls[modidx](PakRomAddr);
 		
 		//PakRomShareCalls[Temp] = NULL;
 
-		if (ModuleResetCalls[Temp] !=NULL)
-			ModuleResetCalls[Temp]();
+		if (ModuleResetCalls[modidx] !=NULL)
+			ModuleResetCalls[modidx]();
 
 		//ModuleResetCalls[Temp] = NULL;
 
-		if (PakRomAddr != NULL && ExtRomPointers[Temp] != NULL && ExtRomSizes[Temp] != 0)
-			memcpy(PakRomAddr, ExtRomPointers[Temp], ExtRomSizes[Temp]);
+		if (PakRomAddr != NULL && ExtRomPointers[modidx] != NULL && ExtRomSizes[modidx] != 0)
+			memcpy(PakRomAddr, ExtRomPointers[modidx], ExtRomSizes[modidx]);
 	}
 	PakSetCart(0);
 	if (CartForSlot[SpareSelectSlot]==1)
@@ -629,9 +629,9 @@ void LoadConfig(void)
 	GetPrivateProfileString(ModName,"SLOT4","",ModulePaths[3],MAX_PATH,IniFile);
 	CheckPath(ModulePaths[3]);
 	BuildMenu();
-	for (Temp=0;Temp<4;Temp++)
-		if (strlen(ModulePaths[Temp]) !=0)
-			MountModule(Temp, ModulePaths[Temp]);
+	for (int modidx=0;modidx<4;modidx++)
+		if (strlen(ModulePaths[modidx]) !=0)
+			MountModule(modidx, ModulePaths[modidx]);
 	//RetriggerModuleShare();
 	return;
 }

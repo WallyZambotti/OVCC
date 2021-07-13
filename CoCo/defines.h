@@ -87,6 +87,7 @@ typedef struct
     AG_Window       *agwin;
     AG_Pixmap       *fx;
     AG_Thread       emuThread;
+    AG_Thread       cpuThread;
     Uint16          Rendering;
     Uint16          Resizing;
     void            *Pixels;

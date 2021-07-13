@@ -1,5 +1,6 @@
 Exec/
 CoCo/ovcc
+CoCo/ovcc-isocpu
 */obj
 */lib*.so
 */testlib
@@ -23,3 +24,4 @@ Exec15/
 Exec16/
 vhds/
 testlib
+

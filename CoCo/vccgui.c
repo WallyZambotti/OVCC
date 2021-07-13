@@ -32,7 +32,7 @@ This file is part of VCC (Virtual Color Computer).
 
 int redrawfx = 0;
 
-void SetStatusBarText(const char *, SystemState2 *);
+void SetStatusBarText(const char *);
 
 extern STRConfig CurrentConfig;
 extern JoyStick	LeftSDL;
@@ -891,7 +891,7 @@ void PrintMonitorChange(AG_Event *event)
     BitBangerConfigPrintMonitor(PrintMonitor);
 }
 
-void SetStatusBarText(const char *text, SystemState2 *STState)
+void SetStatusBarText(const char *text)
 {
     AG_LabelText(status, "%s", text);
 }
@@ -1627,7 +1627,7 @@ void About(AG_Event *ev)
     AG_WindowSetCloseAction(AboutWin, AG_WINDOW_HIDE);
 
 	AG_Label *lbl = AG_LabelNewPolled(AboutWin, AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
-        "OVCC 1.4.0\n"
+        "OVCC 1.5.0\n"
         "Walter Zambotti\n"
         "using AGAR 1.6.0 GUI\n"
         "Forked from VCC 2.01B (1.43)\n"
@@ -1703,8 +1703,6 @@ void ButtonDownUp(AG_Event *event)
 void LockTexture(AG_Event *event)
 {
     SystemState2 *SState = AG_PTR(1);
-    write(0, ".", 1);
-//     fprintf(stderr, "2(%2.3f)", timems());
 }
 
 void WindowDetached(AG_Event *event)
@@ -1714,7 +1712,9 @@ void WindowDetached(AG_Event *event)
     SystemState2 *SState = AG_PTR(1);
 
     AG_ThreadCancel(SState->emuThread);
-
+#ifdef ISOCPU
+    AG_ThreadCancel(SState->cpuThread);
+#endif
 	SState->Pixels = NULL;
     SState->EmulationRunning = 0;
     

@@ -185,7 +185,19 @@ int main(int argc, char **argv)
 	}
 
 	EmuState2.emuThread = threadID;
-	
+
+#ifdef ISOCPU
+	extern void CPUloop(SystemState2 *);
+	if (AG_ThreadTryCreate(&threadID, CPUloop, &EmuState2) != 0)
+	{
+		fprintf(stderr, "Can't Start CPU Thread!\n");
+		return(0);
+	}
+#endif
+
+	EmuState2.cpuThread = threadID;
+
+
     AG_EventLoop();
 	
 	EmuState2.Pixels = NULL;
@@ -208,7 +220,7 @@ void DoHardResetF9()
 	if ( EmuState2.EmulationRunning )
 		EmuState2.ResetPending=2;
 	else
-		SetStatusBarText("",&EmuState2);
+		SetStatusBarText("");
 }
 
 void DoSoftReset()
@@ -335,7 +347,6 @@ void DoHardReset(SystemState2* const HRState)
 			case 1: CPUExec=HD6309ExecHiRes; /* fprintf(stdout, "CPU Exec Hi-Res\n"); */ break;
 			default: CPUExec=HD6309Exec; /* fprintf(stdout, "CPU Exec\n"); */ break;
 		}
-		CPUExec=HD6309Exec;
 		CPUReset=HD6309Reset;
 		CPUAssertInterupt=HD6309AssertInterupt;
 		CPUDeAssertInterupt=HD6309DeAssertInterupt;
@@ -545,13 +556,13 @@ void EmuLoop(void)
 		}
 
 		EndRender(EmuState2.FrameSkip);
-		FPS = FPS != 0 ? FPS/EmuState2.FrameSkip : GetCurrentFPS()/EmuState2.FrameSkip;
+		FPS = FPS != 0.0 ? FPS/EmuState2.FrameSkip : GetCurrentFPS()/EmuState2.FrameSkip;
 		GetModuleStatus(&EmuState2);
 
 		// Update status bar
 
 		char tmpbuf[256];
-		sprintf(ttbuff, "Skip:%2.2i|FPS:%3.0f|%s%s%s@%3.2fMhz", EmuState2.FrameSkip,FPS,CpuName,NatEmuStat,MMUStat,EmuState2.CPUCurrentSpeed);
+		sprintf(ttbuff, "FPS:%3.0f|%s%s%s@%3.2fMhz", FPS,CpuName,NatEmuStat,MMUStat,EmuState2.CPUCurrentSpeed);
 
 		if(showLeftJoystickValues)
 		{
@@ -575,12 +586,14 @@ void EmuLoop(void)
 		sprintf(ttbuff,"%s|%s", tmpbuf,EmuState2.StatusLine);
 		SetStatusBarText(ttbuff, &EmuState2);
 
+#ifndef ISOCPU
 		if (Throttle)	//Do nothing until the frame is over returning unused time to OS
 		{
     		//fprintf(stderr, "4(%2.3f)", timems());
 			FrameWait();
     		//fprintf(stderr, "5(%2.3f)-", timems());
 		}
+#endif
 	} //Still Emulating
 	return;
 }
