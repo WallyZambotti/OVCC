@@ -12,7 +12,7 @@ OVCC Dependancies:
 
 AGAR (libraries)
 
-The binary library for Windows are available frmo the AGAR download site. https://libagar.org/download.html
+The binary library for Windows are available from the AGAR download site. https://libagar.org/download.html
 
 The binary libraries for Ubuntu 18.04 & 20.04 are available from:
 
