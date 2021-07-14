@@ -42,6 +42,19 @@ export TARGETARCH = AMD  # options are AMD (Intel) or ARM
 
 Then make.
 
+------------
+
+To make the isolated CPU version you will need to follow these manual steps:
+
+1. After completeling a success make.
+2. cd into the CoCo dir (cd CoCo)
+3. rm obj/coco3.o obj/vcc.o obj/vccgui.o
+4. make -f Makefiles/Linux/makefile-isocpu
+
+The executable ovcc-isocpu should be created.
+
+------------
+
 After OVCC and all device libraries are built OVCC needs to be able to find the libraries.  The easiest approach is to copy the ovcc(.exe) executable to a clean directory and place the libraries in a sub directory of that folder.
 
 There are some required roms to get OVCC working and these are compatible with VCC roms. (Not supplied)  They should be in same directory as the ovcc executable.  Optional roms can be placed in a roms sub directory.
