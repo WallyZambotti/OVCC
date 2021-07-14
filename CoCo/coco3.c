@@ -159,7 +159,6 @@ float RenderFrame (SystemState2 *RFState2, unsigned long DCnt)
 	static unsigned short FrameCounter = 0;
 	unsigned long long StartTime, EndTime, TargetTime;
     static volatile long finetune=0;
-	static int fineinc = 10;
 	//WriteLog("RF ", TOCONS);
 	//fprintf(stderr, ".");
 	DC = DCnt;
@@ -254,8 +253,7 @@ float RenderFrame (SystemState2 *RFState2, unsigned long DCnt)
 
 	if (fps > 0.1)
 	{
-		fineinc = (60.0 - fps) * 10.0;
-		finetune+=fineinc;
+		finetune+=(60.0 - fps) * 10.0;
 	}
 
 	//fprintf(stderr, "fps %2.1f - ft %ld - i %d\n", fps, finetune, fineinc);
