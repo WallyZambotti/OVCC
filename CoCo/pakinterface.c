@@ -146,7 +146,8 @@ void ResetBus(void)
 	}
 	if (ExternalRomBuffer != NULL && ExternROMsize != 0)
 	{
-		memcpy(GetPakExtMem(), ExternalRomBuffer, ExternROMsize);
+		unsigned char ptrpakmem = GetPakExtMem();
+		if (ptrpakmem != NULL) { memcpy(GetPakExtMem(), ExternalRomBuffer, ExternROMsize); }
 	}
 	return;
 }
