@@ -52,7 +52,7 @@ static INIfile *recordFile(char *filename)
 {
     if (iniman->fileCnt % FILEBUCKETSIZE == 0) 
     {
-        iniman->files = realloc(iniman->files, FILEBUCKETSIZE * sizeof(INIman));
+        iniman->files = realloc(iniman->files, FILEBUCKETSIZE * sizeof(INIman) * (int)(iniman->fileCnt/FILEBUCKETSIZE+1));
     }
 
     iniman->files[iniman->fileCnt].name = strdup(filename);
@@ -69,7 +69,7 @@ static INIsection *recordSection(INIfile *inifile, char *section)
 {
     if (inifile->sectionCnt % SECTIONBUCKETSIZE == 0) 
     {
-        inifile->sections = realloc(inifile->sections, SECTIONBUCKETSIZE * sizeof(INIsection));
+        inifile->sections = realloc(inifile->sections, SECTIONBUCKETSIZE * sizeof(INIsection) * (int)(inifile->sectionCnt/SECTIONBUCKETSIZE+1));
     }
         
     inifile->sections[inifile->sectionCnt].name = strdup(section);
@@ -83,7 +83,7 @@ static void *recordEntry(INIsection *section, char *name, char *value)
 {
     if (section->entryCnt % ENTRYBUCKETSIZE == 0)
     {
-        section->entries = realloc(section->entries, ENTRYBUCKETSIZE * sizeof(INIentry));
+        section->entries = realloc(section->entries, ENTRYBUCKETSIZE * sizeof(INIentry) * (int)(section->entryCnt/ENTRYBUCKETSIZE+1));
     }
 
     section->entries[section->entryCnt].name = strdup(name);
@@ -248,7 +248,7 @@ static INIfile *searchFile(char *filename)
 
     for (ifile = 0 ; ifile < iniman->fileCnt ; ifile++)
     {
-        if (! strcmp(iniman->files[ifile].name, filename))
+        if (iniman->files[ifile].name != NULL && !strcmp(iniman->files[ifile].name, filename))
         {
             iniman->lastfile = ifile;
             return (&iniman->files[ifile]);
