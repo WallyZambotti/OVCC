@@ -149,19 +149,19 @@ libglu1-mesa-dev (provides glu.h)
 
 These other optional dependencies may also be usefull:
 
-libfreetype6-dev (very useful)
+```libfreetype6-dev (very useful)
 libfontconfig-dev (very useful)
 libjpeg8-dev (very useful)
 libjpeg8-turbo-dev (very useful)
 libpng-dev (very useful)
-libxinerama-dev  (optional)
+libxinerama-dev  (optional)```
 
 Once all these dependencies have been added there is no need to change the AGAR configure. Just do this :
 
-$ cd libagar
+```$ cd libagar
 $ export CFLAGS=-O2
 $ ./configure
 $ make
-$ sudo make install
+$ sudo make install```
 
 (The export CFLAGS will ensure the build is performed with compiler optimizations.)
