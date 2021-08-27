@@ -301,6 +301,7 @@ keytranslationentry_t keyTranslationsNaturalAGAR[] =
 
 //	{ AG_KEY_SCROLL,     0,              1,     0,    64,    7 }, //   SCROLL (CoCo SHIFT @)
 
+	{ AG_KEY_RALT,       0,              1,     0,     0,    0 }, //   @
 	{ AG_KEY_LALT,       0,             64,     3,     0,    0 }, //   ALT
 	{ AG_KEY_LCTRL,   0,             64,     4,     0,    0 }, //   CTRL
 	{ AG_KEY_LSHIFT,     0,             64,     7,     0,    0 }, //   SHIFT (the code converts AG_KEY_RSHIFT to AG_KEY_LSHIFT)
