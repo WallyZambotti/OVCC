@@ -34,15 +34,9 @@ Build AGAR as per AGAR documentation with the exception/addition of the configur
 
 Compiling OVCC
 
-Once AGAR 1.6.0 and SDL2 are installed clone this OVCC repository change into the top directory and locate the makefile.
+Once AGAR 1.6.0 and SDL2 are installed clone this OVCC repository change into the top directory make.
   
-Edit the two first lines of the makefile to reflect you environment:
-  
-export TARGETOS = Linux  # options are Linux or Mingw
-
-export TARGETARCH = AMD  # options are AMD (Intel) or ARM
-
-Then make.
+$ make
 
 ------------
 
@@ -155,6 +149,8 @@ libjpeg8-dev (very useful)
 libjpeg8-turbo-dev (very useful)
 libpng-dev (very useful)
 libxinerama-dev  (optional)
+libsndio-dev
+libsndio6.1 (or 6,  SDL2 will not work with version 7)
 ```
 
 Once all these dependencies have been added there is no need to change the AGAR configure. Just do this :
