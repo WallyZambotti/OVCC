@@ -1,15 +1,14 @@
 TOS:=$(shell uname -s)
 export TARGETOS = $(TOS)
-export TARGETARCH = ARM # ARM or AMD
 
 DIRS = CoCo becker FD502 HardDisk mpi orch90 Ramdisk SuperIDE
 
 ifeq ($(TARGETOS),Linux)
-DIRS = CoCo becker FD502 HardDisk mpi orch90 Ramdisk SuperIDE mpu
+DIRS := $(DIRS) mpu
 endif
 
 ifeq ($(TARGETOS),Darwin)
-DIRS = CoCo becker FD502 HardDisk mpi orch90 Ramdisk SuperIDE mpu
+DIRS = := $(DIRS) mpu
 endif
 
 .PHONY: all subdirs $(DIRS)
