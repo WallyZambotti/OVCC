@@ -95,10 +95,10 @@ unsigned char read_time(unsigned short port)
 		ret_val = now->tm_mday /10;
 		break;
 		case 8:
-		ret_val = now->tm_mon % 10;
+		ret_val = (now->tm_mon+1) % 10;
 		break;
 		case 9:
-		ret_val = now->tm_mon /10 ;
+		ret_val = (now->tm_mon+1) /10 ;
 		break;
 		case 0xA:
 		ret_val = now->tm_year%10;
