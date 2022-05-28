@@ -34,15 +34,9 @@ Build AGAR as per AGAR documentation with the exception/addition of the configur
 
 Compiling OVCC
 
-Once AGAR 1.6.0 and SDL2 are installed clone this OVCC repository change into the top directory and locate the makefile.
+Once AGAR 1.6.0 and SDL2 are installed clone this OVCC repository change into the top directory make.
   
-Edit the two first lines of the makefile to reflect you environment:
-  
-export TARGETOS = Linux  # options are Linux or Mingw
-
-export TARGETARCH = AMD  # options are AMD (Intel) or ARM
-
-Then make.
+$ make
 
 ------------
 
@@ -136,7 +130,7 @@ http://ds4windows.com
 
 Mac developers need to be aware that OVCC uses the cocoa graphics driver.  This means that if ovcc is started from a terminal the keyboard I/O will not be directed to the application but will instead remain with the terminal that started ovcc.
 
-To overcome this ovcc should be started from a bundle.  If you don't know how to package a Mac application into a bundle then download the Mac executable bundle located via the first link in this readme.  The bundle can be opened (browsed) and the ovcc exectable (and or libraries) can be replaced with a new ovcc (with simple drag and drop).  After substituting the executable the bundle can be closed and the bundle icon double clicked to start ovcc.  There is problably a way to get Mac xcode to create a bundle but, as I am not a Mac developer, I couldn't figure it out.
+To overcome this ovcc should be started from a bundle.  The ovcc repo now provides support for building on Mac OS using xCode. Install xCode and the xCode developement extension tools.  Use brew to install the necessary libraries as described on the LIB AGAR site. Build AGAR as well.  Install the dylibbuilder uitility found here: https://github.com/auriamg/macdylibbundler.git and apply the fix found here: https://github.com/auriamg/macdylibbundler/issues/77.  I found it quite tricky to setup xCode to make it build and install OVCC.  It requires creating targets and editing the schema.  It is easer to just do it from a terminal.  If everything builds cleanly then make install will build the bundle.  Launch OVCC by double clicking on the ovcc.app (bundle) file.  The ovcc.app can be copied to the Applications folder.
 
 ------------
 
@@ -155,6 +149,8 @@ libjpeg8-dev (very useful)
 libjpeg8-turbo-dev (very useful)
 libpng-dev (very useful)
 libxinerama-dev  (optional)
+libsndio-dev
+libsndio6.1 (or 6,  SDL2 will not work with version 7)
 ```
 
 Once all these dependencies have been added there is no need to change the AGAR configure. Just do this :
