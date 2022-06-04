@@ -431,7 +431,7 @@ void CPUConfigSpeedInc(void)
 void CPUConfigSpeedDec(void)
 {
 	if (EmuState2.DoubleSpeedFlag == 0) return;
-	if (EmuState2.DoubleSpeedMultiplyer <= 1) return;
+	if (EmuState2.DoubleSpeedMultiplyer <= 2) return;
 	EmuState2.DoubleSpeedMultiplyer -= 1;
 	EmuState2.CPUCurrentSpeed = EmuState2.DoubleSpeedMultiplyer * 0.894;
 	SetClockSpeed(EmuState2.DoubleSpeedMultiplyer * EmuState2.TurboSpeedFlag);	

@@ -1626,19 +1626,32 @@ void About(AG_Event *ev)
     AG_WindowSetGeometryAligned(AboutWin, AG_WINDOW_ALIGNMENT_NONE, 500, 250);
     AG_WindowSetCloseAction(AboutWin, AG_WINDOW_HIDE);
 
-	AG_Label *lbl = AG_LabelNewPolled(AboutWin, AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
-        "OVCC 1.5.0\n"
+    AG_MPane *mpane = AG_MPaneNew(AboutWin, AG_MPANE1T2B, AG_MPANE_EXPAND|AG_MPANE_FORCE_DIV);
+
+    AG_Label *lbl1 = AG_LabelNewPolled(mpane->panes[0], AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
+        "OVCC 1.5.1\n"
         "Walter Zambotti\n"
         "using AGAR 1.6.0 GUI\n"
         "Forked from VCC 2.01B (1.43)\n"
         "Copy Righted Joseph Forgione (GNU General Public License)\n"
         "\n"
-        "Keyboard Shortcuts\n"
-        "F3 - Inc CPU Frequency   F4 - Dec CPU Frequency\n"
-        "F7 - Exit OVCC                  F12 - About\n"
-        "F5 - Soft Reset                  F9 - Hard Reset\n"
-        "F6 - Monitor Type             F10 - Fullscreen Status\n"
-        "F8 - Throttle                      F11 - Fullscreen\n"
+        "Keyboard Shortcuts"
+    );
+
+    AG_Label *lbl2 = AG_LabelNewPolled(mpane->panes[1], AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
+        "F3 - Inc CPU Frequency\n"
+        "F7 - Exit OVCC\n"
+        "F5 - Soft Reset\n"
+        "F6 - Monitor Type\n"
+        "F8 - Throttle"
+    );
+
+    AG_Label *lbl3 = AG_LabelNewPolled(mpane->panes[2], AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
+        "F4 - Dec CPU Frequency\n"
+        "F12 - About\n"
+        "F9 - Hard Reset\n"
+        "F10 - Fullscreen Status\n"
+        "F11 - Fullscreen"
     );
 
     AG_ActionFn(AboutWin, "F12", About, NULL);
