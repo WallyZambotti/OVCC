@@ -163,17 +163,29 @@ void LoadConf(AG_Event *event)
     AG_WindowShow(fdw);
 }
 
-int SaveIniFile(AG_Event *event)
+void SaveIniFile(AG_Event *event)
 {
     SystemState2 *state = AG_PTR(1);
 	char *file = AG_STRING(2);
 	AG_FileType *ft = AG_PTR(3);
 
     extern unsigned char SaveCurrentConfigToFile(char *);
+    extern char GlobalVccIniPath[256];
 
-    SaveCurrentConfigToFile(file);
+    if (strcmp(file, GlobalVccIniPath) == 0)
+    {
+        AG_TextMsg(AG_MSG_INFO, "Cannot overwrite primary ini file : Vcc.ini!");
+        return ;
+    }
 
-    AG_TextMsg(AG_MSG_INFO, "Config (ini) file saved!");
+    if(SaveCurrentConfigToFile(file))
+    {
+        AG_TextMsg(AG_MSG_INFO, "Config (ini) file saved!");
+    }
+    else 
+    {
+        AG_TextMsg(AG_MSG_INFO, "Could not save Config (ini) file!");        
+    }
 }
 
 void SaveConf(AG_Event *event)
@@ -1629,7 +1641,7 @@ void About(AG_Event *ev)
     AG_MPane *mpane = AG_MPaneNew(AboutWin, AG_MPANE1T2B, AG_MPANE_EXPAND|AG_MPANE_FORCE_DIV);
 
     AG_Label *lbl1 = AG_LabelNewPolled(mpane->panes[0], AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
-        "OVCC 1.5.1\n"
+        "OVCC 1.5.2\n"
         "Walter Zambotti\n"
         "using AGAR 1.6.0 GUI\n"
         "Forked from VCC 2.01B (1.43)\n"

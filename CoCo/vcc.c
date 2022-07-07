@@ -88,6 +88,7 @@ void (*SetDistoRamBank)(UINT8)=NULL;
 char *GlobalExecFolder;
 char *GlobalFullName;
 char *GlobalShortName;
+char GlobalVccIniPath[256];
 void HandleSDLevent(SDL_Event);
 void FullScreenToggleAGAR(void);
 void InvalidateBoarderAGAR(void);
@@ -117,6 +118,9 @@ int main(int argc, char **argv)
 		GlobalExecFolder = argv[0];
 		PathRemoveFileSpec(GlobalExecFolder);
 	}
+
+	strcpy(GlobalVccIniPath, GlobalExecFolder);
+	strcat(GlobalVccIniPath, "/Vcc.ini");
 
 	GlobalFullName = argv[0];
 

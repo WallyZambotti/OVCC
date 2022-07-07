@@ -540,6 +540,11 @@ bool DuplicatePrivateProfile(char *filename, char *newfilename)
 
     if (newinifile != NULL)
     {
+        if (newinifile == inifile)
+        {
+            fprintf(stderr, "iniman : cannot duplicate inifile to same inifile : %s\n", filename);
+            return false;
+        }
         freeINIfile(newinifile);
     }
     else
