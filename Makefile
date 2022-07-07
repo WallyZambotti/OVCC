@@ -8,7 +8,7 @@ DIRS := $(DIRS) mpu
 endif
 
 ifeq ($(TARGETOS),Darwin)
-DIRS = := $(DIRS) mpu
+DIRS := $(DIRS) mpu
 endif
 
 .PHONY: all subdirs $(DIRS)
