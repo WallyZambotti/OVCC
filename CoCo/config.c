@@ -66,7 +66,7 @@ static unsigned short int	Monchoice[2]={IDC_COMPOSITE,IDC_RGB};
 static unsigned char temp=0,temp2=0;
 static INIman *iniman = NULL;
 static char IniFileName[]="Vcc.ini";
-static char IniFilePath[MAX_PATH]="";
+char IniFilePath[MAX_PATH]="";
 static char TapeFileName[MAX_PATH]="";
 static char ExecDirectory[MAX_PATH]="";
 static char SerialCaptureFile[MAX_PATH]="";

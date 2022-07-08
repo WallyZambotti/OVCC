@@ -170,11 +170,13 @@ void SaveIniFile(AG_Event *event)
 	AG_FileType *ft = AG_PTR(3);
 
     extern unsigned char SaveCurrentConfigToFile(char *);
-    extern char GlobalVccIniPath[256];
+    extern unsigned char WriteIniFile(void);
+    extern char IniFilePath[MAX_PATH];
 
-    if (strcmp(file, GlobalVccIniPath) == 0)
+    if (strcmp(file, IniFilePath) == 0)
     {
-        AG_TextMsg(AG_MSG_INFO, "Cannot overwrite primary ini file : Vcc.ini!");
+        WriteIniFile();
+        AG_TextMsg(AG_MSG_INFO, "Config (ini) file saved!");
         return ;
     }
 
