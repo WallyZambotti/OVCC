@@ -10,7 +10,7 @@ endif
 ODIR = obj
 
 DEBUG=#-g
-OPT=-O2 # -flto # -Og
+OPT=-Ofast -march=native -flto # -Og
 WARN = -w # -Wall
 PTHREAD = -pthread
 
