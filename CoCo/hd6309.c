@@ -6862,13 +6862,16 @@ int HD6309Exec(int CycleFor)
 {
 	CycleCounter = 0;
 	gCycleFor = CycleFor;
-	if (process == NULL) 
-	{
-		process = &&execinst;
-		pendIntr = &&pendintr;
-		execInst = &&execinst;
-	}
+	static void *setup = &&setup;
 
+	goto *setup;
+setup:
+	process = &&execinst;
+	pendIntr = &&pendintr;
+	execInst = &&execinst;
+	setup = &&skipsetup;
+
+skipsetup:
 	if (SyncWaiting == 1)	//Abort the run nothing happens asyncronously from the CPU
 	{
 		pendingnmi();
