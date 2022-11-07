@@ -6864,6 +6864,7 @@ int HD6309Exec(int CycleFor)
 	gCycleFor = CycleFor;
 	static void *setup = &&setup;
 
+	// goto trick to cause setup code to excute only once without conditional
 	goto *setup;
 setup:
 	process = &&execinst;
@@ -6872,22 +6873,26 @@ setup:
 	setup = &&skipsetup;
 
 skipsetup:
+	// SyncWaiting can be moved here outside the main loop because instructions like Sync_I()
+	// will set CycleCounter=gCycleFor causing the main loop to exit immediately
+
 	if (SyncWaiting == 1)	//Abort the run nothing happens asyncronously from the CPU
 	{
-		pendingnmi();
-		pendingfirq();
-		pendingirq();
-		return(0);	// is required because syncwaiting persists between calls to this function
-					// so while SyncWaiting only Pending Interupts are checked
+		pendingnmi();  // if not dummyinterupt will be set to cpu_mni()
+		pendingfirq(); // if not dummyinterupt will be set to cpu_firq()
+		pendingirq();  // if not dummyinterupt will either be set to interuptwaiter() or 
+					   // cpu_irq() depending on waiter value in HD6309AssertInterupt()
+		return(0);	   // is required because syncwaiting persists between calls to this function
+					   // so while SyncWaiting only Pending Interupts are checked
 	}
 
 	while (CycleCounter < CycleFor) {	
-		// Will goto either pendintr or execinst
+		// goto trick Will goto either pendintr or execinst without conditional
 		goto *process;
 pendintr:
-		pendingnmi();
-		pendingfirq();
-		pendingirq();
+		pendingnmi();  //
+		pendingfirq(); // see above comments
+		pendingirq();  //
 execinst:
 		JmpVec1[MemRead8(PC_REG++)](); // Execute instruction pointed to by PC_REG
 	}//End While
