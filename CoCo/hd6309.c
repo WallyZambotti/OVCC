@@ -2129,16 +2129,16 @@ void Band(void)
 
 	if ((temp8 & (1 << Source)) == 0)
 	{
-    switch (postbyte)
-    {
-    case 0 : // A Reg
-    case 1 : // B Reg
-      *ureg8[postbyte] &= ~(1 << Dest);
-      break;
-    case 2 : // CC Reg
-      setcc(getcc() & ~(1 << Dest));
-      break;
-    }
+		switch (postbyte)
+		{
+		case 0 : // CC Reg
+			setcc(getcc() & ~(1 << Dest));
+			break;
+		case 1 : // A Reg
+		case 2 : // B Reg
+			*ureg8[postbyte] &= ~(1 << Dest);
+			break;
+		}
 	}
 	// Else nothing changes
 	CycleCounter+=NatEmuCycles76;
@@ -2160,16 +2160,16 @@ void Biand(void)
 
 	if ((temp8 & (1 << Source)) != 0)
 	{
-    switch (postbyte)
-    {
-    case 0: // A Reg
-    case 1: // B Reg
-      *ureg8[postbyte] &= ~(1 << Dest);
-      break;
-    case 2: // CC Reg
-      setcc(getcc() & ~(1 << Dest));
-      break;
-    }
+		switch (postbyte)
+		{
+		case 0: // CC Reg
+			setcc(getcc() & ~(1 << Dest));
+			break;
+		case 1: // A Reg
+		case 2: // B Reg
+			*ureg8[postbyte] &= ~(1 << Dest);
+			break;
+		}
   }
 	// Else do nothing
 	CycleCounter+=NatEmuCycles76;
@@ -2191,16 +2191,16 @@ void Bor(void)
 
 	if ((temp8 & (1 << Source)) != 0)
 	{
-    switch (postbyte)
-    {
-    case 0: // A Reg
-    case 1: // B Reg
-      *ureg8[postbyte] |= (1 << Dest);
-      break;
-    case 2: // CC Reg
-      setcc(getcc() | (1 << Dest));
-      break;
-    }
+		switch (postbyte)
+		{
+		case 0: // CC Reg
+			setcc(getcc() | (1 << Dest));
+			break;
+		case 1: // A Reg
+		case 2: // B Reg
+			*ureg8[postbyte] |= (1 << Dest);
+			break;
+		}
 	}
 	// Else do nothing
 	CycleCounter+=NatEmuCycles76;
@@ -2222,16 +2222,16 @@ void Bior(void)
 
 	if ((temp8 & (1 << Source)) == 0)
 	{
-    switch (postbyte)
-    {
-    case 0: // A Reg
-    case 1: // B Reg
-      *ureg8[postbyte] |= (1 << Dest);
-      break;
-    case 2: // CC Reg
-      setcc(getcc() | (1 << Dest));
-      break;
-    }
+		switch (postbyte)
+		{
+		case 0: // CC Reg
+			setcc(getcc() | (1 << Dest));
+			break;
+		case 1: // A Reg
+		case 2: // B Reg
+			*ureg8[postbyte] |= (1 << Dest);
+			break;
+		}
   }
 	// Else do nothing
 	CycleCounter+=NatEmuCycles76;
@@ -2253,16 +2253,16 @@ void Beor(void)
 
 	if ((temp8 & (1 << Source)) != 0)
 	{
-    switch (postbyte)
-    {
-    case 0: // A Reg
-    case 1: // B Reg
-      *ureg8[postbyte] ^= (1 << Dest);
-      break;
-    case 2: // CC Reg
-      setcc(getcc() ^ (1 << Dest));
-      break;
-    }
+    	switch (postbyte)
+    	{
+    	case 0: // CC Reg
+      		setcc(getcc() ^ (1 << Dest));
+			break;
+    	case 1: // A Reg
+    	case 2: // B Reg
+      		*ureg8[postbyte] ^= (1 << Dest);
+      		break;
+    	}
 	}
 	CycleCounter+=NatEmuCycles76;
 }
@@ -2283,17 +2283,17 @@ void Bieor(void)
 
 	if ((temp8 & (1 << Source)) == 0)
 	{
-    switch (postbyte)
-    {
-    case 0: // A Reg
-    case 1: // B Reg
-      *ureg8[postbyte] ^= (1 << Dest);
-      break;
-    case 2: // CC Reg
-      setcc(getcc() ^ (1 << Dest));
-      break;
-    }
-  }
+    	switch (postbyte)
+    	{
+    	case 0: // CC Reg
+      		setcc(getcc() ^ (1 << Dest));
+      		break;
+    	case 1: // A Reg
+    	case 2: // B Reg
+       		*ureg8[postbyte] ^= (1 << Dest);
+      		break;
+   		}
+  	}
 	CycleCounter+=NatEmuCycles76;
 }
 
@@ -2313,29 +2313,29 @@ void Ldbt(void)
 
 	if ((temp8 & (1 << Source)) != 0)
 	{
-    switch (postbyte)
-    {
-    case 0: // A Reg
-    case 1: // B Reg
-      *ureg8[postbyte] |= (1 << Dest);
-      break;
-    case 2: // CC Reg
-      setcc(getcc() | (1 << Dest));
-      break;
-    }
-  }
+		switch (postbyte)
+		{
+		case 0: // CC Reg
+			setcc(getcc() | (1 << Dest));
+			break;
+		case 1: // A Reg
+		case 2: // B Reg
+			*ureg8[postbyte] |= (1 << Dest);
+			break;
+		}
+  	}
 	else
 	{
-    switch (postbyte)
-    {
-    case 0: // A Reg
-    case 1: // B Reg
-      *ureg8[postbyte] &= ~(1 << Dest);
-      break;
-    case 2: // CC Reg
-      setcc(getcc() & ~(1 << Dest));
-      break;
-    }
+		switch (postbyte)
+		{
+		case 0: // CC Reg
+			setcc(getcc() & ~(1 << Dest));
+			break;
+		case 1: // A Reg
+		case 2: // B Reg
+			*ureg8[postbyte] &= ~(1 << Dest);
+			break;
+		}
 	}
 	CycleCounter+=NatEmuCycles76;
 }
@@ -2355,16 +2355,16 @@ void Stbt(void)
 		return;
 	}
 
-  switch (postbyte)
-  {
-  case 0: // A Reg
-  case 1: // B Reg
-    postbyte = *ureg8[postbyte];
-    break;
-  case 2: // CC Reg
-    postbyte = getcc();
-    break;
-  }
+	switch (postbyte)
+	{
+	case 0: // CC Reg
+		postbyte = getcc();
+		break;
+	case 1: // A Reg
+	case 2: // B Reg
+		postbyte = *ureg8[postbyte];
+		break;
+	}
 
 	if ((postbyte & (1 << Source)) != 0)
 	{

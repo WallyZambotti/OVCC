@@ -165,6 +165,7 @@ if ( (port>=0x50) & (port <=0x5a))
 	return(temp);
 }
 
+static int debug = 0;
 
 void port_write(unsigned char data,unsigned short addr)
 {
@@ -194,7 +195,28 @@ void port_write(unsigned char data,unsigned short addr)
 		case 0x23:
 			pia1_write(data,port);	//MC6821 P.I.A	Sound and VDG Control 
 		break;
+#define DEBUGPORT 1
+#ifdef  DEBUGPORT
+		case 0x70:
+		    if (debug) fputc((int)data, stderr);
+			break;
 
+		case 0x71:
+		    if (debug) fprintf(stderr, "%2X", (int)data);
+			break;
+
+		case 0x72:
+		    if (debug) fprintf(stderr, "%2X", (int)data);
+			break;
+
+		case 0x73:
+		    if (debug) fputc('\n', stderr);
+			break;
+
+		case 0x74:
+			debug = (int)data;
+			break;
+#endif
 		case 0xC0:
 		case 0xC1:
 		case 0xC2:
