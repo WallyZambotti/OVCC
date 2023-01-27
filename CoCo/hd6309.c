@@ -2136,7 +2136,7 @@ void Band(void)
 			break;
 		case 1 : // A Reg
 		case 2 : // B Reg
-			*ureg8[postbyte] &= ~(1 << Dest);
+			*ureg8[postbyte-1] &= ~(1 << Dest);
 			break;
 		}
 	}
@@ -2167,7 +2167,7 @@ void Biand(void)
 			break;
 		case 1: // A Reg
 		case 2: // B Reg
-			*ureg8[postbyte] &= ~(1 << Dest);
+			*ureg8[postbyte-1] &= ~(1 << Dest);
 			break;
 		}
   }
@@ -2198,7 +2198,7 @@ void Bor(void)
 			break;
 		case 1: // A Reg
 		case 2: // B Reg
-			*ureg8[postbyte] |= (1 << Dest);
+			*ureg8[postbyte-1] |= (1 << Dest);
 			break;
 		}
 	}
@@ -2229,7 +2229,7 @@ void Bior(void)
 			break;
 		case 1: // A Reg
 		case 2: // B Reg
-			*ureg8[postbyte] |= (1 << Dest);
+			*ureg8[postbyte-1] |= (1 << Dest);
 			break;
 		}
   }
@@ -2260,7 +2260,7 @@ void Beor(void)
 			break;
     	case 1: // A Reg
     	case 2: // B Reg
-      		*ureg8[postbyte] ^= (1 << Dest);
+      		*ureg8[postbyte-1] ^= (1 << Dest);
       		break;
     	}
 	}
@@ -2290,7 +2290,7 @@ void Bieor(void)
       		break;
     	case 1: // A Reg
     	case 2: // B Reg
-       		*ureg8[postbyte] ^= (1 << Dest);
+       		*ureg8[postbyte-1] ^= (1 << Dest);
       		break;
    		}
   	}
@@ -2320,7 +2320,7 @@ void Ldbt(void)
 			break;
 		case 1: // A Reg
 		case 2: // B Reg
-			*ureg8[postbyte] |= (1 << Dest);
+			*ureg8[postbyte-1] |= (1 << Dest);
 			break;
 		}
   	}
@@ -2333,7 +2333,7 @@ void Ldbt(void)
 			break;
 		case 1: // A Reg
 		case 2: // B Reg
-			*ureg8[postbyte] &= ~(1 << Dest);
+			*ureg8[postbyte-1] &= ~(1 << Dest);
 			break;
 		}
 	}
@@ -2362,7 +2362,7 @@ void Stbt(void)
 		break;
 	case 1: // A Reg
 	case 2: // B Reg
-		postbyte = *ureg8[postbyte];
+		postbyte = *ureg8[postbyte-1];
 		break;
 	}
 
