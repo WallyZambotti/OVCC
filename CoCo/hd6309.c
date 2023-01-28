@@ -1184,9 +1184,9 @@ void Swi2_I(void)
 
 void Negd_I(void)
 { //1040 Phase 5 6309
-	D_REG = 0-D_REG;
-	cc[C] = temp16>0;
 	cc[V] = D_REG==0x8000;
+	D_REG = 0-D_REG;
+	cc[C] = D_REG>0;
 	cc[N] = NTEST16(D_REG);
 	cc[Z] = ZTEST(D_REG);
 	CycleCounter+=NatEmuCycles32;
@@ -4158,12 +4158,11 @@ void Swi1_I(void)
 
 void Nega_I(void)
 { //40
-	temp8= 0-A_REG;
-	cc[C] = temp8>0;
 	cc[V] = A_REG==0x80; //cc[C] ^ ((A_REG^temp8)>>7);
-	cc[N] = NTEST8(temp8);
-	cc[Z] = ZTEST(temp8);
-	A_REG= temp8;
+	A_REG = 0-A_REG;
+	cc[C] = A_REG>0;
+	cc[N] = NTEST8(A_REG);
+	cc[Z] = ZTEST(A_REG);
 	CycleCounter+=NatEmuCycles21;
 }
 
@@ -4264,12 +4263,11 @@ void Clra_I(void)
 
 void Negb_I(void)
 { //50
-	temp8= 0-B_REG;
-	cc[C] = temp8>0;
 	cc[V] = B_REG == 0x80;	
-	cc[N] = NTEST8(temp8);
-	cc[Z] = ZTEST(temp8);
-	B_REG= temp8;
+	B_REG = 0-B_REG;
+	cc[C] = B_REG>0;
+	cc[N] = NTEST8(B_REG);
+	cc[Z] = ZTEST(B_REG);
 	CycleCounter+=NatEmuCycles21;
 }
 
