@@ -2760,7 +2760,7 @@ void Divq_M(void)
 
 	D_REG = (unsigned short)((signed int)temp32 % (signed short int)postword);
 	W_REG = stemp32;
-	if ((stemp16 > 32767) || (stemp16 < -32768)) 
+	if ((stemp32 > 32767) || (stemp32 < -32768)) 
 	{
 		cc[V] = 1;
 		cc[N] = 1;
@@ -2771,7 +2771,7 @@ void Divq_M(void)
 		cc[N] = NTEST16(W_REG);
 		cc[V] = 0;
 	}
-	cc[C] = B_REG & 1;
+	cc[C] = F_REG & 1;
 	CycleCounter+=34;
 }
 
@@ -2930,7 +2930,7 @@ void Divq_D(void)
 
 	D_REG = (unsigned short)((signed int)temp32 % (signed short int)postword);
 	W_REG = stemp32;
-	if ((stemp16 > 32767) || (stemp32 < -32768)) 
+	if ((stemp32 > 32767) || (stemp32 < -32768)) 
 	{
 		cc[V] = 1;
 		cc[N] = 1;
@@ -2941,7 +2941,7 @@ void Divq_D(void)
 		cc[N] = NTEST16(W_REG);
 		cc[V] = 0;
 	}
-	cc[C] = B_REG & 1;
+	cc[C] = F_REG & 1;
   CycleCounter+=NatEmuCycles3635;
 }
 
@@ -3099,7 +3099,7 @@ void Divq_X(void)
 
   D_REG = (unsigned short)((signed int)temp32 % (signed short int)postword);
   W_REG = stemp32;
-  if ((stemp16 > 32767) || (stemp16 < -32768))
+  if ((stemp32 > 32767) || (stemp32 < -32768))
   {
     cc[V] = 1;
     cc[N] = 1;
@@ -3110,7 +3110,7 @@ void Divq_X(void)
     cc[N] = NTEST16(W_REG);
     cc[V] = 0;
   }
-  cc[C] = B_REG & 1;
+  cc[C] = F_REG & 1;
   CycleCounter += NatEmuCycles3635;
 }
 
@@ -3277,7 +3277,7 @@ void Divq_E(void)
 
   D_REG = (unsigned short)((signed int)temp32 % (signed short int)postword);
   W_REG = stemp32;
-  if ((stemp16 > 32767) || (stemp16 < -32768))
+  if ((stemp32 > 32767) || (stemp32 < -32768))
   {
     cc[V] = 1;
     cc[N] = 1;
@@ -3288,7 +3288,7 @@ void Divq_E(void)
     cc[N] = NTEST16(W_REG);
     cc[V] = 0;
   }
-  cc[C] = B_REG & 1;
+  cc[C] = F_REG & 1;
   CycleCounter += NatEmuCycles3635;
 }
 
