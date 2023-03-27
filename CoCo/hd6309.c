@@ -8292,4 +8292,16 @@ void HD6309ForcePC(unsigned short NewPC)
 // 	return(PC_REG);
 // }
 
-
+void DumpRegisters(void)
+{
+	ccbits = getcc();
+	mdbits = getmd();
+	//      00 00 00 00 0000 0000 0000 0000 0000 0000 00 00 00
+	printf("A  B  E  F  X    Y    U    S    PC   V    DP MD CC\n");
+	printf("%02X %02X %02X %02X %04X %04X %04X %04X %04X %04X %02X %02X %02X\n",
+		A_REG, B_REG, E_REG, F_REG, X_REG, Y_REG, U_REG, S_REG, PC_REG, V_REG, dp.B.msb, mdbits, ccbits);
+	printf("A   B   E   F   D     W     Q\n");
+	printf("%3d %3d %3d %3d %5d %5d %d\n", 
+		(signed int)A_REG, (signed int)B_REG, (signed int)E_REG, (signed int)F_REG, 
+		(signed int)D_REG, (signed int)W_REG, (signed int)Q_REG);
+}

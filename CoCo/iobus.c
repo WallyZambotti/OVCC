@@ -165,6 +165,7 @@ if ( (port>=0x50) & (port <=0x5a))
 	return(temp);
 }
 
+extern void DumpRegisters(void);
 static int debug = 0;
 
 void port_write(unsigned char data,unsigned short addr)
@@ -202,11 +203,11 @@ void port_write(unsigned char data,unsigned short addr)
 			break;
 
 		case 0x71:
-		    if (debug) fprintf(stderr, "%2X", (int)data);
+		    if (debug) fprintf(stderr, "%02X", (int)data);
 			break;
 
 		case 0x72:
-		    if (debug) fprintf(stderr, "%2X", (int)data);
+		    if (debug) fprintf(stderr, "%02X", (int)data);
 			break;
 
 		case 0x73:
@@ -215,6 +216,10 @@ void port_write(unsigned char data,unsigned short addr)
 
 		case 0x74:
 			debug = (int)data;
+			break;
+
+		case 0x75:
+			DumpRegisters();
 			break;
 #endif
 		case 0xC0:
