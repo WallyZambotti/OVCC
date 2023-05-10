@@ -32,7 +32,7 @@ This file is part of VCC (Virtual Color Computer).
 
 int redrawfx = 0;
 
-void SetStatusBarText(const char *);
+void SetStatusBarText(const char *, SystemState2 *);
 
 extern STRConfig CurrentConfig;
 extern JoyStick	LeftSDL;
@@ -58,7 +58,7 @@ static AG_Combo *comDev, *comQual;
 static AG_Menu *menu;
 static AG_MenuItem *itemCartridge = NULL, *itemEjectCart = NULL;
 static AG_Label *status = NULL;
-static AG_Fixed *fx = NULL;
+//static AG_Fixed *fx = NULL;
 
 static int soundDev = 0;
 static int soundQuality = 3;
@@ -323,7 +323,7 @@ void DevComboSelected(AG_Event *event)
     extern void AudioConfigSetDevice(int);
     AG_TlistItem *item = NULL;
 
-    soundDev = ti->label;
+    soundDev = ti->u;
     AudioConfigSetDevice(soundDev);
 }
 
@@ -332,7 +332,7 @@ void QualityComboSelected(AG_Event *event)
     AG_TlistItem *ti = AG_PTR(1);
     extern void AudioConfigSetRate(int);
 
-    soundQuality = ti->label;
+    soundQuality = ti->u;
     AudioConfigSetRate(soundQuality);
 }
 
@@ -499,27 +499,27 @@ void LeftAnalogComboSelected(AG_Event *event)
 
     AG_TextMsg(AG_MSG_INFO, "Feature no implemented!");
 
-    leftAnalogDevice = ti->label;
+    leftAnalogDevice = ti->u;
 }
 
 void LeftJoystickComboSelected(AG_Event *event)
 {
-    AG_TlistItem *ti = AG_PTR(1);
+    AG_TlistItem *ti = AG_TLISTITEM_PTR(1);   
 
     extern void JoyStickConfigLeftJoyStickDevice(int);
 
-    leftJoystickDevice = ti->label;
+    leftJoystickDevice = ti->u;
 
     JoyStickConfigLeftJoyStickDevice(leftJoystickDevice);
 }
 
 void LeftKeyLeftComboSelected(AG_Event *event)
 {
-    AG_TlistItem *ti = AG_PTR(1);
+    AG_TlistItem *ti = AG_TLISTITEM_PTR(1);   
 
     extern void joyStickConfigLeftKeyLeft(int);
     
-    leftKeyLeft = ti->label;
+    leftKeyLeft = ti->u;
 
     joyStickConfigLeftKeyLeft(leftKeyLeft);
 }
@@ -530,7 +530,7 @@ void LeftKeyRightComboSelected(AG_Event *event)
 
     extern void joyStickConfigLeftKeyRight(int);
     
-    leftKeyRight = ti->label;
+    leftKeyRight = ti->u;
 
     joyStickConfigLeftKeyRight(leftKeyRight);
 }
@@ -541,7 +541,7 @@ void LeftKeyUpComboSelected(AG_Event *event)
 
     extern void joyStickConfigLeftKeyUp(int);
     
-    leftKeyUp = ti->label;
+    leftKeyUp = ti->u;
 
     joyStickConfigLeftKeyUp(leftKeyUp);
 }
@@ -552,7 +552,7 @@ void LeftKeyDownComboSelected(AG_Event *event)
 
     extern void joyStickConfigLeftKeyDown(int);
     
-    leftKeyDown = ti->label;
+    leftKeyDown = ti->u;
 
     joyStickConfigLeftKeyDown(leftKeyDown);
 }
@@ -563,7 +563,7 @@ void LeftKeyFire1ComboSelected(AG_Event *event)
 
     extern void joyStickConfigLeftKeyFire1(int);
     
-    leftKeyFire1 = ti->label;
+    leftKeyFire1 = ti->u;
 
     joyStickConfigLeftKeyFire1(leftKeyFire1);
 }
@@ -574,7 +574,7 @@ void LeftKeyFire2ComboSelected(AG_Event *event)
 
     extern void joyStickConfigLeftKeyFire2(int);
     
-    leftKeyFire2 = ti->label;
+    leftKeyFire2 = ti->u;
 
     joyStickConfigLeftKeyFire2(leftKeyFire2);
 }
@@ -651,7 +651,7 @@ void RightAnalogComboSelected(AG_Event *event)
 
     AG_TextMsg(AG_MSG_INFO, "Feature no implemented!");
 
-    rightAnalogDevice = ti->label;
+    rightAnalogDevice = ti->u;
 }
 
 void RightJoystickComboSelected(AG_Event *event)
@@ -660,7 +660,7 @@ void RightJoystickComboSelected(AG_Event *event)
 
     extern void JoyStickConfigRightJoyStickDevice(int);
 
-    rightJoystickDevice = ti->label;
+    rightJoystickDevice = ti->u;
 
     JoyStickConfigRightJoyStickDevice(rightJoystickDevice);
 }
@@ -671,7 +671,7 @@ void RightKeyLeftComboSelected(AG_Event *event)
 
     extern void joyStickConfigRightKeyLeft(int);
     
-    rightKeyLeft = ti->label;
+    rightKeyLeft = ti->u;
 
     joyStickConfigRightKeyLeft(rightKeyLeft);
 }
@@ -682,7 +682,7 @@ void RightKeyRightComboSelected(AG_Event *event)
 
     extern void joyStickConfigRightKeyRight(int);
     
-    rightKeyRight = ti->label;
+    rightKeyRight = ti->u;
 
     joyStickConfigRightKeyRight(rightKeyRight);
 }
@@ -693,7 +693,7 @@ void RightKeyUpComboSelected(AG_Event *event)
 
     extern void joyStickConfigRightKeyUp(int);
     
-    rightKeyUp = ti->label;
+    rightKeyUp = ti->u;
 
     joyStickConfigRightKeyUp(rightKeyUp);
 }
@@ -704,7 +704,7 @@ void RightKeyDownComboSelected(AG_Event *event)
 
     extern void joyStickConfigRightKeyDown(int);
     
-    rightKeyDown = ti->label;
+    rightKeyDown = ti->u;
 
     joyStickConfigRightKeyDown(rightKeyDown);
 }
@@ -715,7 +715,7 @@ void RightKeyFire1ComboSelected(AG_Event *event)
 
     extern void joyStickConfigRightKeyFire1(int);
     
-    rightKeyFire1 = ti->label;
+    rightKeyFire1 = ti->u;
 
     joyStickConfigRightKeyFire1(rightKeyFire1);
 }
@@ -726,7 +726,7 @@ void RightKeyFire2ComboSelected(AG_Event *event)
 
     extern void joyStickConfigRightKeyFire2(int);
     
-    rightKeyFire2 = ti->label;
+    rightKeyFire2 = ti->u;
 
     joyStickConfigRightKeyFire2(rightKeyFire2);
 }
@@ -905,13 +905,16 @@ void PrintMonitorChange(AG_Event *event)
     BitBangerConfigPrintMonitor(PrintMonitor);
 }
 
-void SetStatusBarText(const char *text)
+void SetStatusBarText(const char *text, SystemState2 *EmuState2)
 {
+    // char newtext[240];
+    // sprintf(newtext, "%s[%d,%d](%d,%d)", text, EmuState2->fx->wid.w, EmuState2->fx->wid.h, EmuState2->agwin->wid.w, EmuState2->agwin->wid.h); 
     AG_LabelText(status, "%s", text);
 }
 
-void PopulateAudioDevices(AG_Tlist *list)
+void PopulateAudioDevices(AG_Event *event)
 {
+    AG_Combo *com = AG_COMBO_SELF(); 
     int numOfDevs = 0, dev = 0, currentdev = 0;
     SndCardList *cardList;
 
@@ -919,29 +922,54 @@ void PopulateAudioDevices(AG_Tlist *list)
 
     AudioConfigGetAudioDevices(&numOfDevs, &currentdev, &cardList);
 
+    AG_ComboSizeHint(com, "Speakers (High Definition Audio Device", 4);
+
     for (dev = 0 ; dev < numOfDevs ; dev++)
     {
-        AG_TlistAddS(list, NULL, cardList[dev].CardName);
+        AG_TlistItem *item = AG_TlistAddS(com->list, NULL, cardList[dev].CardName);
+        item->u = dev;
     }
 
     soundDev = currentdev;
+
+    AG_TlistItem *item = AG_TlistFindByIndex(com->list, soundDev+1);
+    if (item != NULL) AG_ComboSelect(com, item);
 }
 
-void PopulateAudioQualities(AG_Tlist *list)
+void PopulateAudioQualities(AG_Event *event)
 {
-    AG_TlistAddS(list, NULL, "Mute");
-    AG_TlistAddS(list, NULL, "11025");
-    AG_TlistAddS(list, NULL, "22050");
-    AG_TlistAddS(list, NULL, "44100");
+    AG_Combo *com = AG_COMBO_SELF(); 
+
+    AG_ComboSizeHint(com, "192000", 4);
+
+    AG_TlistItem *item = AG_TlistAddS(com->list, NULL, "Mute");
+    item->u = 0;
+    item = AG_TlistAddS(com->list, NULL, "11025");
+    item->u = 1;
+    item = AG_TlistAddS(com->list, NULL, "22050");
+    item->u = 2;
+    item = AG_TlistAddS(com->list, NULL, "44100");
+    item->u = 3;
+
+    item = AG_TlistFindByIndex(com->list, soundQuality+1);
+    if (item != NULL) AG_ComboSelect(com, item);
 }
 
-void PopulateDummyAnalogDevices(AG_Tlist *list)
+void PopulateDummyAnalogDevices(AG_Event *event)
 {
-    AG_TlistAddS(list, NULL, "Feature Not Implemented!");
+    AG_Combo *com = AG_COMBO_SELF(); 
+
+    AG_ComboSizeHint(com, "Feature Not Implemented!", 4);
+    AG_TlistAddS(com->list, NULL, "Feature Not Implemented!");
+
+    AG_TlistItem *item = AG_TlistFindByIndex(com->list, 1);
+    if (item != NULL) AG_ComboSelect(com, item);
 }
 
-void PopulateJoystickDevices(AG_Tlist *list)
+void PopulateJoystickDevices(AG_Event *event)
 {
+    AG_Combo *com = AG_COMBO_SELF(); 
+
     int numOfSticks = 0, stick = 0, currentleft = 0, currentright;
     char **sticknames;
 
@@ -949,27 +977,41 @@ void PopulateJoystickDevices(AG_Tlist *list)
 
     AudioConfigGetJoyStickDevices(&numOfSticks, &currentleft, &currentright, &sticknames);
 
+    AG_ComboSizeHint(com, "Digital Joystick 1", 4);
+    
     for (stick = 0 ; stick < numOfSticks ; stick++)
     {
-        AG_TlistAddS(list, NULL, sticknames[stick]);
+        AG_TlistItem *item = AG_TlistAddS(com->list, NULL, sticknames[stick]);
+        item->u = stick;
     }
 
     leftJoystickDevice = currentleft;
     rightJoystickDevice = currentright;
+
+    AG_TlistItem *item = AG_TlistFindByIndex(com->list, LeftSDL.DiDevice+1);
+    if (item != NULL) AG_ComboSelect(com, item);
 }
 
-void PopulateKeysList(AG_Tlist *list)
+void PopulateKeysList(AG_Event *event)
 {
+    AG_Combo *com = AG_COMBO_SELF(); 
+    int index = AG_INT(1);
     char *keyName;
     char listTxt[8];
     int nkeys = sizeof(keyNames) / sizeof(keyName);
     int key;
 
+    AG_ComboSizeHint(com, "12345678", 8);
+
     for (key = 0; key < nkeys; key++)
     {
         AG_Strlcpy(listTxt, keyNames[key], sizeof(listTxt));
-        AG_TlistAddS(list, NULL, listTxt);
+        AG_TlistItem *item = AG_TlistAddS(com->list, NULL, listTxt);
+        item->u = key;
     }
+
+    AG_TlistItem *item = AG_TlistFindByIndex(com->list, index);
+    if (item != NULL) AG_ComboSelect(com, item);
 }
 
 void Configure(AG_Event *ev)
@@ -1008,10 +1050,7 @@ void Configure(AG_Event *ev)
         AG_LabelNew(lbox, 0, "Output Device");
 
         comDev = AG_ComboNew(lbox, AG_COMBO_HFILL, NULL);
-        AG_ComboSizeHint(comDev, "Speakers (High Definition Audio Device", 4);
-        PopulateAudioDevices(comDev->list);
-        AG_TlistItem *item = AG_TlistFindByIndex(comDev->list, soundDev+1);
-        if (item != NULL) AG_ComboSelect(comDev, item);
+        AG_SetEvent(comDev, "combo-expanded", PopulateAudioDevices, NULL);
         AG_SetEvent(comDev, "combo-selected", DevComboSelected, NULL);
 
         // Sound Quality Combo
@@ -1019,10 +1058,7 @@ void Configure(AG_Event *ev)
         AG_LabelNew(lbox, 0, "Sound Quality");
 
         comQual = AG_ComboNew(lbox, AG_COMBO_HFILL, NULL);
-        AG_ComboSizeHint(comQual, "192000", 4);
-        PopulateAudioQualities(comQual->list);
-        item = AG_TlistFindByIndex(comQual->list, soundQuality+1);
-        if (item != NULL) AG_ComboSelect(comQual, item);
+        AG_SetEvent(comQual, "combo-expanded", PopulateAudioQualities, NULL);
         AG_SetEvent(comQual, "combo-selected", QualityComboSelected, NULL);
 
         rbox = AG_BoxNewHoriz(box, 0);
@@ -1248,19 +1284,14 @@ void Configure(AG_Event *ev)
 
         com = comLeftAudio = AG_ComboNew(vbox2, AG_COMBO_HFILL, NULL);
         AG_ComboSizeHint(com, "Analog Joystick 1", 4);
-        PopulateDummyAnalogDevices(com->list);
-        item = AG_TlistFindByIndex(com->list, 1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateDummyAnalogDevices, NULL);
         AG_SetEvent(com, "combo-selected", LeftAnalogComboSelected, NULL);
         if (leftJoystick == JOYSTICK_AUDIO) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
         // Left Joystick Digital Combo
 
         com = comLeftJoystick = AG_ComboNew(vbox2, AG_COMBO_HFILL, NULL);
-        AG_ComboSizeHint(com, "Digital Joystick 1", 4);
-        PopulateJoystickDevices(com->list);
-        item = AG_TlistFindByIndex(com->list, LeftSDL.DiDevice+1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateJoystickDevices, NULL);
         AG_SetEvent(com, "combo-selected", LeftJoystickComboSelected, NULL);
         if (leftJoystick == JOYSTICK_JOYSTICK) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
@@ -1271,60 +1302,43 @@ void Configure(AG_Event *ev)
         extern unsigned short TranslateScan2Disp(int);
 
         com = comLeftKeyLeft = AG_ComboNew(vbox2, AG_COMBO_HFILL, "Left  ");
-        AG_ComboSizeHint(com, "12345678", 8);
-        PopulateKeysList(com->list);
-        item = AG_TlistFindByIndex(com->list, TranslateScan2Disp(LeftSDL.Left)+1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        int index = TranslateScan2Disp(LeftSDL.Left)+1;
+        AG_SetEvent(com, "combo-expanded", PopulateKeysList, "%i", index);
         AG_SetEvent(com, "combo-selected", LeftKeyLeftComboSelected, NULL);
         if (leftJoystick == JOYSTICK_KEYBOARD) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
         // Left Key Right Combo
 
         com = comLeftKeyRight = AG_ComboNew(vbox2, AG_COMBO_HFILL, "Right");
-        AG_ComboSizeHint(com, "12345678", 8);
-        PopulateKeysList(com->list);
-        item = AG_TlistFindByIndex(com->list, TranslateScan2Disp(LeftSDL.Right)+1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateKeysList, "%i", TranslateScan2Disp(LeftSDL.Right)+1);
         AG_SetEvent(com, "combo-selected", LeftKeyRightComboSelected, NULL);
         if (leftJoystick == JOYSTICK_KEYBOARD) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
         // Left Key Up Combo
 
         com = comLeftKeyUp = AG_ComboNew(vbox2, AG_COMBO_HFILL, "Up    ");
-        AG_ComboSizeHint(com, "12345678", 8);
-        PopulateKeysList(com->list);
-        item = AG_TlistFindByIndex(com->list, TranslateScan2Disp(LeftSDL.Up)+1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateKeysList, "%i", TranslateScan2Disp(LeftSDL.Up)+1);
         AG_SetEvent(com, "combo-selected", LeftKeyUpComboSelected, NULL);
         if (leftJoystick == JOYSTICK_KEYBOARD) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
         // Left Key Down Combo
 
         com = comLeftKeyDown = AG_ComboNew(vbox2, AG_COMBO_HFILL, "Down");
-        AG_ComboSizeHint(com, "12345678", 8);
-        PopulateKeysList(com->list);
-        item = AG_TlistFindByIndex(com->list, TranslateScan2Disp(LeftSDL.Down)+1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateKeysList, "%i", TranslateScan2Disp(LeftSDL.Down)+1);
         AG_SetEvent(com, "combo-selected", LeftKeyDownComboSelected, NULL);
         if (leftJoystick == JOYSTICK_KEYBOARD) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
         // Left Key Fire 1 Combo
 
         com = comLeftKeyFire1 = AG_ComboNew(vbox2, AG_COMBO_HFILL, "Fire 1");
-        AG_ComboSizeHint(com, "12345678", 8);
-        PopulateKeysList(com->list);
-        item = AG_TlistFindByIndex(com->list, TranslateScan2Disp(LeftSDL.Fire1)+1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateKeysList, "%i", TranslateScan2Disp(LeftSDL.Fire1)+1);
         AG_SetEvent(com, "combo-selected", LeftKeyFire1ComboSelected, NULL);
         if (leftJoystick == JOYSTICK_KEYBOARD) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
         // Left Key Fire 2 Combo
 
         com = comLeftKeyFire2 = AG_ComboNew(vbox2, AG_COMBO_HFILL, "Fire 2");
-        AG_ComboSizeHint(com, "12345678", 8);
-        PopulateKeysList(com->list);
-        item = AG_TlistFindByIndex(com->list, TranslateScan2Disp(LeftSDL.Fire2)+1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateKeysList, "%i", TranslateScan2Disp(LeftSDL.Fire2)+1);
         AG_SetEvent(com, "combo-selected", LeftKeyFire2ComboSelected, NULL);
         if (leftJoystick == JOYSTICK_KEYBOARD) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
@@ -1361,20 +1375,14 @@ void Configure(AG_Event *ev)
         // Right Joystick Audio (Analog) Combo
 
         com = comRightAudio = AG_ComboNew(vbox2, AG_COMBO_HFILL, NULL);
-        AG_ComboSizeHint(com, "Analog Joystick 1", 4);
-        PopulateDummyAnalogDevices(com->list);
-        item = AG_TlistFindByIndex(com->list, 1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateDummyAnalogDevices, NULL);
         AG_SetEvent(com, "combo-selected", RightAnalogComboSelected, NULL);
         if (rightJoystick == JOYSTICK_AUDIO) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
         // Right Joystick Digital Combo
 
         com = comRightJoystick = AG_ComboNew(vbox2, AG_COMBO_HFILL, NULL);
-        AG_ComboSizeHint(com, "Digital Joystick 1", 4);
-        PopulateJoystickDevices(com->list);
-        item = AG_TlistFindByIndex(com->list, RightSDL.DiDevice+1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateJoystickDevices, "%i", RightSDL.DiDevice+1);
         AG_SetEvent(com, "combo-selected", RightJoystickComboSelected, NULL);
         if (rightJoystick == JOYSTICK_JOYSTICK) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
@@ -1383,60 +1391,42 @@ void Configure(AG_Event *ev)
         // Right Key Left Combo
 
         com = comRightKeyLeft = AG_ComboNew(vbox2, AG_COMBO_HFILL, "Left  ");
-        AG_ComboSizeHint(com, "12345678", 8);
-        PopulateKeysList(com->list);
-        item = AG_TlistFindByIndex(com->list, TranslateScan2Disp(RightSDL.Left)+1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateKeysList, "%i", TranslateScan2Disp(RightSDL.Left)+1);
         AG_SetEvent(com, "combo-selected", RightKeyLeftComboSelected, NULL);
         if (rightJoystick == JOYSTICK_KEYBOARD) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
         // Right Key Right Combo
 
         com = comRightKeyRight = AG_ComboNew(vbox2, AG_COMBO_HFILL, "Right");
-        AG_ComboSizeHint(com, "12345678", 8);
-        PopulateKeysList(com->list);
-        item = AG_TlistFindByIndex(com->list, TranslateScan2Disp(RightSDL.Right)+1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateKeysList, "%i", TranslateScan2Disp(RightSDL.Right)+1);
         AG_SetEvent(com, "combo-selected", RightKeyRightComboSelected, NULL);
         if (rightJoystick == JOYSTICK_KEYBOARD) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
         // Right Key Up Combo
 
         com = comRightKeyUp = AG_ComboNew(vbox2, AG_COMBO_HFILL, "Up    ");
-        AG_ComboSizeHint(com, "12345678", 8);
-        PopulateKeysList(com->list);
-        item = AG_TlistFindByIndex(com->list, TranslateScan2Disp(RightSDL.Up)+1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateKeysList, "%i", TranslateScan2Disp(RightSDL.Up)+1);
         AG_SetEvent(com, "combo-selected", RightKeyUpComboSelected, NULL);
         if (rightJoystick == JOYSTICK_KEYBOARD) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
         // Right Key Down Combo
 
         com = comRightKeyDown = AG_ComboNew(vbox2, AG_COMBO_HFILL, "Down");
-        AG_ComboSizeHint(com, "12345678", 8);
-        PopulateKeysList(com->list);
-        item = AG_TlistFindByIndex(com->list, TranslateScan2Disp(RightSDL.Down)+1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateKeysList, "%i", TranslateScan2Disp(RightSDL.Down)+1);
         AG_SetEvent(com, "combo-selected", RightKeyDownComboSelected, NULL);
         if (rightJoystick == JOYSTICK_KEYBOARD) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
         // Right Key Fire 1 Combo
 
         com = comRightKeyFire1 = AG_ComboNew(vbox2, AG_COMBO_HFILL, "Fire 1");
-        AG_ComboSizeHint(com, "12345678", 8);
-        PopulateKeysList(com->list);
-        item = AG_TlistFindByIndex(com->list, TranslateScan2Disp(RightSDL.Fire1)+1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateKeysList, "%i", TranslateScan2Disp(RightSDL.Fire1)+1);
         AG_SetEvent(com, "combo-selected", RightKeyFire1ComboSelected, NULL);
         if (rightJoystick == JOYSTICK_KEYBOARD) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
         // Right Key Fire 2 Combo
 
         com = comRightKeyFire2 = AG_ComboNew(vbox2, AG_COMBO_HFILL, "Fire 2");
-        AG_ComboSizeHint(com, "12345678", 8);
-        PopulateKeysList(com->list);
-        item = AG_TlistFindByIndex(com->list, TranslateScan2Disp(RightSDL.Fire2)+1);
-        if (item != NULL) AG_ComboSelect(com, item);
+        AG_SetEvent(com, "combo-expanded", PopulateKeysList, "%i", TranslateScan2Disp(RightSDL.Fire2)+1);
         AG_SetEvent(com, "combo-selected", RightKeyFire2ComboSelected, NULL);
         if (rightJoystick == JOYSTICK_KEYBOARD) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
@@ -1643,9 +1633,9 @@ void About(AG_Event *ev)
     AG_MPane *mpane = AG_MPaneNew(AboutWin, AG_MPANE1T2B, AG_MPANE_EXPAND|AG_MPANE_FORCE_DIV);
 
     AG_Label *lbl1 = AG_LabelNewPolled(mpane->panes[0], AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
-        "OVCC 1.5.3\n"
+        "OVCC 1.6.0\n"
         "Walter Zambotti\n"
-        "using AGAR 1.6.0 GUI\n"
+        "using AGAR 1.7.0 GUI\n"
         "Forked from VCC 2.01B (1.43)\n"
         "Copy Righted Joseph Forgione (GNU General Public License)\n"
         "\n"

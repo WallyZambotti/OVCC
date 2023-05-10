@@ -296,14 +296,14 @@ void PhysDriveASelected(AG_Event *event)
 {
   AG_TlistItem *ti = AG_PTR(1);
 
-  PhysicalDriveA = ti->label;
+  PhysicalDriveA = ti->u;
 }
 
 void PhysDriveBSelected(AG_Event *event)
 {
     AG_TlistItem *ti = AG_PTR(1);
 
-    PhysicalDriveB = ti->label;	
+    PhysicalDriveB = ti->u;	
 }
 
 int UpdateROM(AG_Event *event)
@@ -330,13 +330,24 @@ void BrowseROM(AG_Event *event)
     AG_WindowShow(fdw);
 }
 
-void PopulateDriveDevices(AG_Tlist *list)
+void PopulateDriveDevices(AG_Event *event)
 {
-    AG_TlistAddS(list, NULL, "None");
-    AG_TlistAddS(list, NULL, "Drive 0");
-    AG_TlistAddS(list, NULL, "Drive 1");
-    AG_TlistAddS(list, NULL, "Drive 2");
-    AG_TlistAddS(list, NULL, "Drive 3");
+    AG_Combo *com = AG_COMBO_SELF(); 
+
+	AG_ComboSizeHint(com, "Drive 0", 5);
+    AG_TlistItem *item = AG_TlistAddS(com->list, NULL, "None");
+	item->u = 0;
+    AG_TlistAddS(com->list, NULL, "Drive 0");
+	item->u = 1;
+    AG_TlistAddS(com->list, NULL, "Drive 1");
+	item->u = 2;
+    AG_TlistAddS(com->list, NULL, "Drive 2");
+	item->u = 3;
+    AG_TlistAddS(com->list, NULL, "Drive 3");
+	item->u = 4;
+
+	item = AG_TlistFindByIndex(com->list, PhysicalDriveA);
+	if (item != NULL) AG_ComboSelect(com, item);
 }
 
 void ConfigFD502(AG_Event *event)
@@ -401,18 +412,12 @@ void ConfigFD502(AG_Event *event)
 	AG_LabelNew(vbox, 0, "Physical Disks");
 
 	com = AG_ComboNewS(vbox, AG_COMBO_HFILL, "A:");
-	AG_ComboSizeHint(com, "Drive 0", 5);
-	PopulateDriveDevices(com->list);
-	item = AG_TlistFindByIndex(com->list, PhysicalDriveA);
-	if (item != NULL) AG_ComboSelect(com, item);
+	AG_SetEvent(com, "combo-expanded", PopulateDriveDevices, NULL);
 	AG_SetEvent(com, "combo-selected", PhysDriveASelected, NULL);
 	if (RealDisks) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 
 	com = AG_ComboNewS(vbox, AG_COMBO_HFILL, "B:");
-	AG_ComboSizeHint(com, "Drive 0", 5);
-	PopulateDriveDevices(com->list);
-	item = AG_TlistFindByIndex(com->list, PhysicalDriveB);
-	if (item != NULL) AG_ComboSelect(com, item);
+	AG_SetEvent(com, "combo-expanded", PopulateDriveDevices, NULL);
 	AG_SetEvent(com, "combo-selected", PhysDriveBSelected, NULL);
 	if (RealDisks) AG_WidgetEnable(com); else AG_WidgetDisable(com);
 

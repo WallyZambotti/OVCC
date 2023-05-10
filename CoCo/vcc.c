@@ -216,11 +216,13 @@ int main(int argc, char **argv)
 
 void DoHardResetF9()
 {
+    extern void SetStatusBarText(const char *, SystemState2 *);
+
 	//EmuState2.EmulationRunning=!EmuState2.EmulationRunning;
 	if ( EmuState2.EmulationRunning )
 		EmuState2.ResetPending=2;
 	else
-		SetStatusBarText("");
+		SetStatusBarText("", &EmuState2);
 }
 
 void DoSoftReset()
@@ -586,6 +588,7 @@ void EmuLoop(void)
 
 		strcpy(tmpbuf, ttbuff);
 		sprintf(ttbuff,"%s|%s", tmpbuf,EmuState2.StatusLine);
+    	extern void SetStatusBarText(const char *, SystemState2 *);
 		SetStatusBarText(ttbuff, &EmuState2);
 
 #ifndef ISOCPU
