@@ -13,6 +13,7 @@ OVCC Dependancies:
 AGAR (libraries)
 
 The binary library for Windows are available from the AGAR download site. https://libagar.org/download.html
+As of version 1.7.0 AGAR no longer provides the binary versions.
 
 The binary libraries for Ubuntu 18.04 & 20.04 are available from:
 
@@ -24,9 +25,9 @@ Install SDL2 (dev) as per your distribution guidelines.
 
 Compiling AGAR.
 
-If compiling the original AGAR 1.6.0 source is available from https://libagar.org/download.html
+If compiling the original AGAR 1.7.0 source is available from https://libagar.org/download.html
 however it is recommended that you download the source from the github site https://github.com/JulNadeauCA/libagar.git
-this is version 1.6.1 and contains fixes that affect ovcc.
+this is version 1.7.1 and contains fixes that affect ovcc.
 
 AGAR also has its dependancies so read the compilation documentation for the relevant platforms here https://libagar.org/docs/
 
@@ -34,7 +35,7 @@ Build AGAR as per AGAR documentation with the exception/addition of the configur
 
 Compiling OVCC
 
-Once AGAR 1.6.0 and SDL2 are installed clone this OVCC repository change into the top directory make.
+Once AGAR 1.7.0 and SDL2 are installed clone this OVCC repository change into the top directory make.
   
 $ make
 
@@ -134,7 +135,7 @@ To overcome this ovcc should be started from a bundle.  The ovcc repo now provid
 
 ------------
 
-For Ubuntu developers there were a number of missing dependencies not mentioned on the AGAR web site.  These missing dependencies will not stop AGAR from building but will mean certain option like OpenGL support are
+For Ubuntu developers there were a number of missing dependencies not mentioned on the AGAR web site.  These missing dependencies will not stop AGAR from building but will mean certain options like OpenGL support are
 missing:
 
 ligopengl-dev (provides the obvious)
@@ -158,7 +159,7 @@ Once all these dependencies have been added there is no need to change the AGAR 
 ```$ cd libagar
 $ export CFLAGS=-O2
 $ ./configure
-$ make
+$ make depend all
 $ sudo make install
 ```
 
