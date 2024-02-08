@@ -64,7 +64,7 @@ Screen *GetScreen(unsigned short int id)
     return (Screen*)FindListItem(&ScreenList, (unsigned int)id);
 }
 
-unsigned int *GetScreenMMUmemPagefromAddress(Screen *screen, unsigned short int addr)
+unsigned char GetScreenMMUmemPagefromAddress(Screen *screen, unsigned short int addr)
 {
     if (screen == NULL) return 0;
     unsigned short bankidx = addr>>13;
@@ -112,7 +112,7 @@ void SetScreenPixel(Screen *screen, unsigned short x, unsigned short y)
     }
     unsigned short xmodPPB = x%screen->PixelsPerByte;
     unsigned char  pixmask = pixelmasks[screen->PPBshift][xmodPPB];
-    unsigned short bankpage = GetScreenMMUmemPagefromAddress(screen, pixaddr);
+    unsigned char bankpage = GetScreenMMUmemPagefromAddress(screen, pixaddr);
     // unsigned char pixelbyte = MemRead(pixaddr) & (pixmask^0xff);
     unsigned char  pixelbyte = MmuRead(bankpage, pixaddr) & (pixmask^0xff);
     pixelbyte |= screen->Color<<(screen->BitsPerPixel*(screen->PixelsPerByte-xmodPPB-1));

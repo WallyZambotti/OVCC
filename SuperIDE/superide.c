@@ -270,7 +270,7 @@ void BaseComboSelected(AG_Event *event)
 {
     AG_TlistItem *ti = AG_PTR(1);
 
-    BaseAddr = ti->label;
+    BaseAddr = ti->v ; // ti->label;
 
 	if (BaseAddr == 3)
 	{
@@ -285,10 +285,12 @@ void BaseComboSelected(AG_Event *event)
 
 void PopulateBaseAddresses(AG_Tlist *list)
 {
-    AG_TlistAddS(list, NULL, "40");
-    AG_TlistAddS(list, NULL, "50");
-    AG_TlistAddS(list, NULL, "60");
-    AG_TlistAddS(list, NULL, "70");
+	AG_TlistItem *listItem;
+
+    listItem = AG_TlistAddS(list, NULL, "40"); listItem->v = 0;
+    listItem = AG_TlistAddS(list, NULL, "50"); listItem->v = 1;
+    listItem = AG_TlistAddS(list, NULL, "60"); listItem->v = 2;
+    listItem = AG_TlistAddS(list, NULL, "70"); listItem->v = 3;
 }
 
 void ConfigIDE(AG_Event *event)

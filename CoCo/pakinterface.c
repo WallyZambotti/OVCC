@@ -146,7 +146,7 @@ void ResetBus(void)
 	}
 	if (ExternalRomBuffer != NULL && ExternROMsize != 0)
 	{
-		unsigned char ptrpakmem = GetPakExtMem();
+		unsigned char *ptrpakmem = GetPakExtMem();
 		if (ptrpakmem != NULL) { memcpy(GetPakExtMem(), ExternalRomBuffer, ExternROMsize); }
 	}
 	return;
@@ -166,7 +166,7 @@ unsigned char PackPortRead (unsigned char port)
 	if (PakPortRead != NULL)
 		return(PakPortRead(port));
 	else
-		return(NULL);
+		return(0);
 }
 
 void PackPortWrite(unsigned char Port,unsigned char Data)
@@ -203,7 +203,7 @@ unsigned short PackAudioSample(void)
 {
 	if (ModuleAudioSample !=NULL)
 		return(ModuleAudioSample());
-	return(NULL);
+	return(0);
 }
 
 int InsertModule (char *ModulePath)

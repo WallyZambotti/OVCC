@@ -26,7 +26,7 @@ This file is part of VCC (Virtual Color Computer).
 
 #define MAXCARDS	12
 //PlayBack
-static SDL_AudioDeviceID audioDev = NULL;
+static SDL_AudioDeviceID audioDev = 0;
 static SDL_AudioSpec audioSpec, actualAudioSpec;
 //Record
 
@@ -69,10 +69,10 @@ int SoundInitSDL (int devID, unsigned short Rate)
 		InitPassed=0;
 		SDL_PauseAudioDevice(audioDev, 1);
 
-		if (audioDev!=NULL)
+		if (audioDev!=0)
 		{
 			SDL_CloseAudioDevice(audioDev);
-			audioDev=NULL;
+			audioDev=0;
 		}
 	}
 
@@ -150,7 +150,7 @@ int SoundDeInitSDL(void)
 		InitPassed=0;
 		SDL_PauseAudioDevice(audioDev, 1);
 		SDL_CloseAudioDevice(audioDev);
-		audioDev = NULL;
+		audioDev = 0;
 	}
 	return(0);
 }

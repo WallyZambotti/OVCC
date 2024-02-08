@@ -274,7 +274,7 @@ unsigned char ADDCALL PakMemRead8(unsigned short Address)
 		return(ExtRomPointers[ChipSelectSlot][(Address & 32767)/*+BankedCartOffset[ChipSelectSlot]*/]); //Bank Select ???
 	if (PakMemRead8Calls[ChipSelectSlot] != NULL)
 		return(PakMemRead8Calls[ChipSelectSlot](Address));
-	return(NULL);
+	return(0);
 }
 
 void ADDCALL PakMemWrite8(unsigned char Data,unsigned short Address)
@@ -343,7 +343,7 @@ unsigned char ADDCALL ModuleReset(void)
 	PakSetCart(0);
 	if (CartForSlot[SpareSelectSlot]==1)
 		PakSetCart(1);
-	return(NULL);
+	return(0);
 }
 
 void ADDCALL PakRomShare(unsigned char *pakromaddr)
