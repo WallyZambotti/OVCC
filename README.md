@@ -1,8 +1,10 @@
-# OVCC
+# OVCC 1.6.1
 
 The portable and open Virtual Colo(u)r Computer. GNU General Public License.
 
 Developed from VCC 1.43 (2.01) by Joseph Forgione. GNU General Public License.
+
+Special thanks to Paul Zimmerman for providing Mac patches for OVCC and AGAR.  OVCC patches are pre-integrated.
 
 Binaries for Linux and Windows and Mac can be downloaded from here:
 
@@ -13,7 +15,7 @@ OVCC Dependancies:
 AGAR (libraries)
 
 The binary library for Windows are available from the AGAR download site. https://libagar.org/download.html
-As of version 1.7.0 AGAR no longer provides the binary versions.
+As of version 1.7.1 AGAR no longer provides the binary versions.
 
 The binary libraries for Ubuntu 18.04 & 20.04 are available from:
 
@@ -25,6 +27,9 @@ Install SDL2 (dev) as per your distribution guidelines.
 
 Compiling AGAR.
 
+Included with the OVCC is a directory containing patches for AGAR for Mac builds.  Not required if building for anything else.
+They are located ovcc/Patches/AGAR.  Apply the patches before building AGAR. Patches kindly provided by Paul Zimmerman.
+
 If compiling the original AGAR 1.7.0 source is available from https://libagar.org/download.html
 however it is recommended that you download the source from the github site https://github.com/JulNadeauCA/libagar.git
 this is version 1.7.1 and contains fixes that affect ovcc.
@@ -35,7 +40,7 @@ Build AGAR as per AGAR documentation with the exception/addition of the configur
 
 Compiling OVCC
 
-Once AGAR 1.7.0 and SDL2 are installed clone this OVCC repository change into the top directory make.
+Once AGAR 1.7.1 and SDL2 are installed clone this OVCC repository change into the top directory make.
   
 $ make
 
