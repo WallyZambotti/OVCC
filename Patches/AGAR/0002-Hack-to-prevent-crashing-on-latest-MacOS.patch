@@ -1,0 +1,33 @@
+From cf8955ac58c0e884d03727ad599848bb977f00b0 Mon Sep 17 00:00:00 2001
+From: Paul Zimmerman <pauldzim@gmail.com>
+Date: Wed, 13 Mar 2024 12:57:50 -0700
+Subject: [PATCH 2/3] Hack to prevent crashing on latest MacOS
+
+This fixes a crash on MacOS, where if you press the Globe/fn key
+on its own, not combined with another key, the event queue seems
+to get corrupted, but it doesn't show up until you click on
+another window outside of the AGAR app. At that point the app
+crashes. This ugly hack seems to fix it. Tested on my MacBook and
+also on an emulated MacBook using the UTM emulator.
+---
+ gui/drv_cocoa.m | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/gui/drv_cocoa.m b/gui/drv_cocoa.m
+index 97e0cb4dc..8c3767094 100644
+--- a/gui/drv_cocoa.m
++++ b/gui/drv_cocoa.m
+@@ -609,7 +609,9 @@ - (void)windowDidResignKey:(NSNotification *)aNotification
+ 		goto out;
+ 	}
+ 
+-	if ((coWin = (AG_CocoaWindow *)[event window]) == nil) {
++	if ((coWin = (AG_CocoaWindow *)[event window]) == nil ||
++	    (long)coWin->_agarWindow == 0 ||
++	    (long)coWin->_agarWindow == 0x100000000) {
+ 		[NSApp sendEvent:event];
+ 		goto out;
+ 	}
+-- 
+2.39.3 (Apple Git-146)
+

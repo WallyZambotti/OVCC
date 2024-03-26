@@ -17,6 +17,8 @@ This file is part of VCC (Virtual Color Computer).
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "memboard.h"
 
 union

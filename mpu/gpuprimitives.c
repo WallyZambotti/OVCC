@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "mpu.h"
 #include "gpu.h"
+#include "dma.h"
 #include "gpuprimitives.h"
 #include "linkedlists.h"
 

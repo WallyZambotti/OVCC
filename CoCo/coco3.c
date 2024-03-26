@@ -31,6 +31,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "vcc.h"
 #include "cassette.h"
 #include "logger.h"
+#include "AGARInterface.h"
 
 //****************************************
 	static double SoundInterupt=0;
@@ -261,8 +262,9 @@ float RenderFrame (SystemState2 *RFState2, unsigned long DCnt)
 	return(fps);
 }
 
-void CPUloop (SystemState2 *RFState2)
+void *CPUloop (void *p)
 {
+	SystemState2 *RFState2 = p;
 	long long cputime = 16666667;
 	unsigned long long StartTime, EndTime, TargetTime;
 	long timeavg, finetune=0;
@@ -291,6 +293,7 @@ void CPUloop (SystemState2 *RFState2)
 		if (cputime < 16666667) finetune--; else finetune++;
 		//fprintf(stderr, "<%lld:%d>", cputime, finetune);
 	}
+	return(RFState2);
 }
 #endif
 

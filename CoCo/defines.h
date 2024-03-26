@@ -76,6 +76,12 @@ extern void (*CPUForcePC)(unsigned short);
 extern void _MessageBox(const char *);
 extern char *GlobalExecFolder;
 
+#ifdef _DEBUG
+# ifdef DARWIN
+extern FILE *logg;
+# endif
+#endif
+
 typedef struct _tagPOINT
 {
     long x;

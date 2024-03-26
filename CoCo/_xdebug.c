@@ -28,6 +28,7 @@ int	g_bTraceMessageLogging	= TRUE;
 
 /*****************************************************************************/
 
+#ifdef _DEBUG
 #if 0
 void _xDbgTrace(const void * pFile, const int iLine, const void * pFormat, ...)
 {
@@ -52,15 +53,24 @@ void _xDbgTrace(const void * pFile, const int iLine, const void * pFormat, ...)
 	va_start(args, pFormat);
 
 	sprintf(temp, "%s(%d) : ", (char *)pFile, iLine);
+#ifdef DARWIN
+	fprintf(logg, "%s", temp);
+#else
 	fprintf(stderr, "%s", temp);
+#endif
 
 	vsprintf(temp, (char *)pFormat, args);
+#ifdef DARWIN
+	fprintf(logg, "%s", temp);
+#else
 	fprintf(stderr, "%s", temp);
+#endif
 
 	va_end(args);
 
 //	fflush(stdout);
 }
+#endif
 #endif
 
 /*****************************************************************************/

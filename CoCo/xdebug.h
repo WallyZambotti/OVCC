@@ -13,11 +13,12 @@
 #if (defined _DEBUG)
 #	define XTRACE(x,...)			_xDbgTrace( __FILE__, __LINE__, x, ##__VA_ARGS__ )
 #else
-#	define XTRACE(x,...)
+#	define XTRACE(x,...)			do {} while(0)
 #endif
 
 /*****************************************************************************/
 
+#ifdef _DEBUG
 #ifdef __cplusplus
 extern "C"
 {
@@ -27,6 +28,7 @@ extern "C"
 	
 #ifdef __cplusplus
 }
+#endif
 #endif
 
 /*****************************************************************************/

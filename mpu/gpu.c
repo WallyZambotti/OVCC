@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <signal.h>
 #include <pthread.h>
@@ -6,7 +7,7 @@
 #include "gpu.h"
 #include "dma.h"
 #include "gpuprimitives.h"
-// #include "gputextures.h"
+#include "gputextures.h"
 #include "linkedlists.h"
 
 static pthread_t GPUthread;

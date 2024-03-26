@@ -1,0 +1,78 @@
+From a3b48197b65ba632348ae25b3a870e41bccc0264 Mon Sep 17 00:00:00 2001
+From: Paul Zimmerman <pauldzim@gmail.com>
+Date: Sat, 2 Mar 2024 12:55:45 -0700
+Subject: [PATCH 1/3] Fix compile on latest MacOS
+
+Fix compile on latest MacOS, currently Sonoma 14.3.1, with Xcode
+15.3
+---
+ configure       | 2 +-
+ core/dir.c      | 5 +++++
+ gui/drv_cocoa.m | 8 +++++++-
+ 3 files changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/configure b/configure
+index 4147ab7bd..bd3196a0a 100755
+--- a/configure
++++ b/configure
+@@ -10739,7 +10739,7 @@ echo '#undef HAVE_XINERAMA' >$bb_incdir/have_xinerama.h
+ $ECHO_N 'checking for the Cocoa framework...'
+ $ECHO_N '# checking for the Cocoa framework...' >>config.log
+ # BEGIN cocoa(0)
+-COCOA_CFLAGS="-DTARGET_API_MAC_CARBON -DTARGET_API_MAC_OSX -force_cpusubtype_ALL -fpascal-strings"
++COCOA_CFLAGS="-DTARGET_API_MAC_CARBON -DTARGET_API_MAC_OSX -fpascal-strings"
+ COCOA_LIBS="-lobjc -Wl,-framework,Cocoa -Wl,-framework,OpenGL -Wl,-framework,IOKit"
+ MK_COMPILE_STATUS=OK
+ cat << EOT >conftest$$.m
+diff --git a/core/dir.c b/core/dir.c
+index a2140cc8b..d96c07748 100644
+--- a/core/dir.c
++++ b/core/dir.c
+@@ -85,6 +85,9 @@
+ #  ifndef _DARWIN_C_SOURCE
+ #   define _DARWIN_C_SOURCE
+ #   define _AGAR_DEFINED_DARWIN_C_SOURCE
++#   define _AGAR_DEFINED_DARWIN_C_LEVEL __DARWIN_C_LEVEL
++#   undef __DARWIN_C_LEVEL
++#   define __DARWIN_C_LEVEL 200809L // needed for dirfd()
+ #  endif
+ # endif
+ 
+@@ -94,6 +97,8 @@
+ #  undef _NETBSD_SOURCE
+ # endif
+ # ifdef _AGAR_DEFINED_DARWIN_C_SOURCE
++#  undef __DARWIN_C_LEVEL
++#  define __DARWIN_C_LEVEL _AGAR_DEFINED_DARWIN_C_LEVEL
+ #  undef _DARWIN_C_SOURCE
+ # endif
+ 
+diff --git a/gui/drv_cocoa.m b/gui/drv_cocoa.m
+index 550e851a1..97e0cb4dc 100644
+--- a/gui/drv_cocoa.m
++++ b/gui/drv_cocoa.m
+@@ -28,6 +28,12 @@
+  * Cocoa window is created for each Agar window).
+  */
+ 
++#ifdef __APPLE__
++# ifndef _DARWIN_C_SOURCE
++# define _DARWIN_C_SOURCE
++# endif
++#endif
++
+ #include <agar/core/core.h>
+ #include <agar/core/config.h>
+ 
+@@ -846,7 +852,7 @@ - (void)windowDidResignKey:(NSNotification *)aNotification
+ 	switch (dev->type) {
+ 	case AG_DRIVER_MOUSE_MOTION:
+ 		AG_ProcessMouseMotion(win, dev->motion.x, dev->motion.y,
+-		    drv->mouse->xRel, drv->mouse->yRel, drv->mouse->btnState);
++		    drv->mouse->xRel, drv->mouse->yRel);
+ 		AG_MouseCursorUpdate(win, dev->motion.x, dev->motion.y);
+ 		break;
+ 	case AG_DRIVER_MOUSE_BUTTON_DOWN:
+-- 
+2.39.3 (Apple Git-146)
+

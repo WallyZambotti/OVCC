@@ -3,6 +3,7 @@
 #include <agar/core.h>
 #include <agar/gui.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #ifdef __MINGW32__
 #include <winsock2.h>
@@ -291,7 +292,7 @@ void attemptDWConnection( void )
 }
 
 // TCP connection thread
-unsigned  DWTCPThread(void)
+void *DWTCPThread(void *p)
 {
 #ifdef __MINGW32__
 	WSADATA wsaData;
@@ -307,7 +308,7 @@ unsigned  DWTCPThread(void)
 	{
 		fprintf(stderr, "WSAStartup() failed, DWTCPConnection thread exiting\n");
 		WSACleanup();
-		return(0);
+		return(p);
 	}
 #endif
 
@@ -377,7 +378,7 @@ unsigned  DWTCPThread(void)
 	sprintf(msg,"DWTCPConnection thread terminated\n");
 	fprintf(stderr, "%s", msg);
 
-	return(0);
+	return(p);
 }
 
 // called from config.c/UpdateConfig
@@ -607,9 +608,11 @@ void ADDCALL ModuleConfig(unsigned char func)
 	case 0: // Destroy Menus
 	{
 		killDWTCPThread();
-		AG_MenuDel(itemConfig);
-		AG_MenuDel(itemSeperator);
+		if (itemConfig)
+			AG_MenuDel(itemConfig);
 		itemConfig = NULL;
+		if (itemSeperator)
+			AG_MenuDel(itemSeperator);
 		itemSeperator = NULL;
 	}
 	break;

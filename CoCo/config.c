@@ -35,6 +35,7 @@ This file is part of VCC (Virtual Color Computer).
 #include "fileops.h"
 #include "cassette.h"
 #include "AGARInterface.h"
+#include "coco3.h"
 
 //#include "logger.h"
 #include <assert.h>

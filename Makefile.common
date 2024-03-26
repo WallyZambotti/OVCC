@@ -9,10 +9,14 @@ endif
 
 ODIR = obj
 
-DEBUG=#-g
+DEBUG=#-g #-D _DEBUG
 OPT=-Ofast -march=native -flto # -Og # -Ofast #
 WARN = -w # -Wall
 PTHREAD = -pthread
+
+ifeq ($(TARGETOS),Darwin)
+CFLAGS += -D DARWIN
+endif
 
 SDLINC := $(shell pkg-config --cflags sdl2)
 AGARINC := $(shell agar-config --cflags)

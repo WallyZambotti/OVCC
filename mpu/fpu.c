@@ -18,6 +18,7 @@
 // // 
 
 #include <stdio.h>
+#include <math.h>
 #include "mpu.h"
 #include "gpu.h"
 #include "dma.h"

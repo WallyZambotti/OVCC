@@ -19,8 +19,9 @@
 
 typedef int BOOL;
 
-#include <sys/types.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <math.h>
 #include "fileops.h"
@@ -29,6 +30,8 @@ typedef int BOOL;
 #include "fpu.h"
 #include "gpu.h"
 #include "gpuclock.h"
+#include "gpuprimitives.h"
+#include "gputextures.h"
 
 #define GPU_Nil_Arg ((unsigned short)0)
 

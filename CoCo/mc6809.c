@@ -16,7 +16,10 @@ This file is part of VCC (Virtual Color Computer).
     along with VCC (Virtual Color Computer).  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "stdio.h"
+#include <stdio.h>
+#include "defines.h"
+#include "vcc.h"
+#include "mc6821.h"
 #include "mc6809.h"
 #include "mc6809defs.h"
 #include "tcc1014mmu.h"

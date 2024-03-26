@@ -37,7 +37,7 @@ This file is part of VCC (Virtual Color Computer).
 #define STANDALONE 2
 
 typedef void (*DYNAMICMENUCALLBACK)( char *,int, int);
-typedef void (*GETNAME)(char *,char *,DYNAMICMENUCALLBACK); 
+typedef void (*GETNAME)(char *,AG_MenuItem * /*,DYNAMICMENUCALLBACK*/);
 typedef void (*CONFIGIT)(unsigned char); 
 typedef void (*HEARTBEAT) (void);
 typedef unsigned char (*PACKPORTREAD)(unsigned char);
@@ -55,10 +55,10 @@ typedef void (*MODULESTATUS)(char *);
 
 typedef void (*DMAMEMPOINTERS) ( MEMREAD8,MEMWRITE8);
 typedef void (*MMUMEMPOINTERS) ( MMUREAD8,MMUWRITE8);
-typedef void (*MMUROMSHARE)(unsigned short, unsigned char *);
+typedef void (*MMUROMSHARE)(unsigned char *);
 typedef void (*SETINTERUPTCALLPOINTER) (ASSERTINTERUPT);
 typedef unsigned short (*MODULEAUDIOSAMPLE)(void);
 typedef void (*MODULERESET)(void);
-typedef void (*SETINIPATH)(char *);
+typedef void (*SETINIPATH)(INIman *);
 
 #endif

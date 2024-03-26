@@ -20,11 +20,14 @@ This file is part of VCC (Virtual Color Computer).
 #include <agar/core.h>
 #include <agar/gui.h>
 #include <agar/core/types.h>
+#include "AGARInterface.h"
 #include "audio.h"
 #include "config.h"
 #include "keyboard.h"
 #include "joystickinputSDL.h"
 #include "throttle.h"
+
+#include "xdebug.h"
 
 #ifndef Ulong
 #define Ulong unsigned long
@@ -136,7 +139,7 @@ void Halt(AG_Event *event)
     AG_TextMsg(AG_MSG_INFO, "Emulation State set to halt!");
 }
 
-int LoadIniFile(AG_Event *event)
+void LoadIniFile(AG_Event *event)
 {
     SystemState2 *state = AG_PTR(1);
 	char *file = AG_STRING(2);
@@ -774,7 +777,7 @@ void AutoStartCartChange(AG_Event *event)
     MiscConfigCartAutoStart(autoStartCart);
 }
 
-int LoadCasette(AG_Event *event)
+void LoadCasette(AG_Event *event)
 {
 	char *file = AG_STRING(1);
 	AG_FileType *ft = AG_PTR(2);
@@ -790,8 +793,6 @@ int LoadCasette(AG_Event *event)
     }
 
     TapeConfigLoadTape();
-
-    return 0;
 }
 
 void BrowseTape(AG_Event *event)
@@ -817,7 +818,7 @@ void UpdateTapeWidgets(int counter, char mode, char *file)
     AG_Strlcpy(tapefile, file, sizeof(tapefile));
 }
 
-int SelectBitBangerFile(AG_Event *event)
+void SelectBitBangerFile(AG_Event *event)
 {
 	char *file = AG_STRING(1);
 	AG_FileType *ft = AG_PTR(2);
@@ -833,8 +834,6 @@ int SelectBitBangerFile(AG_Event *event)
     }
 
     BitBangerConfigOpen(bitbangerfile);
-
-    return 0;
 }
 
 void OpenBitBanger()
@@ -1033,7 +1032,7 @@ void Configure(AG_Event *ev)
         return;
     }
 
-    AG_WindowSetGeometryAligned(win, AG_WINDOW_ALIGNMENT_NONE, 640, 316);
+    AG_WindowSetGeometryAligned(win, AG_WINDOW_ALIGNMENT_NONE, 682, 366);
     AG_WindowSetCaptionS(win, "OVCC Options");
     AG_WindowSetCloseAction(win, AG_WINDOW_HIDE);
 
@@ -1540,17 +1539,20 @@ AG_MenuItem *GetMenuAnchor()
     return itemCartridge;
 }
 
-void CartLoad(SystemState2 *state)
+void *CartLoad(void *p)
 {
     extern int InsertModule(char *);
+    SystemState2 *state = p;
 
     InsertModule(modulefile);
 
 	state->EmulationRunning = TRUE;
 	inLoadCart = 0;
+
+    return state;
 }
 
-int LoadPack(AG_Event *event)
+void LoadPack(AG_Event *event)
 {
     SystemState2 *state = AG_PTR(1);
 
@@ -1568,11 +1570,9 @@ int LoadPack(AG_Event *event)
         if (threadID == (AG_Thread)NULL)
         {
             fprintf(stderr, "Can't Start Cart Load Thread!\n");
-            return(0);
+            return;
         }
     }
-
-    return 0;
 }
 
 static void LoadCart(AG_Event *event)
@@ -1633,9 +1633,9 @@ void About(AG_Event *ev)
     AG_MPane *mpane = AG_MPaneNew(AboutWin, AG_MPANE1T2B, AG_MPANE_EXPAND|AG_MPANE_FORCE_DIV);
 
     AG_Label *lbl1 = AG_LabelNewPolled(mpane->panes[0], AG_LABEL_FRAME | AG_LABEL_EXPAND, "%s", 
-        "OVCC 1.6.0\n"
+        "OVCC 1.6.1\n"
         "Walter Zambotti\n"
-        "using AGAR 1.7.0 GUI\n"
+        "using AGAR 1.7.1 GUI\n"
         "Forked from VCC 2.01B (1.43)\n"
         "Copy Righted Joseph Forgione (GNU General Public License)\n"
         "\n"
@@ -1691,7 +1691,6 @@ void MouseMotion(AG_Event *event)
 
 void KeyDownUp(AG_Event *event)
 {
-    static int lastkey = 0;
 	AG_Widget *w = AG_SELF();
     unsigned short updown = (Uint16)AG_INT(1);
 	unsigned short kb = AG_INT(2);
@@ -1700,8 +1699,64 @@ void KeyDownUp(AG_Event *event)
 
     extern void DoKeyBoardEvent(unsigned short, unsigned short, unsigned short);
 
+#ifdef DARWIN
+    // **** Added for latest MacOS ****
+    static int capslocked;
+
+    if (kb == AG_KEY_CAPSLOCK)
+    {
+        if (updown)
+        {
+            capslocked = 1;
+            XTRACE("CAPS locked\n");
+        }
+        else
+        {
+            capslocked = 0;
+            XTRACE("CAPS unlocked\n");
+        }
+        updown = kEventKeyDown;
+        DoKeyBoardEvent(uc, kb, updown);
+        XTRACE("key %x - mod %x - unicode %lx - updown %x\n", kb, mod, uc, updown);
+        updown = kEventKeyUp;
+        goto event;
+    }
+
+    // make the shift-alpha keys work
+    switch (kb) {
+    case AG_KEY_A - 0x20 ... AG_KEY_Z - 0x20:
+        kb += 0x20;
+        if (capslocked)
+        {
+            // fake a shift key
+            DoKeyBoardEvent(uc, AG_KEY_LSHIFT, updown);
+            XTRACE("faked a SHIFT key\n");
+        }
+        break;
+    default:
+        break;
+    }
+
+    // make the ctrl-alpha keys work
+    if (mod & (AG_KEYMOD_LCTRL | AG_KEYMOD_RCTRL))
+    {
+        switch (kb)
+        {
+        case AG_KEY_ASCII_START ... AG_KEY_ESCAPE:
+            kb += 0x60;
+            break;
+        default:
+            break;
+        }
+    }
+
+event:
+    // **** End of additions ****
+#endif
+
     DoKeyBoardEvent(uc, kb, updown);
 	//fprintf(stderr, "key %d - scancode %d - mod %d - unicode %ld - updown %i,\n", kb&0xf, sc&0xff, mod, uc, updown);
+    XTRACE("key %x - mod %x - unicode %lx - updown %x\n", kb, mod, uc, updown);
 }
 
 void ButtonDownUp(AG_Event *event)
@@ -1715,6 +1770,7 @@ void ButtonDownUp(AG_Event *event)
     DoButton(b, state);
 
 	//fprintf(stderr, "%s: Button %d, updown %i,\n", AGOBJECT(w)->name, b, state);
+    XTRACE("%s: Button %d, updown %i,\n", AGOBJECT(w)->name, b, state);
 }
 
 void LockTexture(AG_Event *event)

@@ -27,12 +27,13 @@ This file is part of VCC (Virtual Color Computer).
 #include "defines.h"
 #include "vcc.h"
 
-static unsigned long long StartTime,EndTime,OneFrame,CurrentTime,SleepRes,TargetTime,OneMs;
-static unsigned long long LagTime = 0, LagCnt = 0;
-static unsigned long long MasterClock,Now;
+static unsigned long /*long*/ StartTime,EndTime,OneFrame,CurrentTime,SleepRes,TargetTime,OneMs;
+static unsigned long /*long*/ LagTime = 0, LagCnt = 0;
+static unsigned long /*long*/ MasterClock,Now;
 static unsigned char FrameSkip=0;
 static float fMasterClock=0;
 static int timerfd;
+static float cfps=0;
 
 void CalibrateThrottle(void)
 {
@@ -45,13 +46,14 @@ void CalibrateThrottle(void)
 	LagTime = 0;
 	LagCnt = 0;
 
+
 	// timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
 	// memset(&schedparm, 0, sizeof(schedparm));
 	// schedparm.sched_priority = 1; // lowest rt priority
 	// pthread_setschedparam(0, SCHED_FIFO, &schedparm);
 
 	StartTime = TargetTime = SDL_GetPerformanceCounter();
-	//printf("CalibrateThrottle : MC %ld fMC %f 1ms %ld 1Frame %ld\n", MasterClock, fMasterClock, OneMs, OneFrame);
+	//printf("CalibrateThrottle : MC %lld fMC %f 1ms %lld 1Frame %lld ST %lld TT %lld\n", MasterClock, fMasterClock, OneMs, OneFrame, StartTime, TargetTime);
 }
 
 
@@ -66,6 +68,7 @@ void EndRender(unsigned char Skip)
 {
 	FrameSkip = Skip;
 	//if (abs(LagTime) > OneFrame) LagTime = 0;
+
 	//fprintf(stderr, "<%lld>", LagTime);
 	TargetTime = ( StartTime + (OneFrame * FrameSkip));
 	//fprintf(stderr, ">");
@@ -85,10 +88,10 @@ void FrameWait(void)
 	if (CurrentTime > TargetTime)
 	{
 		extern void CPUConfigSpeedDec(void);  // ran out of time so reduce the CPU frequency
-		CPUConfigSpeedDec();
+		if (cfps < (TARGETFRAMERATE-0.25)) CPUConfigSpeedDec();
 		LagTime += CurrentTime - TargetTime;
 		LagCnt++;
-		//fprintf(stderr, "v");
+		//fprintf(stderr, "<%lld>", LagTime);
 		return;
 	}
 
@@ -101,12 +104,12 @@ void FrameWait(void)
 
 	extern void CPUConfigSpeedInc(void); // had time left over so increase the CPU frequency
 	CPUConfigSpeedInc();
-	//fprintf(stderr, "^");
+	// fprintf(stderr, "^");
 
 	// Use nanosleep to delay
 
-	unsigned long long tmpt = TargetTime - CurrentTime;
-	unsigned long long lagavg = LagCnt ? LagTime / LagCnt : 0;
+	unsigned long /*long*/ tmpt = TargetTime - CurrentTime;
+	unsigned long /*long*/ lagavg = LagCnt ? LagTime / LagCnt : 0;
 	if (lagavg < tmpt)
 	{
 		tmpt -= lagavg;
@@ -114,6 +117,7 @@ void FrameWait(void)
 		duration.tv_nsec = tmpt;
 		nanosleep(&duration, &dummy);
 	}
+
 
 	// Use AG_Delay or SDL_Delay ro delay
 
@@ -143,7 +147,7 @@ void FrameWait(void)
 		// }
 
 	}
-	
+
 	// Use busy CPU with high resolution counter to delay
 
 	while (CurrentTime < TargetTime)	//Poll Until frame end.
@@ -181,8 +185,6 @@ void FrameWait(void)
 // 	return secs + fsecs;
 // }
 
-static float cfps=0;
-
 float CalculateFPS(void) //Done at end of render;
 {
 
@@ -197,7 +199,7 @@ float CalculateFPS(void) //Done at end of render;
 	fps=(fNow-fLast)/fMasterClock;
 	fps= FRAMEINTERVAL/fps;
 	fps*=FrameSkip;
-	//printf("%d %2.2f %f %f %f\n", FrameCount, fps, fNow, fLast, timems());
+	//printf("%d %2.2f %f %f %f\n", FrameCount, fps, fNow, fLast, fNow-fLast) ;
 	fLast=fNow;
 	FrameCount=0;
 	cfps = fps;

@@ -22,7 +22,28 @@
 
 	key translation tables used to convert keyboard oem scan codes / key 
 	combinations into CoCo keyboard row/col values
-
+*/
+//  ___________________________________________________________________
+// |        LSB                 $FF02                 MSB              |
+// |         0     1     2     3     4     5     6     7               |
+// +-------------------------------------------------------------------+
+// |   1     @     A     B     C     D     E     F     G      0  LSB   |
+// |                                                                   |
+// |   2     H     I     J     K     L     M     N     O      1        |
+// |                                                                   |
+// |   4     P     Q     R     S     T     U     V     W      2        |
+// |                                                              $    |
+// |   8     X     Y     Z     up    dn    lf    rt  space    3   F    |
+// |                                                              F    |
+// |  16     0    !/1   "/2   #/3   $/4   %/5   &/6   '/7     4   0    |
+// |                                                              0    |
+// |  32    (/8   )/9   */:   +/;   </,   =/-   >/.   ? /     5        |
+// |                                                                   |
+// |  64   enter  clr  es/br  alt   ctrl   F1    F2  shifts   6        |
+// |                                                                   |
+// | 128   Joystick comparison result                         7  MSB   |
+//  -------------------------------------------------------------------
+/*
 	ScanCode1 and ScanCode2 are used to determine what actual
 	key presses are translated into a specific CoCo key
 
@@ -55,6 +76,13 @@
 #include <agar/core.h>
 #include <agar/gui.h>
 
+/* AGAR doesn't define these for some reason */
+#ifndef AG_KEY_LEFTBRACE
+# define AG_KEY_LEFTBRACE      0x7b
+# define AG_KEY_PIPE           0x7c
+# define AG_KEY_RIGHTBRACE     0x7d
+# define AG_KEY_TILDE          0x7e
+#endif
 
 /*****************************************************************************/
 /**
@@ -63,8 +91,8 @@
 	VCC BASIC Keyboard:
 
 	+--------------------------------------------------------------------------------+
-	[  ][F1][F2][  ][  ][Rst][RGB][  ][Thr][Pwr][StB][FSc][  ]   [    ][   ][    ]   |
-    |                                                                                |
+	| [  ][F1][F2][  ][  ][Rst][RGB][  ][Thr][Pwr][StB][FSc][  ]   [    ][   ][    ] |
+	|                                                                                |
 	| [ ][1!][2"][3#][4$][5%][6&][7'][8(][9)][0 ][:*][-=][BkSpc]   [    ][Clr][    ] |
 	| [    ][Qq][Ww][Ee][Rr][Tt][Yy][Uu][Ii][Oo][Pp][[{][]}][\|]   [    ][Esc][    ] |
 	| [ Caps][Aa][Ss][Dd][Ff][Gg][Hh][Jj][Kk][Ll][;:][  ][Enter]                     |
@@ -111,69 +139,70 @@ keytranslationentry_t keyTranslationsCoCoAGAR[] =
 	{ AG_KEY_7,          0,             16,     7,     0,    0 }, //   7
 	{ AG_KEY_8,          0,             32,     0,     0,    0 }, //   8
 	{ AG_KEY_9,          0,             32,     1,     0,    0 }, //   9
-	{ AG_KEY_1,          AG_KEY_LSHIFT,    16,     1,    64,    7 }, //   !
-	{ AG_KEY_2,          AG_KEY_LSHIFT,    16,     2,    64,    7 }, //   "
-	{ AG_KEY_3,          AG_KEY_LSHIFT,    16,     3,    64,    7 }, //   #
-	{ AG_KEY_4,          AG_KEY_LSHIFT,    16,     4,    64,    7 }, //   $
-	{ AG_KEY_5,          AG_KEY_LSHIFT,    16,     5,	   64,    7 }, //   %
-	{ AG_KEY_6,          AG_KEY_LSHIFT,    16,     6,    64,    7 }, //   &
-	{ AG_KEY_7,          AG_KEY_LSHIFT,    16,     7,    64,    7 }, //   '
-	{ AG_KEY_8,          AG_KEY_LSHIFT,    32,     0,    64,    7 }, //   (
-	{ AG_KEY_9,          AG_KEY_LSHIFT,    32,     1,    64,    7 }, //   )
-	{ AG_KEY_0,          AG_KEY_LSHIFT,    16,     0,    64,    7 }, //   CAPS LOCK (DECB SHIFT-0, OS-9 CTRL-0 does not need ot be emulated specifically)
+	{ AG_KEY_1,          AG_KEY_LSHIFT, 16,     1,    64,    7 }, //   !
+	{ AG_KEY_2,          AG_KEY_LSHIFT, 16,     2,    64,    7 }, //   "
+	{ AG_KEY_3,          AG_KEY_LSHIFT, 16,     3,    64,    7 }, //   #
+	{ AG_KEY_4,          AG_KEY_LSHIFT, 16,     4,    64,    7 }, //   $
+	{ AG_KEY_5,          AG_KEY_LSHIFT, 16,     5,    64,    7 }, //   %
+	{ AG_KEY_6,          AG_KEY_LSHIFT, 16,     6,    64,    7 }, //   &
+	{ AG_KEY_7,          AG_KEY_LSHIFT, 16,     7,    64,    7 }, //   '
+	{ AG_KEY_8,          AG_KEY_LSHIFT, 32,     0,    64,    7 }, //   (
+	{ AG_KEY_9,          AG_KEY_LSHIFT, 32,     1,    64,    7 }, //   )
+	{ AG_KEY_0,          AG_KEY_LSHIFT, 16,     0,    64,    7 }, //   CAPS LOCK (DECB SHIFT-0, OS-9 CTRL-0 does not
+	                                                              //              need to be emulated specifically)
 	{ AG_KEY_SPACE,      0,              8,     7,     0,    0 }, //   SPACE
 
 	{ AG_KEY_COMMA,      0,             32,     4,     0,    0 }, //   ,
 	{ AG_KEY_PERIOD,     0,             32,     6,     0,    0 }, //   .
-	{ AG_KEY_SLASH,      AG_KEY_LSHIFT,    32,     7,    64,    7 }, //   ?
+	{ AG_KEY_SLASH,      AG_KEY_LSHIFT, 32,     7,    64,    7 }, //   ?
 	{ AG_KEY_SLASH,      0,             32,     7,     0,    0 }, //   /
-	{ AG_KEY_MINUS,      AG_KEY_LSHIFT,    32,     2,    64,    7 }, //   *
+	{ AG_KEY_MINUS,      AG_KEY_LSHIFT, 32,     2,    64,    7 }, //   *
 	{ AG_KEY_MINUS,      0,             32,     2,     0,    0 }, //   :
-	{ AG_KEY_SEMICOLON,  AG_KEY_LSHIFT,    32,     3,    64,    7 }, //   +
+	{ AG_KEY_SEMICOLON,  AG_KEY_LSHIFT, 32,     3,    64,    7 }, //   +
 	{ AG_KEY_SEMICOLON,  0,             32,     3,     0,    0 }, //   ;
-	{ AG_KEY_EQUALS,     AG_KEY_LSHIFT,    32,     5,    64,    7 }, //   =
+	{ AG_KEY_EQUALS,     AG_KEY_LSHIFT, 32,     5,    64,    7 }, //   =
 	{ AG_KEY_EQUALS,     0,             32,     5,     0,    0 }, //   -
-//	{ AG_KEY_GRAVE,      AG_KEY_LSHIFT,    16,     3,    64,    4 }, //   ~ (tilde) (CoCo CTRL-3)
+//	{ AG_KEY_GRAVE,      AG_KEY_LSHIFT, 16,     3,    64,    4 }, //   ~ (tilde) (CoCo CTRL-3)
 
 	// added
-	{ AG_KEY_UP,    0,              8,     3,     0,    0 }, //   UP
-	{ AG_KEY_DOWN,  0,              8,     4,     0,    0 }, //   DOWN
-	{ AG_KEY_LEFT,  0,              8,     5,     0,    0 }, //   LEFT
-	{ AG_KEY_RIGHT, 0,              8,     6,     0,    0 }, //   RIGHT
+	{ AG_KEY_UP,         0,              8,     3,     0,    0 }, //   UP
+	{ AG_KEY_DOWN,       0,              8,     4,     0,    0 }, //   DOWN
+	{ AG_KEY_LEFT,       0,              8,     5,     0,    0 }, //   LEFT
+	{ AG_KEY_RIGHT,      0,              8,     6,     0,    0 }, //   RIGHT
 
-	{ AG_KEY_KP8,    0,              8,     3,     0,    0 }, //   UP
-	{ AG_KEY_KP2,    0,              8,     4,     0,    0 }, //   DOWN
-	{ AG_KEY_KP4,    0,              8,     5,     0,    0 }, //   LEFT
-	{ AG_KEY_KP6,    0,              8,     6,     0,    0 }, //   RIGHT
+	{ AG_KEY_KP8,        0,              8,     3,     0,    0 }, //   UP
+	{ AG_KEY_KP2,        0,              8,     4,     0,    0 }, //   DOWN
+	{ AG_KEY_KP4,        0,              8,     5,     0,    0 }, //   LEFT
+	{ AG_KEY_KP6,        0,              8,     6,     0,    0 }, //   RIGHT
 
 	{ AG_KEY_RETURN,     0,             64,     0,     0,    0 }, //   ENTER
-	{ AG_KEY_HOME,    0,             64,     1,     0,    0 }, //   HOME (CLEAR)
-	{ AG_KEY_ESCAPE,    0,             64,     2,     0,    0 }, //   ESCAPE (BREAK)
+	{ AG_KEY_HOME,       0,             64,     1,     0,    0 }, //   HOME (CLEAR)
+	{ AG_KEY_ESCAPE,     0,             64,     2,     0,    0 }, //   ESCAPE (BREAK)
 	{ AG_KEY_F1,         0,             64,     5,     0,    0 }, //   F1
 	{ AG_KEY_F2,         0,             64,     6,     0,    0 }, //   F2
-	{ AG_KEY_BACKSPACE,       0,              8,     5,     0,    0 }, //   BACKSPACE -> CoCo left arrow
+	{ AG_KEY_BACKSPACE,  0,              8,     5,     0,    0 }, //   BACKSPACE -> CoCo left arrow
 
 //	{ AG_KEY_CAPSLOCK,   0,             64,     4,    16,    0 }, //   CAPS LOCK (CoCo CTRL-0 for OS-9)
 	{ AG_KEY_CAPSLOCK,   0,             64,     7,    16,    0 }, //   CAPS LOCK (CoCo SHIFT-0 for DECB)
 
 	// these produce the square bracket characters in DECB 
 	// but it does not match what the real CoCo does
-	//{ AG_KEY_LBRACKET,   0,           64,     7,    8,    4 }, //   [
-	//{ AG_KEY_RBRACKET,   0,           64,     7,    8,    6 }, //   ]
+	//{ AG_KEY_LBRACKET, 0,             64,     7,     8,    4 }, //   [
+	//{ AG_KEY_RBRACKET, 0,             64,     7,     8,    6 }, //   ]
 	// added from OS-9 layout
-	{ AG_KEY_LEFTBRACKET,   0,             64,     4,    32,    0 }, //   [ (CoCo CTRL 8)
-	{ AG_KEY_RIGHTBRACKET,   0,             64,     4,    32,    1 }, //   ] (CoCo CTRL 9)
-	{ AG_KEY_LEFTBRACKET,   AG_KEY_LSHIFT,    64,     4,    32,    4 }, //   { (CoCo CTRL ,)
-	{ AG_KEY_RIGHTBRACKET,   AG_KEY_LSHIFT,    64,     4,    32,    6 }, //   } (CoCo CTRL .)
+	{ AG_KEY_LEFTBRACKET,  0,           64,     4,    32,    0 }, //   [ (CoCo CTRL 8)
+	{ AG_KEY_RIGHTBRACKET, 0,           64,     4,    32,    1 }, //   ] (CoCo CTRL 9)
+	{ AG_KEY_LEFTBRACKET,  AG_KEY_LSHIFT, 64,   4,    32,    4 }, //   { (CoCo CTRL ,)
+	{ AG_KEY_RIGHTBRACKET, AG_KEY_LSHIFT, 64,   4,    32,    6 }, //   } (CoCo CTRL .)
 
 //	{ AG_KEY_SCROLL,     0,              1,     0,    64,    7 }, //   SCROLL (CoCo SHIFT @)
 	{ AG_KEY_RALT,       0,              1,     0,     0,    0 }, //   @
 
 	{ AG_KEY_LALT,       0,             64,     3,     0,    0 }, //   ALT
-	{ AG_KEY_LCTRL,   0,             64,     4,     0,    0 }, //   CTRL
+	{ AG_KEY_LCTRL,      0,             64,     4,     0,    0 }, //   CTRL
 	{ AG_KEY_LSHIFT,     0,             64,     7,     0,    0 }, //   SHIFT (the code converts AG_KEY_RSHIFT to AG_KEY_LSHIFT)
 
-	{ 0,              0,              0,     0,     0,    0 }  // terminator
+	{ 0,                 0,              0,     0,     0,    0 }  // terminator
 };
 
 /*****************************************************************************/
@@ -242,59 +271,87 @@ keytranslationentry_t keyTranslationsNaturalAGAR[] =
 	{ AG_KEY_7,          0,             16,     7,     0,    0 }, //   7
 	{ AG_KEY_8,          0,             32,     0,     0,    0 }, //   8
 	{ AG_KEY_9,          0,             32,     1,     0,    0 }, //   9
-	{ AG_KEY_1,          AG_KEY_LSHIFT,    16,     1,    64,    7 }, //   !
-	{ AG_KEY_2,          AG_KEY_LSHIFT,     1,     0,     0,    0 }, //   @
-	{ AG_KEY_3,          AG_KEY_LSHIFT,    16,     3,    64,    7 }, //   #
-	{ AG_KEY_4,          AG_KEY_LSHIFT,    16,     4,    64,    7 }, //   $
-	{ AG_KEY_5,          AG_KEY_LSHIFT,    16,     5,	   64,    7 }, //   %
-	{ AG_KEY_6,          AG_KEY_LSHIFT,    16,     7,    64,    4 }, //   ^ (CoCo CTRL 7)
-	{ AG_KEY_7,          AG_KEY_LSHIFT,    16,     6,    64,    7 }, //   &
-	{ AG_KEY_8,          AG_KEY_LSHIFT,    32,     2,    64,    7 }, //   *
-	{ AG_KEY_9,          AG_KEY_LSHIFT,    32,     0,    64,    7 }, //   (
-	{ AG_KEY_0,          AG_KEY_LSHIFT,    32,     1,    64,    7 }, //   )
+	{ AG_KEY_1,          AG_KEY_LSHIFT, 16,     1,    64,    7 }, //   !
+	{ AG_KEY_2,          AG_KEY_LSHIFT,  1,     0,     0,    0 }, //   @
+	{ AG_KEY_3,          AG_KEY_LSHIFT, 16,     3,    64,    7 }, //   #
+	{ AG_KEY_4,          AG_KEY_LSHIFT, 16,     4,    64,    7 }, //   $
+	{ AG_KEY_5,          AG_KEY_LSHIFT, 16,     5,    64,    7 }, //   %
+	{ AG_KEY_6,          AG_KEY_LSHIFT, 16,     7,    64,    4 }, //   ^ (CoCo CTRL 7)
+	{ AG_KEY_7,          AG_KEY_LSHIFT, 16,     6,    64,    7 }, //   &
+	{ AG_KEY_8,          AG_KEY_LSHIFT, 32,     2,    64,    7 }, //   *
+	{ AG_KEY_9,          AG_KEY_LSHIFT, 32,     0,    64,    7 }, //   (
+	{ AG_KEY_0,          AG_KEY_LSHIFT, 32,     1,    64,    7 }, //   )
+
+#ifdef DARWIN
+	// added for latest MacOS
+	{ AG_KEY_EXCLAIM,    AG_KEY_LSHIFT, 16,     1,    64,    7 }, //   !
+	{ AG_KEY_QUOTEDBL,   AG_KEY_LSHIFT, 16,     2,    64,    7 }, //   "
+	{ AG_KEY_HASH,       AG_KEY_LSHIFT, 16,     3,    64,    7 }, //   #
+	{ AG_KEY_DOLLAR,     AG_KEY_LSHIFT, 16,     4,    64,    7 }, //   $
+	{ AG_KEY_PERCENT,    AG_KEY_LSHIFT, 16,     5,    64,    7 }, //   %
+	{ AG_KEY_AMPERSAND,  AG_KEY_LSHIFT, 16,     6,    64,    7 }, //   &
+	{ AG_KEY_QUOTE,      AG_KEY_LSHIFT, 16,     7,    64,    7 }, //   '
+	{ AG_KEY_LEFTPAREN,  AG_KEY_LSHIFT, 32,     0,    64,    7 }, //   (
+	{ AG_KEY_RIGHTPAREN, AG_KEY_LSHIFT, 32,     1,    64,    7 }, //   )
+	{ AG_KEY_ASTERISK,   AG_KEY_LSHIFT, 32,     2,    64,    7 }, //   *
+	{ AG_KEY_PLUS,       AG_KEY_LSHIFT, 32,     3,    64,    7 }, //   +
+	{ AG_KEY_COLON,      AG_KEY_LSHIFT, 32,     2,     0,    0 }, //   :
+	{ AG_KEY_LESS,       AG_KEY_LSHIFT, 32,     4,    64,    7 }, //   <
+	{ AG_KEY_GREATER,    AG_KEY_LSHIFT, 32,     6,    64,    7 }, //   >
+	{ AG_KEY_QUESTION,   AG_KEY_LSHIFT, 32,     7,    64,    7 }, //   ?
+	{ AG_KEY_AT,         AG_KEY_LSHIFT,  1,     0,     0,    0 }, //   @
+	{ AG_KEY_CARET,      AG_KEY_LSHIFT, 16,     7,    64,    4 }, //   ^ (CoCo CTRL 7)
+	{ AG_KEY_UNDERSCORE, AG_KEY_LSHIFT, 32,     5,    64,    4 }, //   _ (underscore) (CoCo CTRL -)
+	{ AG_KEY_BACKQUOTE,  AG_KEY_LSHIFT, 16,     3,    64,    4 }, //   ~ (tilde) (CoCo CTRL 3)
+	{ AG_KEY_LEFTBRACE,  AG_KEY_LSHIFT, 64,     4,    32,    4 }, //   { (CoCo CTRL ,)
+	{ AG_KEY_PIPE,       AG_KEY_LSHIFT, 16,     1,    64,    4 }, //   | (Pipe) (CoCo CTRL 1)
+	{ AG_KEY_RIGHTBRACE, AG_KEY_LSHIFT, 64,     4,    32,    6 }, //   } (CoCo CTRL .)
+	{ AG_KEY_TILDE,      AG_KEY_LSHIFT, 16,     3,    64,    4 }, //   ~ (tilde) (CoCo CTRL 3)
+	// end of addition
+#endif
 
 	{ AG_KEY_SEMICOLON,  0,             32,     3,     0,    0 }, //   ;
-	{ AG_KEY_SEMICOLON,  AG_KEY_LSHIFT,    32,     2,     0,    0 }, //   :
+	{ AG_KEY_SEMICOLON,  AG_KEY_LSHIFT, 32,     2,     0,    0 }, //   :
 
-	{ AG_KEY_QUOTE, 0,             16,     7,    64,    7 }, //   '
-	{ AG_KEY_QUOTE, AG_KEY_LSHIFT,    16,     2,    64,    7 }, //   "
+	{ AG_KEY_QUOTE,      0,             16,     7,    64,    7 }, //   '
+	{ AG_KEY_QUOTE,      AG_KEY_LSHIFT, 16,     2,    64,    7 }, //   "
 
 	{ AG_KEY_COMMA,      0,             32,     4,     0,    0 }, //   ,
 	{ AG_KEY_PERIOD,     0,             32,     6,     0,    0 }, //   .
-	{ AG_KEY_SLASH,      AG_KEY_LSHIFT,    32,     7,    64,    7 }, //   ?
+	{ AG_KEY_SLASH,      AG_KEY_LSHIFT, 32,     7,    64,    7 }, //   ?
 	{ AG_KEY_SLASH,      0,             32,     7,     0,    0 }, //   /
-	{ AG_KEY_EQUALS,     AG_KEY_LSHIFT,    32,     3,    64,    7 }, //   +
+	{ AG_KEY_EQUALS,     AG_KEY_LSHIFT, 32,     3,    64,    7 }, //   +
 	{ AG_KEY_EQUALS,     0,             32,     5,    64,    7 }, //   =
 	{ AG_KEY_MINUS,      0,             32,     5,     0,    0 }, //   -
-	{ AG_KEY_MINUS,      AG_KEY_LSHIFT,    32,     5,    64,    4 }, //   _ (underscore) (CoCo CTRL -)
+	{ AG_KEY_MINUS,      AG_KEY_LSHIFT, 32,     5,    64,    4 }, //   _ (underscore) (CoCo CTRL -)
 
 	// added
-	{ AG_KEY_UP,    0,              8,     3,     0,    0 }, //   UP
-	{ AG_KEY_DOWN,  0,              8,     4,     0,    0 }, //   DOWN
-	{ AG_KEY_LEFT,  0,              8,     5,     0,    0 }, //   LEFT
-	{ AG_KEY_RIGHT, 0,              8,     6,     0,    0 }, //   RIGHT
+	{ AG_KEY_UP,         0,              8,     3,     0,    0 }, //   UP
+	{ AG_KEY_DOWN,       0,              8,     4,     0,    0 }, //   DOWN
+	{ AG_KEY_LEFT,       0,              8,     5,     0,    0 }, //   LEFT
+	{ AG_KEY_RIGHT,      0,              8,     6,     0,    0 }, //   RIGHT
 
-	{ AG_KEY_KP8,    0,              8,     3,     0,    0 }, //   UP
-	{ AG_KEY_KP2,    0,              8,     4,     0,    0 }, //   DOWN
-	{ AG_KEY_KP4,    0,              8,     5,     0,    0 }, //   LEFT
-	{ AG_KEY_KP6,    0,              8,     6,     0,    0 }, //   RIGHT
+	{ AG_KEY_KP8,        0,              8,     3,     0,    0 }, //   UP
+	{ AG_KEY_KP2,        0,              8,     4,     0,    0 }, //   DOWN
+	{ AG_KEY_KP4,        0,              8,     5,     0,    0 }, //   LEFT
+	{ AG_KEY_KP6,        0,              8,     6,     0,    0 }, //   RIGHT
 	{ AG_KEY_SPACE,      0,              8,     7,     0,    0 }, //   SPACE
 
 	{ AG_KEY_RETURN,     0,             64,     0,     0,    0 }, //   ENTER
-	{ AG_KEY_HOME,    0,             64,     1,     0,    0 }, //   HOME (CLEAR)
-	{ AG_KEY_ESCAPE,    0,             64,     2,     0,    0 }, //   ESCAPE (BREAK)
+	{ AG_KEY_HOME,       0,             64,     1,     0,    0 }, //   HOME (CLEAR)
+	{ AG_KEY_ESCAPE,     0,             64,     2,     0,    0 }, //   ESCAPE (BREAK)
 	{ AG_KEY_F1,         0,             64,     5,     0,    0 }, //   F1
 	{ AG_KEY_F2,         0,             64,     6,     0,    0 }, //   F2
-	{ AG_KEY_BACKSPACE,       0,              8,     5,     0,    0 }, //   BACKSPACE -> CoCo left arrow
+	{ AG_KEY_BACKSPACE,  0,              8,     5,     0,    0 }, //   BACKSPACE -> CoCo left arrow
 
-	{ AG_KEY_LEFTBRACKET,   0,             64,     4,    32,    0 }, //   [ (CoCo CTRL 8)
-	{ AG_KEY_RIGHTBRACKET,   0,             64,     4,    32,    1 }, //   ] (CoCo CTRL 9)
-	{ AG_KEY_LEFTBRACKET,   AG_KEY_LSHIFT,    64,     4,    32,    4 }, //   { (CoCo CTRL ,)
-	{ AG_KEY_RIGHTBRACKET,   AG_KEY_LSHIFT,    64,     4,    32,    6 }, //   } (CoCo CTRL .)
+	{ AG_KEY_LEFTBRACKET,  0,             64,   4,    32,    0 }, //   [ (CoCo CTRL 8)
+	{ AG_KEY_RIGHTBRACKET, 0,             64,   4,    32,    1 }, //   ] (CoCo CTRL 9)
+	{ AG_KEY_LEFTBRACKET,  AG_KEY_LSHIFT, 64,   4,    32,    4 }, //   { (CoCo CTRL ,)
+	{ AG_KEY_RIGHTBRACKET, AG_KEY_LSHIFT, 64,   4,    32,    6 }, //   } (CoCo CTRL .)
 
 	{ AG_KEY_BACKSLASH,  0,             32,     7,    64,    4 }, //   '\' (Back slash) (CoCo CTRL /)
-	{ AG_KEY_BACKSLASH,  AG_KEY_LSHIFT,    16,     1,    64,    4 }, //   | (Pipe) (CoCo CTRL 1)
-	{ AG_KEY_GRAVE,      AG_KEY_LSHIFT,    16,     3,    64,    4 }, //   ~ (tilde) (CoCo CTRL 3)
+	{ AG_KEY_BACKSLASH,  AG_KEY_LSHIFT, 16,     1,    64,    4 }, //   | (Pipe) (CoCo CTRL 1)
+	{ AG_KEY_GRAVE,      AG_KEY_LSHIFT, 16,     3,    64,    4 }, //   ~ (tilde) (CoCo CTRL 3)
 
 	{ AG_KEY_CAPSLOCK,   0,             64,     4,    16,    0 }, //   CAPS LOCK (CoCo CTRL 0 for OS-9)
 //	{ AG_KEY_CAPSLOCK,   0,             64,     7,    16,    0 }, //   CAPS LOCK (CoCo Shift 0 for DECB)
@@ -303,10 +360,10 @@ keytranslationentry_t keyTranslationsNaturalAGAR[] =
 
 	{ AG_KEY_RALT,       0,              1,     0,     0,    0 }, //   @
 	{ AG_KEY_LALT,       0,             64,     3,     0,    0 }, //   ALT
-	{ AG_KEY_LCTRL,   0,             64,     4,     0,    0 }, //   CTRL
+	{ AG_KEY_LCTRL,      0,             64,     4,     0,    0 }, //   CTRL
 	{ AG_KEY_LSHIFT,     0,             64,     7,     0,    0 }, //   SHIFT (the code converts AG_KEY_RSHIFT to AG_KEY_LSHIFT)
 
-	{ 0,              0,              0,     0,     0,    0 }  // terminator
+	{ 0,                 0,              0,     0,     0,    0 }  // terminator
 };
 
 /*****************************************************************************/
@@ -327,7 +384,7 @@ PC Keyboard:
 Compact natural Keyboard
 
 +-----------------------------------------------------------------------------------+
-| [  ][F1][F2][  ][  ][Rst][RGB][  ][Thr][Pwr][StB][FSc][  ]   [    ][   ][    ]    |
+| [  ][F1][F2][  ][  ][Rst][RGB][  ][Thr][Pwr][StB][FSc][  ]      [    ][   ][    ] |
 |                                                                                   |
 | [BRK~][1!][2@][3#][4$][5%][6^][7&][8*][9(][0]][-_][=+][BkSpc]   [    ][   ][    ] |
 |    [ CLR][Qq][Ww][Ee][Rr][Tt][Yy][Uu][Ii][Oo][Pp][[{][]}][\|]   [    ][   ][    ] |
@@ -338,7 +395,7 @@ Compact natural Keyboard
 
 Differences from Natural layout:
 
-	CLR				TAB
+	CLR			TAB
 	ESC/BREAK		GRAVE (`)
 */
 keytranslationentry_t keyTranslationsCompactAGAR[] =
@@ -380,59 +437,87 @@ keytranslationentry_t keyTranslationsCompactAGAR[] =
 	{ AG_KEY_7,          0,             16,     7,     0,    0 }, //   7
 	{ AG_KEY_8,          0,             32,     0,     0,    0 }, //   8
 	{ AG_KEY_9,          0,             32,     1,     0,    0 }, //   9
-	{ AG_KEY_1,          AG_KEY_LSHIFT,    16,     1,    64,    7 }, //   !
-	{ AG_KEY_2,          AG_KEY_LSHIFT,     1,     0,     0,    0 }, //   @
-	{ AG_KEY_3,          AG_KEY_LSHIFT,    16,     3,    64,    7 }, //   #
-	{ AG_KEY_4,          AG_KEY_LSHIFT,    16,     4,    64,    7 }, //   $
-	{ AG_KEY_5,          AG_KEY_LSHIFT,    16,     5,	   64,    7 }, //   %
-	{ AG_KEY_6,          AG_KEY_LSHIFT,    16,     7,    64,    4 }, //   ^ (CoCo CTRL 7)
-	{ AG_KEY_7,          AG_KEY_LSHIFT,    16,     6,    64,    7 }, //   &
-	{ AG_KEY_8,          AG_KEY_LSHIFT,    32,     2,    64,    7 }, //   *
-	{ AG_KEY_9,          AG_KEY_LSHIFT,    32,     0,    64,    7 }, //   (
-	{ AG_KEY_0,          AG_KEY_LSHIFT,    32,     1,    64,    7 }, //   )
+	{ AG_KEY_1,          AG_KEY_LSHIFT, 16,     1,    64,    7 }, //   !
+	{ AG_KEY_2,          AG_KEY_LSHIFT,  1,     0,     0,    0 }, //   @
+	{ AG_KEY_3,          AG_KEY_LSHIFT, 16,     3,    64,    7 }, //   #
+	{ AG_KEY_4,          AG_KEY_LSHIFT, 16,     4,    64,    7 }, //   $
+	{ AG_KEY_5,          AG_KEY_LSHIFT, 16,     5,    64,    7 }, //   %
+	{ AG_KEY_6,          AG_KEY_LSHIFT, 16,     7,    64,    4 }, //   ^ (CoCo CTRL 7)
+	{ AG_KEY_7,          AG_KEY_LSHIFT, 16,     6,    64,    7 }, //   &
+	{ AG_KEY_8,          AG_KEY_LSHIFT, 32,     2,    64,    7 }, //   *
+	{ AG_KEY_9,          AG_KEY_LSHIFT, 32,     0,    64,    7 }, //   (
+	{ AG_KEY_0,          AG_KEY_LSHIFT, 32,     1,    64,    7 }, //   )
+
+#ifdef DARWIN
+	// added for latest MacOS
+	{ AG_KEY_EXCLAIM,    AG_KEY_LSHIFT, 16,     1,    64,    7 }, //   !
+	{ AG_KEY_QUOTEDBL,   AG_KEY_LSHIFT, 16,     2,    64,    7 }, //   "
+	{ AG_KEY_HASH,       AG_KEY_LSHIFT, 16,     3,    64,    7 }, //   #
+	{ AG_KEY_DOLLAR,     AG_KEY_LSHIFT, 16,     4,    64,    7 }, //   $
+	{ AG_KEY_PERCENT,    AG_KEY_LSHIFT, 16,     5,    64,    7 }, //   %
+	{ AG_KEY_AMPERSAND,  AG_KEY_LSHIFT, 16,     6,    64,    7 }, //   &
+	{ AG_KEY_QUOTE,      AG_KEY_LSHIFT, 16,     7,    64,    7 }, //   '
+	{ AG_KEY_LEFTPAREN,  AG_KEY_LSHIFT, 32,     0,    64,    7 }, //   (
+	{ AG_KEY_RIGHTPAREN, AG_KEY_LSHIFT, 32,     1,    64,    7 }, //   )
+	{ AG_KEY_ASTERISK,   AG_KEY_LSHIFT, 32,     2,    64,    7 }, //   *
+	{ AG_KEY_PLUS,       AG_KEY_LSHIFT, 32,     3,    64,    7 }, //   +
+	{ AG_KEY_COLON,      AG_KEY_LSHIFT, 32,     2,     0,    0 }, //   :
+	{ AG_KEY_LESS,       AG_KEY_LSHIFT, 32,     4,    64,    7 }, //   <
+	{ AG_KEY_GREATER,    AG_KEY_LSHIFT, 32,     6,    64,    7 }, //   >
+	{ AG_KEY_QUESTION,   AG_KEY_LSHIFT, 32,     7,    64,    7 }, //   ?
+	{ AG_KEY_AT,         AG_KEY_LSHIFT,  1,     0,     0,    0 }, //   @
+	{ AG_KEY_CARET,      AG_KEY_LSHIFT, 16,     7,    64,    4 }, //   ^ (CoCo CTRL 7)
+	{ AG_KEY_UNDERSCORE, AG_KEY_LSHIFT, 32,     5,    64,    4 }, //   _ (underscore) (CoCo CTRL -)
+	{ AG_KEY_BACKQUOTE,  AG_KEY_LSHIFT, 16,     3,    64,    4 }, //   ~ (tilde) (CoCo CTRL 3)
+	{ AG_KEY_LEFTBRACE,  AG_KEY_LSHIFT, 64,     4,    32,    4 }, //   { (CoCo CTRL ,)
+	{ AG_KEY_PIPE,       AG_KEY_LSHIFT, 16,     1,    64,    4 }, //   | (Pipe) (CoCo CTRL 1)
+	{ AG_KEY_RIGHTBRACE, AG_KEY_LSHIFT, 64,     4,    32,    6 }, //   } (CoCo CTRL .)
+	{ AG_KEY_TILDE,      AG_KEY_LSHIFT, 16,     3,    64,    4 }, //   ~ (tilde) (CoCo CTRL 3)
+	// end of addition
+#endif
 
 	{ AG_KEY_SEMICOLON,  0,             32,     3,     0,    0 }, //   ;
-	{ AG_KEY_SEMICOLON,  AG_KEY_LSHIFT,    32,     2,     0,    0 }, //   :
+	{ AG_KEY_SEMICOLON,  AG_KEY_LSHIFT, 32,     2,     0,    0 }, //   :
 
-	{ AG_KEY_QUOTE, 0,             16,     7,    64,    7 }, //   '
-	{ AG_KEY_QUOTE, AG_KEY_LSHIFT,    16,     2,    64,    7 }, //   "
+	{ AG_KEY_QUOTE,      0,             16,     7,    64,    7 }, //   '
+	{ AG_KEY_QUOTE,      AG_KEY_LSHIFT, 16,     2,    64,    7 }, //   "
 
 	{ AG_KEY_COMMA,      0,             32,     4,     0,    0 }, //   ,
 	{ AG_KEY_PERIOD,     0,             32,     6,     0,    0 }, //   .
-	{ AG_KEY_SLASH,      AG_KEY_LSHIFT,    32,     7,    64,    7 }, //   ?
+	{ AG_KEY_SLASH,      AG_KEY_LSHIFT, 32,     7,    64,    7 }, //   ?
 	{ AG_KEY_SLASH,      0,             32,     7,     0,    0 }, //   /
-	{ AG_KEY_EQUALS,     AG_KEY_LSHIFT,    32,     3,    64,    7 }, //   +
+	{ AG_KEY_EQUALS,     AG_KEY_LSHIFT, 32,     3,    64,    7 }, //   +
 	{ AG_KEY_EQUALS,     0,             32,     5,    64,    7 }, //   =
 	{ AG_KEY_MINUS,      0,             32,     5,     0,    0 }, //   -
-	{ AG_KEY_MINUS,      AG_KEY_LSHIFT,    32,     5,    64,    4 }, //   _ (underscore) (CoCo CTRL -)
+	{ AG_KEY_MINUS,      AG_KEY_LSHIFT, 32,     5,    64,    4 }, //   _ (underscore) (CoCo CTRL -)
 
-															   // added
-	{ AG_KEY_UP,    0,              8,     3,     0,    0 }, //   UP
-	{ AG_KEY_DOWN,  0,              8,     4,     0,    0 }, //   DOWN
-	{ AG_KEY_LEFT,  0,              8,     5,     0,    0 }, //   LEFT
-	{ AG_KEY_RIGHT, 0,              8,     6,     0,    0 }, //   RIGHT
+	// added
+	{ AG_KEY_UP,         0,              8,     3,     0,    0 }, //   UP
+	{ AG_KEY_DOWN,       0,              8,     4,     0,    0 }, //   DOWN
+	{ AG_KEY_LEFT,       0,              8,     5,     0,    0 }, //   LEFT
+	{ AG_KEY_RIGHT,      0,              8,     6,     0,    0 }, //   RIGHT
 
-	{ AG_KEY_KP8,    0,              8,     3,     0,    0 }, //   UP
-	{ AG_KEY_KP2,    0,              8,     4,     0,    0 }, //   DOWN
-	{ AG_KEY_KP4,    0,              8,     5,     0,    0 }, //   LEFT
-	{ AG_KEY_KP6,    0,              8,     6,     0,    0 }, //   RIGHT
+	{ AG_KEY_KP8,        0,              8,     3,     0,    0 }, //   UP
+	{ AG_KEY_KP2,        0,              8,     4,     0,    0 }, //   DOWN
+	{ AG_KEY_KP4,        0,              8,     5,     0,    0 }, //   LEFT
+	{ AG_KEY_KP6,        0,              8,     6,     0,    0 }, //   RIGHT
 	{ AG_KEY_SPACE,      0,              8,     7,     0,    0 }, //   SPACE
 
 	{ AG_KEY_RETURN,     0,             64,     0,     0,    0 }, //   ENTER
-	{ AG_KEY_HOME,        0,             64,     1,     0,    0 }, //   HOME (CLEAR)
-	{ AG_KEY_ESCAPE,      0,             64,     2,     0,    0 }, //   ESCAPE (BREAK)
+	{ AG_KEY_HOME,       0,             64,     1,     0,    0 }, //   HOME (CLEAR)
+	{ AG_KEY_ESCAPE,     0,             64,     2,     0,    0 }, //   ESCAPE (BREAK)
 	{ AG_KEY_F1,         0,             64,     5,     0,    0 }, //   F1
 	{ AG_KEY_F2,         0,             64,     6,     0,    0 }, //   F2
-	{ AG_KEY_BACKSPACE,       0,              8,     5,     0,    0 }, //   BACKSPACE -> CoCo left arrow
+	{ AG_KEY_BACKSPACE,  0,              8,     5,     0,    0 }, //   BACKSPACE -> CoCo left arrow
 
-	{ AG_KEY_LEFTBRACKET,   0,             64,     4,    32,    0 }, //   [ (CoCo CTRL 8)
-	{ AG_KEY_RIGHTBRACKET,   0,             64,     4,    32,    1 }, //   ] (CoCo CTRL 9)
-	{ AG_KEY_LEFTBRACKET,   AG_KEY_LSHIFT,    64,     4,    32,    4 }, //   { (CoCo CTRL ,)
-	{ AG_KEY_RIGHTBRACKET,   AG_KEY_LSHIFT,    64,     4,    32,    6 }, //   } (CoCo CTRL .)
+	{ AG_KEY_LEFTBRACKET,  0,             64,   4,    32,    0 }, //   [ (CoCo CTRL 8)
+	{ AG_KEY_RIGHTBRACKET, 0,             64,   4,    32,    1 }, //   ] (CoCo CTRL 9)
+	{ AG_KEY_LEFTBRACKET,  AG_KEY_LSHIFT, 64,   4,    32,    4 }, //   { (CoCo CTRL ,)
+	{ AG_KEY_RIGHTBRACKET, AG_KEY_LSHIFT, 64,   4,    32,    6 }, //   } (CoCo CTRL .)
 
 	{ AG_KEY_BACKSLASH,  0,             32,     7,    64,    4 }, //   '\' (Back slash) (CoCo CTRL /)
-	{ AG_KEY_BACKSLASH,  AG_KEY_LSHIFT,    16,     1,    64,    4 }, //   | (Pipe) (CoCo CTRL 1)
-	{ AG_KEY_GRAVE,      AG_KEY_LSHIFT,    16,     3,    64,    4 }, //   ~ (tilde) (CoCo CTRL 3)
+	{ AG_KEY_BACKSLASH,  AG_KEY_LSHIFT, 16,     1,    64,    4 }, //   | (Pipe) (CoCo CTRL 1)
+	{ AG_KEY_GRAVE,      AG_KEY_LSHIFT, 16,     3,    64,    4 }, //   ~ (tilde) (CoCo CTRL 3)
 
 	{ AG_KEY_CAPSLOCK,   0,             64,     4,    16,    0 }, //   CAPS LOCK (CoCo CTRL 0 for OS-9)
 //	{ AG_KEY_CAPSLOCK,   0,             64,     7,    16,    0 }, //   CAPS LOCK (CoCo Shift 0 for DECB)
@@ -440,10 +525,10 @@ keytranslationentry_t keyTranslationsCompactAGAR[] =
 //	{ AG_KEY_SCROLL,     0,              1,     0,    64,    7 }, //   SCROLL (CoCo SHIFT @)
 
 	{ AG_KEY_LALT,       0,             64,     3,     0,    0 }, //   ALT
-	{ AG_KEY_LCTRL,   0,             64,     4,     0,    0 }, //   CTRL
+	{ AG_KEY_LCTRL,      0,             64,     4,     0,    0 }, //   CTRL
 	{ AG_KEY_LSHIFT,     0,             64,     7,     0,    0 }, //   SHIFT (the code converts AG_KEY_RSHIFT to AG_KEY_LSHIFT)
 
-	{ 0,              0,              0,     0,     0,    0 }  // terminator
+	{ 0,                 0,              0,     0,     0,    0 }  // terminator
 };
 
 /*****************************************************************************/

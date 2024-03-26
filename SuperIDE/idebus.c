@@ -19,6 +19,8 @@ This file is part of VCC (Virtual Color Computer).
 #include "logger.h"
 #include "idebus.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define MAX_PATH 260
 #define INVALID_HANDLE_VALUE NULL

@@ -20,9 +20,12 @@ This file is part of VCC (Virtual Color Computer).
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "defines.h"
+#include "vcc.h"
 #include "hd6309.h"
 #include "hd6309defs.h"
 #include "tcc1014mmu.h"
+#include "mc6821.h"
 #include "logger.h"
 
 #if defined(_WIN64)

@@ -57,8 +57,7 @@ char QuickLoadFile[256];
 
 static void SoftReset(void);
 void LoadIniFile(void);
-void EmuLoop(void);
-void CartLoad(void);
+void *EmuLoop(void *);
 void (*CPUInit)(void)=NULL;
 int  (*CPUExec)( int)=NULL;
 void (*CPUReset)(void)=NULL;
@@ -85,6 +84,12 @@ void (*SetDistoRamBank)(UINT8)=NULL;
 
 // Globals
 
+#ifdef _DEBUG
+# ifdef DARWIN
+FILE *logg;
+# endif
+#endif
+
 char *GlobalExecFolder;
 char *GlobalFullName;
 char *GlobalShortName;
@@ -100,6 +105,7 @@ void DecorateWindow(SystemState2 *);
 void AddDummyCartMenus(void);
 void RemoveDummyCartMenus(void);
 void PrepareEventCallBacks(SystemState2 *);
+void PadDummyCartMenus(void);
 
 /*--------------------------------------------------------------------------*/
 
@@ -108,6 +114,17 @@ int main(int argc, char **argv)
 {
 	char cwd[260];
 	char name[260];
+
+#ifdef _DEBUG
+# ifdef DARWIN
+	logg = fopen("./ovcc.log", "w");
+	if (!logg) {
+		fprintf(stderr, "Couldn't open ovcc.log\n");
+		return 1;
+	}
+	setbuf(logg, NULL);
+# endif
+#endif
 
 	if (getcwd(cwd, sizeof(cwd)) != NULL) {
 		GlobalExecFolder = cwd;
@@ -187,7 +204,7 @@ int main(int argc, char **argv)
 	EmuState2.emuThread = threadID;
 
 #ifdef ISOCPU
-	extern void CPUloop(SystemState2 *);
+	extern void *CPUloop(void *);
 	if (AG_ThreadTryCreate(&threadID, CPUloop, &EmuState2) != 0)
 	{
 		fprintf(stderr, "Can't Start CPU Thread!\n");
@@ -208,6 +225,12 @@ int main(int argc, char **argv)
 	//UnloadDll(0);
 	//SoundDeInitSDL();
 	//WriteIniFile(); //Save Any changes to ini FileS
+
+#ifdef _DEBUG
+# ifdef DARWIN
+	fclose(logg);
+# endif
+#endif
 
 	return 0;
 }
@@ -484,7 +507,7 @@ void SetMMUStat(unsigned char mmu)
 	}
 }
 
-void EmuLoop(void)
+void *EmuLoop(void *p)
 {
 	static float FPS;
 	static unsigned int FrameCounter=0;	
@@ -600,7 +623,7 @@ void EmuLoop(void)
 		}
 #endif
 	} //Still Emulating
-	return;
+	return(p);
 }
 
 void FullScreenToggleAGAR(void)

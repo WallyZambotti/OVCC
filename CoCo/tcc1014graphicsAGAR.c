@@ -18,6 +18,7 @@ This file is part of VCC (Virtual Color Computer).
 
 #include "defines.h"
 #include "tcc1014graphicsAGAR.h"
+#include "AGARInterface.h"
 #include "coco3.h"
 #include "cc2font.h"
 #include "cc3font.h"

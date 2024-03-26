@@ -1,9 +1,13 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "mpu.h"
+#include "gpu.h"
 #include "gpuprimitives.h"
 #include "gputextures.h"
 #include "linkedlists.h"
 #include "dma.h"
+
+unsigned char GetScreenMMUmemPagefromAddress(Screen *screen, unsigned short int addr);
 
 LinkedList TextureList = { NULL, NULL, 0 };
 

@@ -42,6 +42,12 @@ void LoadPack (void);
 void DynamicMenuCallback( char *,int,int);
 //void RefreshWindow(void);
 
+#ifdef _DEBUG
+# ifdef DARWIN
+extern FILE *logg;
+# endif
+#endif
+
 //Type 0= HEAD TAG 1= Slave Tag 2=StandAlone
 #define	HEAD 0
 #define SLAVE 1

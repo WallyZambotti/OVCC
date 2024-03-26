@@ -88,7 +88,7 @@ unsigned char ComparatorSetByDischarge = 0;
 // keyboard
 //
 
-#define KBTABLE_ENTRY_COUNT 100	///< key translation table maximum size, (arbitrary) most of the layouts are < 80 entries
+#define KBTABLE_ENTRY_COUNT 128	///< key translation table maximum size, (arbitrary) most of the layouts are < 80 entries
 #define KEY_DOWN	1
 #define KEY_UP		0
 
@@ -209,6 +209,10 @@ unsigned char vccKeyboardGetScanAGAR(unsigned char Col)
 	#endif
 
 	//if (ret_val != 0xFF) fprintf(stderr, "<%2x>", ret_val);
+	if (ret_val != 0xFF)
+	{
+		//XTRACE("Key <%2X>\n", ret_val);
+	}
 	return (ret_val);
 }
 
@@ -304,7 +308,8 @@ static void _vccKeyboardUpdateRolloverTable()
 */
 void vccKeyboardHandleKeySDL(unsigned short key, unsigned short ScanCode, unsigned short keyState)
 {
-	XTRACE("Key  : %c (%3d / 0x%02X)  Scan : %d / 0x%02X\n",key,key,key, ScanCode, ScanCode);
+	XTRACE("Key : %c (%3d / 0x%02X)  Scan : %d / 0x%02X  State : %d\n",
+	       (key >= 0x20 && key <= 0x7f) ? key : ' ', key, key, ScanCode, ScanCode, keyState);
 
 	// check for shift key
 	// Left and right shift generate different scan codes
@@ -312,16 +317,18 @@ void vccKeyboardHandleKeySDL(unsigned short key, unsigned short ScanCode, unsign
 	{
 		ScanCode = AG_KEY_LSHIFT;
 	}
-#if 0 // TODO: CTRL and/or ALT?
+#ifdef DARWIN
 	// CTRL key - right -> left
-	if (ScanCode == DIK_RCONTROL)
+	if (ScanCode == AG_KEY_RCTRL)
 	{
-		ScanCode = DIK_LCONTROL;
+		ScanCode = AG_KEY_LCTRL;
 	}
+#endif
+#if 0 // TODO: ALT?
 	// ALT key - right -> left
-	if (ScanCode == DIK_RMENU)
+	if (ScanCode == AG_KEY_RALT)
 	{
-		ScanCode = DIK_LMENU;
+		ScanCode = AG_KEY_LALT;
 	}
 #endif
 
@@ -329,14 +336,17 @@ void vccKeyboardHandleKeySDL(unsigned short key, unsigned short ScanCode, unsign
 	{
 		default:
 			// internal error
+			XTRACE("keyState error\n");
 		break;
 
 		// Key Down
 		case kEventKeyDown:
+			XTRACE("Key %02X down\n", ScanCode);
 			if (  (LeftSDL.UseMouse == JOYSTICK_KEYBOARD)
 				| (RightSDL.UseMouse == JOYSTICK_KEYBOARD)
 				)
 			{
+				XTRACE("Mouse\n");
 				ScanCode = SetMouseStatusSDL(ScanCode, 1);
 			}
 
@@ -353,10 +363,12 @@ void vccKeyboardHandleKeySDL(unsigned short key, unsigned short ScanCode, unsign
 
 		// Key Up
 		case kEventKeyUp:
+			XTRACE("Key %02X up\n", ScanCode);
 			if (  (LeftSDL.UseMouse == JOYSTICK_KEYBOARD)
 				| (RightSDL.UseMouse == JOYSTICK_KEYBOARD)
 				)
 			{
+				XTRACE("Mouse\n");
 				ScanCode = SetMouseStatusSDL(ScanCode, 0);
 			}
 
@@ -367,6 +379,7 @@ void vccKeyboardHandleKeySDL(unsigned short key, unsigned short ScanCode, unsign
 			// Clean out rollover table on shift release
 			if ( ScanCode == AG_KEY_LSHIFT )
 			{
+				XTRACE("Clearing table\n");
 				for (int Index = 0; Index < KBTABLE_ENTRY_COUNT; Index++)
 				{
 					ScanTable[Index] = KEY_UP;

@@ -104,19 +104,26 @@ void ADDCALL ModuleConfig(unsigned char func)
 	switch (func)
 	{
 	case 0: // Destroy Menus
-		AG_MenuDel(itemEjectHDD[0]);
-		AG_MenuDel(itemLoadHDD[0]);
-		AG_MenuDel(itemMenu[0]);
-		AG_MenuDel(itemEjectHDD[1]);
-		AG_MenuDel(itemLoadHDD[1]);
-		AG_MenuDel(itemMenu[1]);
-		AG_MenuDel(itemSeperator);
+		if (itemEjectHDD[0])
+			AG_MenuDel(itemEjectHDD[0]);
 		itemEjectHDD[0] = NULL;
+		if (itemLoadHDD[0])
+			AG_MenuDel(itemLoadHDD[0]);
 		itemLoadHDD[0] = NULL;
+		if (itemMenu[0])
+			AG_MenuDel(itemMenu[0]);
 		itemMenu[0] = NULL;
+		if (itemEjectHDD[1])
+			AG_MenuDel(itemEjectHDD[1]);
 		itemEjectHDD[1] = NULL;
+		if (itemLoadHDD[1])
+			AG_MenuDel(itemLoadHDD[1]);
 		itemLoadHDD[1] = NULL;
+		if (itemMenu[1])
+			AG_MenuDel(itemMenu[1]);
 		itemMenu[1] = NULL;
+		if (itemSeperator)
+			AG_MenuDel(itemSeperator);
 		itemSeperator = NULL;
 		UnmountHD(0);
 		UnmountHD(1);
@@ -221,7 +228,7 @@ void CPUAssertInterupt(unsigned char Interupt,unsigned char Latencey)
 }
 */
 
-static int LoadHDD(AG_Event *event)
+static void LoadHDD(AG_Event *event)
 {
 	int disk = AG_INT(1);
 	char *hddfile = AG_STRING(2), entry[16];
@@ -239,8 +246,6 @@ static int LoadHDD(AG_Event *event)
 	sprintf(entry, "VHDImage%d", disk);
 	SaveConfig(entry);
 	UpdateMenu(disk);
-
-  return 0;
 }
 
 static void LoadHardDisk(AG_Event *event)

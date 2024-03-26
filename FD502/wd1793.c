@@ -49,6 +49,7 @@ This file is part of VCC (Virtual Color Computer).
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "defines.h"
 #include "wd1793.h"

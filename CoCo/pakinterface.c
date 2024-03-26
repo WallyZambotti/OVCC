@@ -57,7 +57,7 @@ static unsigned short ModualParms=0;
 static void *hinstLib; 
 static bool DialogOpen=false;
 typedef void (*DYNAMICMENUCALLBACK)( char *,int, int);
-typedef void (*GETNAME)(char *,char *,DYNAMICMENUCALLBACK); 
+typedef void (*GETNAME)(char *,AG_MenuItem * /*,DYNAMICMENUCALLBACK*/);
 typedef void (*CONFIGIT)(unsigned char); 
 typedef void (*HEARTBEAT) (void);
 typedef unsigned char (*PACKPORTREAD)(unsigned char);
@@ -70,13 +70,13 @@ typedef void (*MEMWRITE8)(unsigned char,unsigned short);
 typedef void (*MMUWRITE8)(unsigned char,unsigned char,unsigned short);
 typedef void (*MODULESTATUS)(char *);
 typedef void (*DMAMEMPOINTERS)(MEMREAD8, MEMWRITE8);
-typedef void (*MMUROMSHARE)(unsigned short, unsigned char *);
+typedef void (*MMUROMSHARE)(unsigned char *);
 typedef void (*SETCARTPOINTER)(SETCART);
 typedef void (*SETINTERUPTCALLPOINTER) (ASSERTINTERUPT);
 typedef unsigned short (*MODULEAUDIOSAMPLE)(void);
 typedef void (*MODULERESET)(void);
-typedef void (*SETINIPATH)(char *);
-typedef void (*SETINI)(INIfile *);
+typedef void (*SETINIPATH)(INIman *);
+typedef void (*SETINI)(INIman *);
 
 static void (*GetModuleName)(char *, AG_MenuItem *)=NULL;
 static void (*ConfigModule)(unsigned char)=NULL;
@@ -92,8 +92,8 @@ static unsigned char (*PakMemRead8)(unsigned short)=NULL;
 static void (*ModuleStatus)(char *)=NULL;
 static unsigned short (*ModuleAudioSample)(void)=NULL;
 static void (*ModuleReset)(void)=NULL;
-static void (*SetIniPath)(char *)=NULL;
-static void (*SetIni)(INIfile *)=NULL;
+static void (*SetIniPath)(INIman *)=NULL;
+static void (*SetIni)(INIman *)=NULL;
 static void (*PakSetCart)(SETCART)=NULL;
 
 void UpdateCartridgeMenu(char *modname);
@@ -542,7 +542,7 @@ int FileID(char *Filename)
 
 void UpdateCartridgeMenu(char *modname)
 {
-	extern UpdateCartridgeEject(char*);
+	extern void UpdateCartridgeEject(char*);
 
 	UpdateCartridgeEject(modname);
 }

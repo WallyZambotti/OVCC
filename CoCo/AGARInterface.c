@@ -46,7 +46,7 @@ bool CreateAGARWindow(SystemState2 *CWState)
     }
 
     CWState->agwin = AG_WindowNew(AG_WINDOW_MAIN);
-    AG_WindowSetCaption(CWState->agwin, "OVCC 1.6.0");
+    AG_WindowSetCaption(CWState->agwin, "OVCC 1.6.1");
     AG_WindowSetGeometryAligned(CWState->agwin, AG_WINDOW_ALIGNMENT_NONE, 646, 548);
     AG_WindowSetCloseAction(CWState->agwin, AG_WINDOW_DETACH);
 
