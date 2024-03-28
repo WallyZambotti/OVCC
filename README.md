@@ -10,6 +10,10 @@ Binaries for Linux and Windows and Mac can be downloaded from here:
 
 https://drive.google.com/drive/folders/1xL8jWnwWLKL9D6K5ZNHIYRGNySIipEKV?usp=sharing
 
+A Mac binary is hosted here (By Paul Zimmerman):
+
+https://drive.google.com/drive/folders/1Va9Vq35dOAkd4joCtuB7zRYQ8CY6mssN?usp=sharing
+
 OVCC Dependancies:
 
 AGAR (libraries)
